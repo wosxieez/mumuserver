@@ -28,10 +28,9 @@ handler.send = function (msg, session, next) {
 	next(null, { code: 0 });
 }
 
-handler.sendAction = function (cmd, session, next) {
-	cmd.username =
-		this.app.rpc.chat.roomRemote.onAction(session, this.app.get('serverId'), session.get('roomname'),
-			session.get('username'), cmd, function () {
-				next(null, { code: 0 })
-			})
+handler.sendAction = function (action, session, next) {
+	this.app.rpc.chat.roomRemote.onAction(session, this.app.get('serverId'), session.get('roomname'),
+		session.get('username'), action, function () {
+			next(null, { code: 0 })
+		})
 }

@@ -78,7 +78,7 @@ RoomRemote.prototype.joinRoom = function (sid, roomname, username, callback) {
 				channel.roominfo.users[0].cards.push(channel.roominfo.cards.pop())      // 庄家多发一张牌
 
 				// 发牌成功通知每个玩家
-				channel.pushMessage({ route: 'onNotification', name: CMD.Notifications.onNewRound, data: channel.roominfo })
+				channel.pushMessage({ route: 'onNotification', name: Notifications.onNewRound, data: channel.roominfo })
 			}
 		}
 		else {
@@ -89,13 +89,13 @@ RoomRemote.prototype.joinRoom = function (sid, roomname, username, callback) {
 	}
 }
 
-RoomRemote.prototype.onAction = function (sid, roomname, username, cmd, callback) {
-	console.log('收到指令', sid, roomname, username, cmd)
+RoomRemote.prototype.onAction = function (sid, roomname, username, action, callback) {
+	console.log('收到指令', sid, roomname, username, action)
 	var channel = this.channelService.getChannel(roomname, false)
 	if (!!channel) {
-		switch (cmd.name) {
-			case CMD.Actions.St: // 收到庄家的开始指令
-				const card = cmd.data
+		switch (action.name) {
+			case Actions.St: // 收到庄家的开始指令
+				const card = action.data
 				for (var i = 0; i < channel.roominfo.users.length; i++) {
 					if (channel.roominfo.users[i].username === username) {
 						for (var j = 0; j < channel.roominfo.users[i].cards.length; j++) {
@@ -216,7 +216,7 @@ function onRoomAutoDo(channel) {
 			if (channel.toUsernames.length > 0) {
 				// 如果还没有检查完的用户 继续检查
 				channel.pushMessage({
-					route: 'onNotification', name: CMD.Notifications.doPeng,
+					route: 'onNotification', name: Notifications.doPeng,
 					data: { username: channel.toUsernames.pop(), card: channel.roominfo.deal_card }
 				})
 			} else {
@@ -233,7 +233,7 @@ function onRoomAutoDo(channel) {
 			if (channel.toUsernames.length > 0) {
 				// 如果还没有检查完的用户 继续检查
 				channel.pushMessage({
-					route: 'onNotification', name: CMD.Notifications.doEat,
+					route: 'onNotification', name: Notifications.doEat,
 					data: { username: channel.toUsernames.pop(), card: channel.roominfo.deal_card }
 				})
 			} else {
@@ -245,9 +245,7 @@ function onRoomAutoDo(channel) {
 	}
 }
 
-var CMD = {}
-
-CMD.Actions = {
+var Actions = {
 	St: 'st',         // 状态
 	Ti: "ti",         // 提
 	Pao: "pao",       // 跑
@@ -259,7 +257,7 @@ CMD.Actions = {
 	Idle: "idle"      // 无操作
 }
 
-CMD.Notifications = {
+var Notifications = {
 	onJoinRoom: 1,    // 新玩家加入通知
 	onNewRound: 2,    // 开局通知
 	onDisCard: 3,    //等待玩家出牌
