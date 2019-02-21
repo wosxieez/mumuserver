@@ -82,3 +82,14 @@
     at addChunk (/Users/coco/Documents/WebProjects/MumuServer/game-server/node_modules/duplexify/node_modules/readable-stream/lib/_stream_readable.js:291:12)
     at readableAddChunk (/Users/coco/Documents/WebProjects/MumuServer/game-server/node_modules/duplexify/node_modules/readable-stream/lib/_stream_readable.js:278:11)
 [2019-02-18 19:06:41.051] [WARN] pomelo-rpc - [33m[mqtt-mailbox] [39mtimer is not exsits, serverId: connector-server-1 remote: 0, host: 127.0.0.1, port: 6050
+[2019-02-21 14:14:37.079] [ERROR] pomelo-rpc - [31m[mqtt-acceptor] [39mprocess rpc message error ReferenceError: channle is not defined
+    at onRoomAutoDo (/Users/coco/Documents/GitHub/mumuserver/app/servers/chat/remote/roomRemote.js:211:2)
+    at dealPoker (/Users/coco/Documents/GitHub/mumuserver/app/servers/chat/remote/roomRemote.js:198:2)
+    at RoomRemote.onCMD (/Users/coco/Documents/GitHub/mumuserver/app/servers/chat/remote/roomRemote.js:109:5)
+    at Dispatcher.pro.route (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/dispatcher.js:52:10)
+    at Acceptor.cb (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/gateway.js:22:16)
+    at processMsg (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/acceptors/mqtt-acceptor.js:138:12)
+    at Connection.<anonymous> (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/acceptors/mqtt-acceptor.js:62:11)
+    at Connection.emit (events.js:182:13)
+    at Connection.emitPacket (/Users/coco/Documents/GitHub/mumuserver/node_modules/mqtt-connection/connection.js:14:8)
+    at Connection.emit (events.js:182:13)
