@@ -33,7 +33,7 @@ RoomRemote.prototype.createRoom = function (sid, roomname, roominfo, username, c
 
 		roominfo.banker_username = null  				// 庄家名称
 		roominfo.deal_username = null  					// 发牌者名称
-		roominfo.deal_card = -1  						// 当前发的牌
+		roominfo.deal_card = 0  						// 当前发的牌
 		roominfo.cards = shufflePoker(generatePoker())  // 发牌洗牌
 
 		channel.roominfo = roominfo
@@ -105,21 +105,39 @@ RoomRemote.prototype.onAction = function (sid, roomname, username, action, callb
 				}
 				break
 			case Actions.Peng: // 收到玩家碰牌操纵
-			if (channel.checkUsername === username) {
-				clearTimeout(channel.timeout)
-				// 把手中的牌拿出来 跟 桌上的牌组合放到 组合牌中去
-				var canPengData = action.data
-				canPengData.forEach(card => {
-					deleteUserCard(channel, username, card)
-					return card
-				})
-				canPengData.push(channel.roominfo.deal_card)
-				getUser(channel, username).groupCards.push(canPengData)
+				if (channel.checkUsername === username) {
+					clearTimeout(channel.timeout)
+					// 把手中的牌拿出来 跟 桌上的牌组合放到 组合牌中去
+					var canPengData = action.data
+					canPengData.forEach(card => {
+						deleteUserCard(channel, username, card)
+						return card
+					})
+					canPengData.push(channel.roominfo.deal_card)
+					getUser(channel, username).groupCards.push(canPengData)
 
-				// 通知所有玩家有碰操纵 并通知玩家继续出牌
-				channel.pushMessage({ route: 'onNotification', name: Notifications.onPeng, data: channel.roominfo })
-				channel.pushMessage({ route: 'onNotification', name: Notifications.checkSt, data: { username: username, data: '请出牌' } })
-			}
+					// 通知所有玩家有碰操纵 并通知玩家继续出牌
+					channel.pushMessage({ route: 'onNotification', name: Notifications.onPeng, data: channel.roominfo })
+					channel.pushMessage({ route: 'onNotification', name: Notifications.checkSt, data: { username: username, data: '请出牌' } })
+				}
+				break
+			case Actions.Chi: // 收到玩家吃牌操纵
+				if (channel.checkUsername === username) {
+					clearTimeout(channel.timeout)
+					// 把手中的牌拿出来 跟 桌上的牌组合放到 组合牌中去
+					var canChiData = action.data[0]
+					canChiData.forEach(card => {
+						deleteUserCard(channel, username, card)
+						return card
+					})
+					canChiData.push(channel.roominfo.deal_card)
+					getUser(channel, username).groupCards.push(canChiData)
+
+					// 通知所有玩家有碰操纵 并通知玩家继续出牌
+					channel.pushMessage({ route: 'onNotification', name: Notifications.onEat, data: channel.roominfo })
+					channel.pushMessage({ route: 'onNotification', name: Notifications.checkSt, data: { username: username, data: '请出牌' } })
+				}
+				break
 			default:
 				break
 		}
@@ -128,7 +146,7 @@ RoomRemote.prototype.onAction = function (sid, roomname, username, action, callb
 }
 
 function getUser(channel, username) {
-	var user 
+	var user
 	channel.roominfo.users.some(u => {
 		if (u.username === username) {
 			user = u
@@ -221,7 +239,7 @@ function dealPoker(channel, username, card) {
 	var dealUser
 	channel.checkUsers = []
 	channel.checkStatus = null
-	channel.checkUsername = null 
+	channel.checkUsername = null
 	for (var i = 0; i < channel.roominfo.users.length; i++) {
 		if (channel.roominfo.users[i].username == username) {
 			dealUser = channel.roominfo.users[i]
@@ -235,19 +253,18 @@ function dealPoker(channel, username, card) {
 		}
 	}
 	channel.dealUser = dealUser // 当前出牌玩家
-	channel.dealCard = card
+	channel.dealCard = parseInt(card)
 	channel.nextUser = channel.checkUsers[1] // 下一个出牌玩家
-
-	console.log('一轮玩家', channel.checkUsers)
-	console.log('下个玩家', channel.nextUser)
 
 	channel.roominfo.deal_username = dealUser.username
 	for (var j = 0; j < dealUser.handCards.length; j++) {
 		if (dealUser.handCards[j] == card) {
 			dealUser.handCards.splice(j, 1) // 删除出的牌
+			break
 		}
 	}
-	channel.roominfo.deal_card = card  // 把出的牌放到桌上
+	channel.roominfo.deal_card = parseInt(card)  // 把出的牌放到桌上
+	console.log('桌上当前的牌', channel.roominfo.deal_card)
 
 	channel.pushMessage({ route: 'onNotification', name: Notifications.onPoker, data: channel.roominfo })
 
@@ -293,7 +310,7 @@ function onRoomAutoCheck(channel) {
 			}
 			break;
 		case '检查吃':
-		console.log('正在检查吃', channel.checkStatus, channel.checkUsernames)
+			console.log('正在检查吃', channel.checkStatus, channel.checkUsernames)
 			if (channel.checkUsernames.length > 0) {
 				// 如果还没有检查完的用户 继续检查
 				channel.checkUsername = channel.checkUsernames.shift()
@@ -310,7 +327,7 @@ function onRoomAutoCheck(channel) {
 				// 吃已经检查完了 看来没玩家要这张牌了
 				channel.dealUser.passCards.push(channel.dealCard)
 				if (channel.roominfo.cards.length > 0) {
-					const nextCard = channel.roominfo.cards.pop() 
+					const nextCard = channel.roominfo.cards.pop()
 					channel.nextUser.handCards.push(nextCard) // 发牌给下个玩家
 					dealPoker(channel, channel.nextUser.username, nextCard)
 				} else {
