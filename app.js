@@ -1,6 +1,6 @@
 var pomelo = require('pomelo');
 var routeUtil = require('./app/util/routeUtil');
-/**
+/**p
  * Init app for client.
  */
 var app = pomelo.createApp();

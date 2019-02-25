@@ -62,7 +62,7 @@ RoomRemote.prototype.joinRoom = function (sid, roomname, username, callback) {
 				}
 			})
 
-			channel.pushMessage({ route: 'onJoinRoom', user: username }) 				// 通知其他用户
+			channel.pushMessage({ route: 'onNotification', name: Notifications.onJoinRoom, data: username })  // 通知其他用户
 			callback({ code: 0, users: channel.getMembers() })
 
 			// 人数满了 开始发牌
@@ -79,7 +79,7 @@ RoomRemote.prototype.joinRoom = function (sid, roomname, username, callback) {
 
 				// 发牌成功通知每个玩家
 				channel.pushMessage({ route: 'onNotification', name: Notifications.onNewRound, data: channel.roominfo })
-				channel.pushMessage({ route: 'onNotification', name: Notifications.checkSt, data: { username: channel.roominfo.users[0].username, data: '请出牌' } })
+				channel.pushMessage({ route: 'onNotification', name: Notifications.checkNewCard, data: { username: channel.roominfo.users[0].username, data: '请出牌' } })
 			}
 		}
 		else {
@@ -94,7 +94,7 @@ RoomRemote.prototype.onAction = function (sid, roomname, username, action, callb
 	var channel = this.channelService.getChannel(roomname, false)
 	if (!!channel) {
 		switch (action.name) {
-			case Actions.St: // 收到庄家的开始出牌指令
+			case Actions.NewCard: // 收到庄家的开始出牌指令
 				const card = action.data
 				dealPoker(channel, username, card)
 				break
@@ -118,7 +118,7 @@ RoomRemote.prototype.onAction = function (sid, roomname, username, action, callb
 
 					// 通知所有玩家有碰操纵 并通知玩家继续出牌
 					channel.pushMessage({ route: 'onNotification', name: Notifications.onPeng, data: channel.roominfo })
-					channel.pushMessage({ route: 'onNotification', name: Notifications.checkSt, data: { username: username, data: '请出牌' } })
+					channel.pushMessage({ route: 'onNotification', name: Notifications.checkNewCard, data: { username: username, data: '请出牌' } })
 				}
 				break
 			case Actions.Chi: // 收到玩家吃牌操纵
@@ -135,7 +135,7 @@ RoomRemote.prototype.onAction = function (sid, roomname, username, action, callb
 
 					// 通知所有玩家有碰操纵 并通知玩家继续出牌
 					channel.pushMessage({ route: 'onNotification', name: Notifications.onEat, data: channel.roominfo })
-					channel.pushMessage({ route: 'onNotification', name: Notifications.checkSt, data: { username: username, data: '请出牌' } })
+					channel.pushMessage({ route: 'onNotification', name: Notifications.checkNewCard, data: { username: username, data: '请出牌' } })
 				}
 				break
 			default:
@@ -186,15 +186,12 @@ RoomRemote.prototype.leaveRoom = function (sid, roomname, username, callback) {
 			}
 		})
 
+		channel.pushMessage({ route: 'onNotification', name: Notifications.onLevelRoom, data: username })
+
 		if (channel.getMembers().length === 0) {
+			clearTimeout(channel.timeout)
 			console.log('删除房间' + roomname)
 			channel.destroy()
-		} else {
-			var param = {
-				route: 'onLeaveRoom',
-				user: username
-			}
-			channel.pushMessage(param)
 		}
 	}
 	callback();
@@ -266,7 +263,7 @@ function dealPoker(channel, username, card) {
 	channel.roominfo.deal_card = parseInt(card)  // 把出的牌放到桌上
 	console.log('桌上当前的牌', channel.roominfo.deal_card)
 
-	channel.pushMessage({ route: 'onNotification', name: Notifications.onPoker, data: channel.roominfo })
+	channel.pushMessage({ route: 'onNotification', name: Notifications.onNewCard, data: channel.roominfo })
 
 	onRoomAutoCheck(channel)
 }
@@ -342,7 +339,7 @@ function onRoomAutoCheck(channel) {
 }
 
 var Actions = {
-	St: 'st',         // 出牌
+	NewCard: 'newCard',         // 出牌
 	Ti: "ti",         // 提
 	Pao: "pao",       // 跑
 	Wei: "wei",       // 偎
@@ -355,8 +352,8 @@ var Actions = {
 
 var Notifications = {
 	onJoinRoom: 1,    // 新玩家加入通知
+	onLevelRoom: 101, // 玩家离开通知
 	onNewRound: 2,    // 开局通知
-	onPoker: 99,      // 发牌操纵
 	onDisCard: 3,     //等待玩家出牌
 	onCard: 4,    	  // 玩家出的牌
 	onEat: 5,         // 玩家吃牌
@@ -368,5 +365,5 @@ var Notifications = {
 	onNewCard: 10,    // 新底牌
 	checkPeng: 12,    // 检查碰
 	checkEat: 13,      // 检查吃
-	checkSt: 14       // 检查出牌
+	checkNewCard: 14       // 检查出牌
 }
