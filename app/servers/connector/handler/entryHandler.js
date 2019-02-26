@@ -76,8 +76,6 @@ handler.joinRoom = function (msg, session, next) {
 		return;
 	}
 
-	console.log(session)
-
 	session.bind(username)
 	session.set('roomname', roomname)
 	session.push('roomname', function (err) {
