@@ -258,6 +258,31 @@ CardUtil.hasTi = function (cardsOnHand) {
   }
 }
 
+/**
+ * 看手里的牌能否 偎
+ *
+ * @param {*} cardsOnHand
+ * @param {*} currentCard
+ * @returns
+ */
+CardUtil.canWei = function (cardsOnHand, currentCard) {
+  console.log('查询能否偎', cardsOnHand, currentCard)
+  var countedCards = _.countBy(cardsOnHand, function (c) { return c; })
+  var canWeiCards = null
+  if (countedCards[currentCard] === 2) {
+    canWeiCards = [currentCard, currentCard]
+  }
+  console.log('查询结果', canWeiCards)
+  return canWeiCards
+}
+
+/**
+ * 看手里的牌能不能 跑 / 提
+ * 
+ * @param {*} cardsOnHand
+ * @param {*} currentCard
+ * @returns
+ */
 CardUtil.canTi = function (cardsOnHand, currentCard) {
   console.log('查询能否提', cardsOnHand, currentCard)
   var countedCards = _.countBy(cardsOnHand, function (c) { return c; })
@@ -267,6 +292,40 @@ CardUtil.canTi = function (cardsOnHand, currentCard) {
   }
   console.log('查询结果', canTiCards)
   return canTiCards
+}
+
+/**
+ * 看组合牌中能不能 跑 / 提
+ *
+ * @param {*} cardsOnGroup
+ * @param {*} currentCard
+ * @returns
+ */
+CardUtil.canTi2 = function (cardsOnGroup, currentCard) {
+  console.log('查询能否提', cardsOnGroup, currentCard)
+
+  var group
+  var can = false
+  for (var i = 0; i < cardsOnGroup.length; i++) {
+    group = cardsOnGroup[i]
+    if (group.cards.length == 3) {
+      can = true
+      for (var j = 0; j < group.cards.length; j++) {
+        if (group.cards[j] != currentCard) {
+          can = false
+          break
+        }
+      }
+    } else {
+      can = false
+    }
+
+    if (can) {
+      return group
+    }
+  }
+
+  return null
 }
 
 CardUtil.canHu = function (cardsOnHand, cardsOnTable, currentCard) {

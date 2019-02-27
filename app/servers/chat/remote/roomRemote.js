@@ -69,15 +69,39 @@ RoomRemote.prototype.joinRoom = function (sid, roomname, username, callback) {
 
 			// 人数满了 开始发牌
 			if (channel.getMembers().length === channel.roominfo.count) {
-				// for (var i = 0; i < 20; i++) {
-				// 	for (var j = 0; j < channel.roominfo.users.length; j++) {
-				// 		channel.roominfo.users[j].handCards.push(channel.roominfo.cards.pop())
-				// 	}
-				// }
 
-				for (var j = 0; j < channel.roominfo.users.length; j++) {
-					channel.roominfo.users[j].handCards = [1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 6, 7, 8, 8, 8, 8, 9, 9, 9, 10, 10, 10, 11, 12, 13]
+				//------------------------------------------------------------------------------------------
+				//	正式代码
+				//------------------------------------------------------------------------------------------
+				for (var i = 0; i < 20; i++) {
+					for (var j = 0; j < channel.roominfo.users.length; j++) {
+						channel.roominfo.users[j].handCards.push(channel.roominfo.cards.pop())
+					}
 				}
+				//------------------------------------------------------------------------------------------
+
+
+				//------------------------------------------------------------------------------------------
+				//	测试代码
+				//------------------------------------------------------------------------------------------
+				// channel.roominfo.cards.push(1)
+				// channel.roominfo.cards.push(1)
+				// channel.roominfo.cards.push(1)
+				// channel.roominfo.cards.push(2)
+				// channel.roominfo.cards.push(2)
+				// channel.roominfo.cards.push(2)
+				// channel.roominfo.cards.push(3)
+				// channel.roominfo.cards.push(3)
+				// channel.roominfo.cards.push(3)
+				// for (var j = 0; j < channel.roominfo.users.length; j++) {
+				// 	channel.roominfo.users[j].groupCards = [{ name: 'peng', cards: [1, 1, 1] },
+				// 	{ name: 'peng', cards: [12, 12, 12] },
+				// 	{ name: 'peng', cards: [11, 11, 11] },
+				// 	{ name: 'ti', cards: [13, 13, 13, 13]},
+				// 	{ name: 'pao', cards: [12, 12, 12, 12] }]
+				// 	channel.roominfo.users[j].handCards = [5, 6, 7, 8, 9, 10, 1, 1, 2, 2, 3, 3, 4, 4]
+				// }
+				//------------------------------------------------------------------------------------------
 
 				// 随机选择一个庄=并且给庄家多发一张牌
 				const banker = channel.roominfo.users[0] // 庄家
@@ -156,7 +180,7 @@ RoomRemote.prototype.onAction = function (sid, roomname, username, action, callb
 						return card
 					})
 					canPengData.push(channel.roominfo.deal_card)
-					getUser(channel, username).groupCards.push({name: 'peng', cards: canPengData})
+					getUser(channel, username).groupCards.push({ name: 'peng', cards: canPengData })
 
 					// 通知所有玩家有碰操纵 并通知玩家继续出牌
 					channel.pushMessage({ route: 'onNotification', name: Notifications.onPeng, data: channel.roominfo })
@@ -173,7 +197,7 @@ RoomRemote.prototype.onAction = function (sid, roomname, username, action, callb
 						return card
 					})
 					canChiData.push(channel.roominfo.deal_card)
-					getUser(channel, username).groupCards.push({name: 'chi', cards: canChiData})
+					getUser(channel, username).groupCards.push({ name: 'chi', cards: canChiData })
 
 					// 通知所有玩家有吃操纵 并通知玩家继续出牌
 					channel.pushMessage({ route: 'onNotification', name: Notifications.onEat, data: channel.roominfo })
@@ -353,7 +377,8 @@ function dealPoker(channel, username, card) {
  */
 function autoCheckTi(channel) {
 	var canTiUser = null
-	channel.roominfo.users.some(user => {
+	channel.checkUsers.some(user => {
+		// 看手中的牌能不能 提 / 跑
 		var canTiCards = CardUtil.canTi(user.handCards, channel.roominfo.deal_card)
 		if (canTiCards) {
 			canTiUser = user
@@ -361,11 +386,40 @@ function autoCheckTi(channel) {
 				deleteCard(canTiUser.handCards, card)
 			})
 			canTiCards.push(channel.roominfo.deal_card)
-			console.log('***********', canTiCards)
+			console.log('发现手中牌能 提/跑', canTiCards)
 			const isTi = user.username === channel.roominfo.deal_username
-			canTiUser.groupCards.push({name: isTi ? 'ti' : 'pao', cards: canTiCards})
+			canTiUser.groupCards.push({ name: isTi ? 'ti' : 'pao', cards: canTiCards })
 			channel.pushMessage({ route: 'onNotification', name: isTi ? Notifications.onTi : Notifications.onPao, data: channel.roominfo })
 			return true // 跳出循环
+		}
+
+		// 看组合牌中能不能 提 / 跑
+		var canTiGroup = CardUtil.canTi2(user.groupCards, channel.roominfo.deal_card)
+		if (canTiGroup) {
+			canTiUser = user
+			console.log('发现组合牌能 提/跑', canTiGroup)
+			canTiGroup.cards.push(channel.roominfo.deal_card)
+			const isTi = user.username === channel.roominfo.deal_username
+			canTiGroup.name = isTi ? 'ti' : 'pao'
+			channel.pushMessage({ route: 'onNotification', name: isTi ? Notifications.onTi : Notifications.onPao, data: channel.roominfo })
+			return true // 跳出循环
+		}
+
+		// 自己的牌 有 偎 的必须 偎
+		if (channel.roominfo.deal_username === user.username) {
+			// 看手里牌中能不能 偎
+			var canWeiCards = CardUtil.canWei(user.handCards, channel.roominfo.deal_card)
+			if (canWeiCards) {
+				canTiUser = user
+				canWeiCards.forEach(card => {
+					deleteCard(canTiUser.handCards, card)
+				})
+				canWeiCards.push(channel.roominfo.deal_card)
+				console.log('发现手中牌能 偎', canWeiCards)
+				canTiUser.groupCards.push({ name: 'wei', cards: canWeiCards })
+				channel.pushMessage({ route: 'onNotification', name: Notifications.onWei, data: channel.roominfo })
+				return true // 跳出循环
+			}
 		}
 	})
 
