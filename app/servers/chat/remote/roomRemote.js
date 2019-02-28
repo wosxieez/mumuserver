@@ -9,6 +9,18 @@ var RoomRemote = function (app) {
 	this.channelService = app.get('channelService')
 }
 
+
+console.log('测试是否能胡', CardUtil.canHu(
+	[9, 16, 17, 18],
+	[
+		{ name: 'chi', cards: [4, 5, 6] },
+		{ name: 'wei', cards: [15, 15, 15] },
+		{ name: 'chi', cards: [1, 2, 3] },
+		{ name: 'chi', cards: [2, 7, 10] },
+		{ name: 'pao', cards: [8, 8, 8, 8] }
+	],
+	9))
+
 /**
  * 创建房间
  *
@@ -79,8 +91,17 @@ RoomRemote.prototype.joinRoom = function (sid, roomname, username, callback) {
 					}
 				}
 				//------------------------------------------------------------------------------------------
-
-
+				
+				channel.roominfo.users[1].handCards = [12, 13, 14, 15, 16]
+				channel.roominfo.users[2].handCards = [12, 13, 14, 15, 16]
+				channel.roominfo.cards.push(8)
+				channel.roominfo.cards.push(13)
+				channel.roominfo.users[0].groupCards = [{name: 'chi', cards: [2, 3, 4]},
+				{name: 'chi', cards: [4, 5, 6]},
+				{name: 'chi', cards: [17, 18, 19]},
+				{name: 'chi', cards: [1, 2, 3]},
+				{name: 'chi', cards: [4, 5, 6]}]
+				channel.roominfo.users[0].handCards = [8, 8, 8, 11, 11]
 				//------------------------------------------------------------------------------------------
 				//	测试代码
 				//------------------------------------------------------------------------------------------
@@ -157,17 +178,24 @@ RoomRemote.prototype.onAction = function (sid, roomname, username, action, callb
 	var channel = this.channelService.getChannel(roomname, false)
 	if (!!channel) {
 		switch (action.name) {
-			case Actions.NewCard: // 收到庄家的开始出牌指令
+			case Actions.Hu: // 收到胡牌指令
+				console.log('收到胡牌指令')
+				break
+			case Actions.NewCard: // 收到出牌指令
 				if (channel.isWatingForNewCard && username === channel.isWatingForNewCardUsername) {
 					clearTimeout(channel.isWatingForNewCardID)
+					channel.isWatingForNewCard = false
 					const card = action.data
 					dealPoker(channel, username, card)
 				}
 				break
 			case Actions.Cancel: // 收到玩家无操纵指令
-				if (channel.checkUsername === username) {
+				// 无操作指令 会在  是否胡  是否吃/碰 的时候返回
+				if (channel.isWatingForHu && username === channel.isWatingForHuUsername) {
+					notificationUserCheckHuTimeout(channel, username)
+				} else if (channel.checkUsername === username) {
 					clearTimeout(channel.timeout)
-					autoCheckPengChi(channel)
+					autoCheckHuPengChi(channel)
 				}
 				break
 			case Actions.Peng: // 收到玩家碰牌操纵
@@ -211,6 +239,26 @@ RoomRemote.prototype.onAction = function (sid, roomname, username, action, callb
 	callback()
 }
 
+/**
+ * 通知玩家胡
+ *
+ * @param {*} channel
+ * @param {*} username
+ */
+function notificationUserCheckHu(channel, username, canHuData) {
+	channel.isWatingForHu = true
+	channel.isWatingForHuUsername = username
+	channel.pushMessage({ route: 'onNotification', name: Notifications.checkHu, data: { username: username, data: canHuData } })
+	channel.isWatingForHuID = setTimeout(notificationUserCheckHuTimeout.bind(null, channel, username), 5000)
+}
+
+function notificationUserCheckHuTimeout(channel, username) {
+	// 胡牌超时了
+	channel.isWatingForHu = false
+	clearTimeout(channel.isWatingForHuID)
+	notificationUserCheckNewCard(channel, username)
+}
+
 
 /**
  * 通知玩家出牌
@@ -228,6 +276,7 @@ function notificationUserCheckNewCard(channel, username) {
 function notificationUserCheckNewCardTimeout(channel, username) {
 	// 出牌超时了
 	channel.isWatingForNewCard = false
+	clearTimeout(channel.isWatingForNewCardID)
 	const user = getUser(channel, username)
 	const card = user.handCards[0]
 	dealPoker(channel, username, card)
@@ -365,17 +414,17 @@ function dealPoker(channel, username, card) {
 
 	channel.pushMessage({ route: 'onNotification', name: Notifications.onNewCard, data: channel.roominfo })
 
-	// 2s后 检查有没有玩家能提/跑
-	setTimeout(autoCheckTi.bind(this, channel), 3000)
+	// 2s后 检查有没有玩家能 提/跑 / 偎
+	setTimeout(autoCheckTiWei.bind(this, channel), 3000)
 }
 
 
 /**
- * 自动检查提
+ * 自动检查 提 / 跑 /  偎
  *
  * @param {*} channel
  */
-function autoCheckTi(channel) {
+function autoCheckTiWei(channel) {
 	var canTiUser = null
 	channel.checkUsers.some(user => {
 		// 看手中的牌能不能 提 / 跑
@@ -424,21 +473,28 @@ function autoCheckTi(channel) {
 	})
 
 	if (canTiUser) {
-		notificationUserCheckNewCard(channel, canTiUser.username)
+		// 在提/跑/偎 之后需要判断下能不能胡
+		const canHuData = CardUtil.canHu(canTiUser.handCards, canTiUser.groupCards, 0)
+		if (!!canHuData) {
+			notificationUserCheckHu(channel, canTiUser.username, canHuData)
+		} else {
+			notificationUserCheckNewCard(channel, canTiUser.username)
+		}
 	} else {
-		autoCheckPengChi(channel)
+		autoCheckHuPengChi(channel)
 	}
 }
+
 /**
- * 自动检查碰/吃
+ * 自动检查胡/碰/吃
  *
  * @param {*} channel
  */
-function autoCheckPengChi(channel) {
+function autoCheckHuPengChi(channel) {
 	console.log('自动检查处理')
 	clearTimeout(channel.timeout)
 	if (!channel.checkStatus) {
-		channel.checkStatus = '检查碰'
+		channel.checkStatus = '检查胡'
 		channel.checkUsernames = []
 		for (var i = 0; i < channel.checkUsers.length; i++) {
 			channel.checkUsernames.push(channel.checkUsers[i].username)
@@ -446,6 +502,37 @@ function autoCheckPengChi(channel) {
 	}
 
 	switch (channel.checkStatus) {
+		case '检查胡':
+			console.log('正在检查胡', channel.checkStatus, channel.checkUsernames)
+			if (channel.checkUsernames.length > 0) {
+				// 如果还没有检查完的用户 继续检查
+				channel.checkUsername = channel.checkUsernames.shift()
+				const currentUser = getUser(channel, channel.checkUsername)
+				const canHuData = CardUtil.canHu(currentUser.handCards, currentUser.groupCards, channel.dealCard)
+				if (!!canHuData) {
+					// 通知玩家是否胡
+					channel.pushMessage({
+						route: 'onNotification', name: Notifications.checkHu,
+						data: { username: channel.checkUsername, data: canHuData }
+					})
+
+					// 加一个超时操作
+					channel.timeout = setTimeout(() => {
+						autoCheckHuPengChi(channel)
+					}, 5000)
+				} else {
+					autoCheckHuPengChi(channel)
+				}
+			} else {
+				// 碰已经检查完了 开始检查 吃
+				channel.checkStatus = '检查碰'
+				channel.checkUsernames = []
+				for (var i = 0; i < channel.checkUsers.length; i++) {
+					channel.checkUsernames.push(channel.checkUsers[i].username)
+				}
+				autoCheckHuPengChi(channel)
+			}
+			break;
 		case '检查碰':
 			console.log('正在检查碰', channel.checkStatus, channel.checkUsernames)
 			if (channel.checkUsernames.length > 0) {
@@ -458,7 +545,7 @@ function autoCheckPengChi(channel) {
 
 				// 加一个超时操纵
 				channel.timeout = setTimeout(() => {
-					autoCheckPengChi(channel)
+					autoCheckHuPengChi(channel)
 				}, 5000)
 			} else {
 				// 碰已经检查完了 开始检查 吃
@@ -467,7 +554,7 @@ function autoCheckPengChi(channel) {
 				for (var i = 0; i < channel.checkUsers.length; i++) {
 					channel.checkUsernames.push(channel.checkUsers[i].username)
 				}
-				autoCheckPengChi(channel)
+				autoCheckHuPengChi(channel)
 			}
 			break;
 		case '检查吃':
@@ -482,7 +569,7 @@ function autoCheckPengChi(channel) {
 
 				// 加一个超时操纵
 				channel.timeout = setTimeout(() => {
-					autoCheckPengChi(channel)
+					autoCheckHuPengChi(channel)
 				}, 5000)
 			} else {
 				console.log('吃已经检查完了 看来没玩家要这张牌了')
@@ -553,6 +640,7 @@ var Notifications = {
 	onPao: 9,         // 玩家跑牌
 	onNewCard: 10,    // 新底牌
 	checkPeng: 12,    // 检查碰
-	checkEat: 13,      // 检查吃
-	checkNewCard: 14       // 检查出牌
+	checkEat: 13,     // 检查吃
+	checkNewCard: 14, // 检查出牌
+	checkHu: 15       // 检查胡
 }

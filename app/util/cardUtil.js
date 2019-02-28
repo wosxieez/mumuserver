@@ -334,38 +334,29 @@ CardUtil.canHu = function (cardsOnHand, cardsOnTable, currentCard) {
   if (currentCard !== 0) {
     copyedCards.push(currentCard);
   }
-
-  var onHand = CardUtil.shouShun(cardsOnHand);
+  var onHand = CardUtil.shouShun(copyedCards);
   if (onHand && onHand.length) {
-    _.each(onHand, function (cards) {
-      if ((_.union(cards, [])).length === 1) {
-        huxi += CardUtil.getHuXi(cards, CardUtil.Actions.Wei);
-      } else {
-        huxi += CardUtil.getHuXi(cards, CardUtil.Actions.Chi);
+    const fullGroupCards = cardsOnTable.concat(onHand)
+    _.each(fullGroupCards, function (group) {
+      if (group.name === CardUtil.Actions.Peng) {
+        huxi += CardUtil.getHuXi(group.cards, CardUtil.Actions.Peng)
+      } else if (group.name === CardUtil.Actions.Wei) {
+        huxi += CardUtil.getHuXi(group.cards, CardUtil.Actions.Wei)
+      } else if (group.name === CardUtil.Actions.Ti) {
+        huxi += CardUtil.getHuXi(group.cards, CardUtil.Actions.Ti)
+      } else if (group.name === CardUtil.Actions.Pao) {
+        huxi += CardUtil.getHuXi(group.cards, CardUtil.Actions.Pao)
+      } else if (group.name === CardUtil.Actions.Chi) {
+        huxi += CardUtil.getHuXi(group.cards, CardUtil.Actions.Chi)
       }
-    });
-    _.each(cardsOnTable.thricePeng, function (c) {
-      huxi += CardUtil.getHuXi([c, c, c], CardUtil.Actions.Peng);
-    });
-    _.each(cardsOnTable.thriceWei, function (c) {
-      huxi += CardUtil.getHuXi([c, c, c], CardUtil.Actions.Wei);
-    });
-    _.each(cardsOnTable.fourfoldTi, function (c) {
-      huxi += CardUtil.getHuXi([c, c, c, c], CardUtil.Actions.Ti);
-    });
-    _.each(cardsOnTable.fourfoldPao, function (c) {
-      huxi += CardUtil.getHuXi([c, c, c, c], CardUtil.Actions.Pao);
-    });
-    _.each(cardsOnTable.shunzi, function (cards) {
-      huxi += CardUtil.getHuXi(cards, CardUtil.Actions.Chi);
-    });
+    })
+
+    const canHu = (huxi >= 15);
+    return [canHu, huxi, fullGroupCards]
+  } else {
+    return false
   }
-  var canHu = (huxi >= 15);
-
-  return [canHu, huxi, onHand];
-};
-
-
+}
 
 /**
  * 玩家的牌是否无单牌。
@@ -373,19 +364,17 @@ CardUtil.canHu = function (cardsOnHand, cardsOnTable, currentCard) {
  */
 CardUtil.shouShun = function (cards) {
   var countedCards = _.countBy(cards, function (c) { return c; });
-
   var results = [];
-  var singleCards = [];
 
   // 1. 处理三张，并找出所有单张
   _.each(countedCards, function (value, key) {
+    const card = parseInt(key)
+    // 三张的剔出来
     if (value === 3) {
-      results.push([key, key, key]);
+      results.push({name: 'peng', cards: [card, card, card]});
       delete countedCards[key];
-    } else if (value === 1) {
-      singleCards.push(key);
     }
-  });
+  })
 
   var findShunzi = function (singleCard) {
     // 贰柒拾
@@ -441,53 +430,38 @@ CardUtil.shouShun = function (cards) {
     return false;
   };
 
-  var shunzi;
-  var isSuccess = true;
-  _.each(singleCards, function (sCard) {
-    shunzi = findShunzi(sCard);
-    if (shunzi && shunzi.length) {
-      results.push(shunzi);
-    } else {
-      isSuccess = false;
+  // 处理单张
+  _.each(countedCards, function(value, key){
+    if (value === 1) {
+      const card = parseInt(key)
+      const shunzi = findShunzi(card)
+      if (!!shunzi) {
+        results.push({name: 'chi', cards: shunzi})
+      }
     }
-  });
-
-  if (!isSuccess) {
-    return false;
-  }
-
+  })
 
   // 去掉所有组合掉的牌
   _.each(countedCards, function (value, key) {
     if (value === 0) {
       delete countedCards[key];
     }
-  });
+  })
 
-  var keys = _.keys(countedCards);
-  if (keys.length > 1) {
-    _.each(countedCards, function (value, key) {
-      if (value === 2) {
-        shunzi = findShunzi(key);
-        if (shunzi && shunzi.length) {
-          {
-            results.push(shunzi);
-          }
-        }
-        shunzi = findShunzi(key);
-        if (shunzi && shunzi.length) {
-          {
-            results.push(shunzi);
-          }
-        }
-      }
-    });
-  } else if (keys.length === 1) {
-    results.push([keys[0], keys[0]]);
+  console.log(countedCards)
+  var keys = _.keys(countedCards)
+  if (keys.length >1) {
+    return false
+  } else if (keys.length == 1) {
+    if (countedCards[keys[0]] === 2) {
+      results.push({name: 'dui', cards: [parseInt(keys[0]), parseInt(keys[0])]})
+    } else {
+      return false 
+    }
   }
 
-  return results;
-};
+  return results
+}
 
 
 CardUtil.canPeng = function (cardsOnHand, currentCard) {
@@ -499,21 +473,6 @@ CardUtil.canPeng = function (cardsOnHand, currentCard) {
   }
   return canPeng;
 }
-
-CardUtil.canGang = function (cardsOnHand, cardsOnTable, currentCard) {
-  var canGang = false;
-  //var countedCards = _.countBy(cards, function(c){return c;});
-  var countedCards = _.countBy(cardsOnHand, function (c) { return c; });
-  if (countedCards[currentCard] === 3) {
-    canGang = true;
-  }
-  if (_.contains(cardsOnTable.thricePeng, currentCard) || _.contains(cardsOnTable.thriceWei, currentCard)) {
-    canGang = true;
-  }
-  return canGang;
-};
-
-
 
 /**
  * 玩家是否能吃拍
@@ -570,6 +529,18 @@ CardUtil.canChi = function (cards, currentCard) {
       return null
     }
   }
+}
+
+CardUtil.Actions = {
+  NewCard: 'newCard',         // 出牌
+  Ti: "ti",         // 提
+  Pao: "pao",       // 跑
+  Wei: "wei",       // 偎
+  Peng: "peng",     // 碰
+  Hu: "hu",         // 胡牌
+  Chi: "chi",       // 吃牌
+  Cancel: "cancel", // 取消 
+  Idle: "idle"      // 无操作
 }
 
 module.exports = CardUtil
