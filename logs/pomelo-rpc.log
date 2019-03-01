@@ -160,3 +160,14 @@
     at Connection.emit (events.js:182:13)
     at addChunk (/Users/coco/Documents/GitHub/mumuserver/node_modules/duplexify/node_modules/readable-stream/lib/_stream_readable.js:291:12)
 [2019-02-26 16:54:13.588] [WARN] pomelo-rpc - [33m[mqtt-mailbox] [39mtimer is not exsits, serverId: connector-server-2 remote: 0, host: 127.0.0.1, port: 6051
+[2019-02-28 22:50:42.727] [ERROR] pomelo-rpc - [31m[mqtt-acceptor] [39mprocess rpc message error ReferenceError: roominfo is not defined
+    at RoomRemote.onAction (/Users/coco/Documents/GitHub/mumuserver/app/servers/chat/remote/roomRemote.js:177:6)
+    at Dispatcher.pro.route (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/dispatcher.js:52:10)
+    at Acceptor.cb (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/gateway.js:22:16)
+    at processMsg (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/acceptors/mqtt-acceptor.js:138:12)
+    at Connection.<anonymous> (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/acceptors/mqtt-acceptor.js:62:11)
+    at Connection.emit (events.js:182:13)
+    at Connection.emitPacket (/Users/coco/Documents/GitHub/mumuserver/node_modules/mqtt-connection/connection.js:14:8)
+    at Connection.emit (events.js:182:13)
+    at addChunk (/Users/coco/Documents/GitHub/mumuserver/node_modules/duplexify/node_modules/readable-stream/lib/_stream_readable.js:291:12)
+    at readableAddChunk (/Users/coco/Documents/GitHub/mumuserver/node_modules/duplexify/node_modules/readable-stream/lib/_stream_readable.js:278:11)

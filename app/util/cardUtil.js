@@ -266,13 +266,11 @@ CardUtil.hasTi = function (cardsOnHand) {
  * @returns
  */
 CardUtil.canWei = function (cardsOnHand, currentCard) {
-  console.log('查询能否偎', cardsOnHand, currentCard)
   var countedCards = _.countBy(cardsOnHand, function (c) { return c; })
   var canWeiCards = null
   if (countedCards[currentCard] === 2) {
     canWeiCards = [currentCard, currentCard]
   }
-  console.log('查询结果', canWeiCards)
   return canWeiCards
 }
 
@@ -284,13 +282,11 @@ CardUtil.canWei = function (cardsOnHand, currentCard) {
  * @returns
  */
 CardUtil.canTi = function (cardsOnHand, currentCard) {
-  console.log('查询能否提', cardsOnHand, currentCard)
   var countedCards = _.countBy(cardsOnHand, function (c) { return c; })
   var canTiCards = null
   if (countedCards[currentCard] === 3) {
     canTiCards = [currentCard, currentCard, currentCard]
   }
-  console.log('查询结果', canTiCards)
   return canTiCards
 }
 
@@ -448,7 +444,6 @@ CardUtil.shouShun = function (cards) {
     }
   })
 
-  console.log(countedCards)
   var keys = _.keys(countedCards)
   if (keys.length >1) {
     return false
@@ -465,7 +460,6 @@ CardUtil.shouShun = function (cards) {
 
 
 CardUtil.canPeng = function (cardsOnHand, currentCard) {
-  console.log('判断是否能碰', cardsOnHand, currentCard)
   var canPeng = null;
   var countedCards = _.countBy(cardsOnHand, function (c) { return c; });
   if (countedCards[currentCard] === 2) {
@@ -483,7 +477,6 @@ CardUtil.canPeng = function (cardsOnHand, currentCard) {
 // 2. 2、7、10
 // 3. 大小混搭
 CardUtil.canChi = function (cards, currentCard) {
-  console.log('判断是否能吃', cards, currentCard)
   var canChiCards = []
   var countedCards = _.countBy(cards, function (c) { return c; });
   _.each(countedCards, function (value, key) {
