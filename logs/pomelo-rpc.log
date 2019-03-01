@@ -171,3 +171,239 @@
     at Connection.emit (events.js:182:13)
     at addChunk (/Users/coco/Documents/GitHub/mumuserver/node_modules/duplexify/node_modules/readable-stream/lib/_stream_readable.js:291:12)
     at readableAddChunk (/Users/coco/Documents/GitHub/mumuserver/node_modules/duplexify/node_modules/readable-stream/lib/_stream_readable.js:278:11)
+[2019-03-01 23:01:56.642] [ERROR] pomelo-rpc - [31m[mqtt-mailbox] [39mrpc connector-server-3 callback timeout 30000, remote server 0 host: 127.0.0.1, port: 6050
+[2019-03-01 23:01:56.643] [ERROR] pomelo-rpc - [31m[MailStation] [39m[pomelo-rpc] fail to send message Error: rpc connector-server-3 callback timeout 30000, remote server 0 host: 127.0.0.1, port: 6050
+    at Timeout.<anonymous> (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-client/mailboxes/mqtt-mailbox.js:257:16)
+    at ontimeout (timers.js:436:11)
+    at tryOnTimeout (timers.js:300:5)
+    at listOnTimeout (timers.js:263:5)
+    at Timer.processTimers (timers.js:223:10)
+[2019-03-01 23:01:56.644] [ERROR] pomelo-rpc - [31m[failprocess] [39mrpc failed with error, remote server: chat-server-1, msg: {"namespace":"user","serverType":"chat","service":"hallRemote","method":"joinHall","args":["connector-server-3"]}, error code: 5
+[2019-03-01 23:03:24.605] [ERROR] pomelo-rpc - [31m[mqtt-mailbox] [39mrpc connector-server-2 callback timeout 30000, remote server 0 host: 127.0.0.1, port: 6051
+[2019-03-01 23:03:24.606] [ERROR] pomelo-rpc - [31m[MailStation] [39m[pomelo-rpc] fail to send message Error: rpc connector-server-2 callback timeout 30000, remote server 0 host: 127.0.0.1, port: 6051
+    at Timeout.<anonymous> (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-client/mailboxes/mqtt-mailbox.js:257:16)
+    at ontimeout (timers.js:436:11)
+    at tryOnTimeout (timers.js:300:5)
+    at listOnTimeout (timers.js:263:5)
+    at Timer.processTimers (timers.js:223:10)
+[2019-03-01 23:03:24.607] [ERROR] pomelo-rpc - [31m[failprocess] [39mrpc failed with error, remote server: chat-server-2, msg: {"namespace":"user","serverType":"chat","service":"hallRemote","method":"leaveHall","args":["connector-server-2"]}, error code: 5
+[2019-03-01 23:03:27.243] [ERROR] pomelo-rpc - [31m[mqtt-mailbox] [39mrpc connector-server-2 callback timeout 30000, remote server 2 host: 127.0.0.1, port: 6051
+[2019-03-01 23:03:27.243] [ERROR] pomelo-rpc - [31m[MailStation] [39m[pomelo-rpc] fail to send message Error: rpc connector-server-2 callback timeout 30000, remote server 2 host: 127.0.0.1, port: 6051
+    at Timeout.<anonymous> (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-client/mailboxes/mqtt-mailbox.js:257:16)
+    at ontimeout (timers.js:436:11)
+    at tryOnTimeout (timers.js:300:5)
+    at listOnTimeout (timers.js:263:5)
+    at Timer.processTimers (timers.js:223:10)
+[2019-03-01 23:03:27.244] [ERROR] pomelo-rpc - [31m[failprocess] [39mrpc failed with error, remote server: chat-server-2, msg: {"namespace":"user","serverType":"chat","service":"hallRemote","method":"joinHall","args":["connector-server-2"]}, error code: 5
+[2019-03-01 23:05:31.142] [ERROR] pomelo-rpc - [31m[mqtt-acceptor] [39mprocess rpc message error TypeError: cb is not a function
+    at HallRemote.joinHall (/Users/coco/Documents/GitHub/mumuserver/app/servers/chat/remote/hallRemote.js:14:5)
+    at Dispatcher.pro.route (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/dispatcher.js:52:10)
+    at Acceptor.cb (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/gateway.js:22:16)
+    at processMsg (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/acceptors/mqtt-acceptor.js:138:12)
+    at Connection.<anonymous> (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/acceptors/mqtt-acceptor.js:62:11)
+    at Connection.emit (events.js:182:13)
+    at Connection.emitPacket (/Users/coco/Documents/GitHub/mumuserver/node_modules/mqtt-connection/connection.js:14:8)
+    at Connection.emit (events.js:182:13)
+    at addChunk (/Users/coco/Documents/GitHub/mumuserver/node_modules/duplexify/node_modules/readable-stream/lib/_stream_readable.js:291:12)
+    at readableAddChunk (/Users/coco/Documents/GitHub/mumuserver/node_modules/duplexify/node_modules/readable-stream/lib/_stream_readable.js:278:11)
+[2019-03-01 23:05:31.515] [ERROR] pomelo-rpc - [31m[mqtt-acceptor] [39mprocess rpc message error TypeError: cb is not a function
+    at HallRemote.leaveHall (/Users/coco/Documents/GitHub/mumuserver/app/servers/chat/remote/hallRemote.js:21:5)
+    at Dispatcher.pro.route (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/dispatcher.js:52:10)
+    at Acceptor.cb (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/gateway.js:22:16)
+    at processMsg (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/acceptors/mqtt-acceptor.js:138:12)
+    at Connection.<anonymous> (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/acceptors/mqtt-acceptor.js:62:11)
+    at Connection.emit (events.js:182:13)
+    at Connection.emitPacket (/Users/coco/Documents/GitHub/mumuserver/node_modules/mqtt-connection/connection.js:14:8)
+    at Connection.emit (events.js:182:13)
+    at addChunk (/Users/coco/Documents/GitHub/mumuserver/node_modules/duplexify/node_modules/readable-stream/lib/_stream_readable.js:291:12)
+    at readableAddChunk (/Users/coco/Documents/GitHub/mumuserver/node_modules/duplexify/node_modules/readable-stream/lib/_stream_readable.js:278:11)
+[2019-03-01 23:06:28.961] [ERROR] pomelo-rpc - [31m[mqtt-acceptor] [39mprocess rpc message error TypeError: cb is not a function
+    at HallRemote.joinHall (/Users/coco/Documents/GitHub/mumuserver/app/servers/chat/remote/hallRemote.js:14:5)
+    at Dispatcher.pro.route (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/dispatcher.js:52:10)
+    at Acceptor.cb (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/gateway.js:22:16)
+    at processMsg (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/acceptors/mqtt-acceptor.js:138:12)
+    at Connection.<anonymous> (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/acceptors/mqtt-acceptor.js:62:11)
+    at Connection.emit (events.js:182:13)
+    at Connection.emitPacket (/Users/coco/Documents/GitHub/mumuserver/node_modules/mqtt-connection/connection.js:14:8)
+    at Connection.emit (events.js:182:13)
+    at addChunk (/Users/coco/Documents/GitHub/mumuserver/node_modules/duplexify/node_modules/readable-stream/lib/_stream_readable.js:291:12)
+    at readableAddChunk (/Users/coco/Documents/GitHub/mumuserver/node_modules/duplexify/node_modules/readable-stream/lib/_stream_readable.js:278:11)
+[2019-03-01 23:06:29.296] [ERROR] pomelo-rpc - [31m[mqtt-acceptor] [39mprocess rpc message error TypeError: cb is not a function
+    at HallRemote.leaveHall (/Users/coco/Documents/GitHub/mumuserver/app/servers/chat/remote/hallRemote.js:21:5)
+    at Dispatcher.pro.route (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/dispatcher.js:52:10)
+    at Acceptor.cb (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/gateway.js:22:16)
+    at processMsg (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/acceptors/mqtt-acceptor.js:138:12)
+    at Connection.<anonymous> (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/acceptors/mqtt-acceptor.js:62:11)
+    at Connection.emit (events.js:182:13)
+    at Connection.emitPacket (/Users/coco/Documents/GitHub/mumuserver/node_modules/mqtt-connection/connection.js:14:8)
+    at Connection.emit (events.js:182:13)
+    at addChunk (/Users/coco/Documents/GitHub/mumuserver/node_modules/duplexify/node_modules/readable-stream/lib/_stream_readable.js:291:12)
+    at readableAddChunk (/Users/coco/Documents/GitHub/mumuserver/node_modules/duplexify/node_modules/readable-stream/lib/_stream_readable.js:278:11)
+[2019-03-01 23:08:36.831] [ERROR] pomelo-rpc - [31m[mqtt-mailbox] [39mrpc connector-server-3 callback timeout 30000, remote server 0 host: 127.0.0.1, port: 6050
+[2019-03-01 23:08:36.832] [ERROR] pomelo-rpc - [31m[MailStation] [39m[pomelo-rpc] fail to send message Error: rpc connector-server-3 callback timeout 30000, remote server 0 host: 127.0.0.1, port: 6050
+    at Timeout.<anonymous> (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-client/mailboxes/mqtt-mailbox.js:257:16)
+    at ontimeout (timers.js:436:11)
+    at tryOnTimeout (timers.js:300:5)
+    at listOnTimeout (timers.js:263:5)
+    at Timer.processTimers (timers.js:223:10)
+[2019-03-01 23:08:36.832] [ERROR] pomelo-rpc - [31m[failprocess] [39mrpc failed with error, remote server: chat-server-1, msg: {"namespace":"user","serverType":"chat","service":"hallRemote","method":"joinHall","args":["connector-server-3"]}, error code: 5
+[2019-03-01 23:08:37.179] [ERROR] pomelo-rpc - [31m[mqtt-mailbox] [39mrpc connector-server-3 callback timeout 30000, remote server 1 host: 127.0.0.1, port: 6050
+[2019-03-01 23:08:37.179] [ERROR] pomelo-rpc - [31m[MailStation] [39m[pomelo-rpc] fail to send message Error: rpc connector-server-3 callback timeout 30000, remote server 1 host: 127.0.0.1, port: 6050
+    at Timeout.<anonymous> (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-client/mailboxes/mqtt-mailbox.js:257:16)
+    at ontimeout (timers.js:436:11)
+    at tryOnTimeout (timers.js:300:5)
+    at listOnTimeout (timers.js:263:5)
+    at Timer.processTimers (timers.js:223:10)
+[2019-03-01 23:08:37.180] [ERROR] pomelo-rpc - [31m[failprocess] [39mrpc failed with error, remote server: chat-server-1, msg: {"namespace":"user","serverType":"chat","service":"hallRemote","method":"leaveHall","args":["connector-server-3"]}, error code: 5
+[2019-03-01 23:09:40.941] [ERROR] pomelo-rpc - [31m[mqtt-acceptor] [39mprocess rpc message error TypeError: Cannot read property 'getChannel' of undefined
+    at HallRemote.joinHall (/Users/coco/Documents/GitHub/mumuserver/app/servers/chat/remote/hallRemote.js:11:39)
+    at Dispatcher.pro.route (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/dispatcher.js:52:10)
+    at Acceptor.cb (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/gateway.js:22:16)
+    at processMsg (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/acceptors/mqtt-acceptor.js:138:12)
+    at Connection.<anonymous> (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/acceptors/mqtt-acceptor.js:62:11)
+    at Connection.emit (events.js:182:13)
+    at Connection.emitPacket (/Users/coco/Documents/GitHub/mumuserver/node_modules/mqtt-connection/connection.js:14:8)
+    at Connection.emit (events.js:182:13)
+    at addChunk (/Users/coco/Documents/GitHub/mumuserver/node_modules/duplexify/node_modules/readable-stream/lib/_stream_readable.js:291:12)
+    at readableAddChunk (/Users/coco/Documents/GitHub/mumuserver/node_modules/duplexify/node_modules/readable-stream/lib/_stream_readable.js:278:11)
+[2019-03-01 23:09:41.281] [ERROR] pomelo-rpc - [31m[mqtt-acceptor] [39mprocess rpc message error TypeError: Cannot read property 'getChannel' of undefined
+    at HallRemote.leaveHall (/Users/coco/Documents/GitHub/mumuserver/app/servers/chat/remote/hallRemote.js:16:39)
+    at Dispatcher.pro.route (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/dispatcher.js:52:10)
+    at Acceptor.cb (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/gateway.js:22:16)
+    at processMsg (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/acceptors/mqtt-acceptor.js:138:12)
+    at Connection.<anonymous> (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/acceptors/mqtt-acceptor.js:62:11)
+    at Connection.emit (events.js:182:13)
+    at Connection.emitPacket (/Users/coco/Documents/GitHub/mumuserver/node_modules/mqtt-connection/connection.js:14:8)
+    at Connection.emit (events.js:182:13)
+    at addChunk (/Users/coco/Documents/GitHub/mumuserver/node_modules/duplexify/node_modules/readable-stream/lib/_stream_readable.js:291:12)
+    at readableAddChunk (/Users/coco/Documents/GitHub/mumuserver/node_modules/duplexify/node_modules/readable-stream/lib/_stream_readable.js:278:11)
+[2019-03-01 23:14:12.741] [ERROR] pomelo-rpc - [31m[mqtt-mailbox] [39mrpc connector-server-1 callback timeout 30000, remote server 0 host: 127.0.0.1, port: 6050
+[2019-03-01 23:14:12.742] [ERROR] pomelo-rpc - [31m[MailStation] [39m[pomelo-rpc] fail to send message Error: rpc connector-server-1 callback timeout 30000, remote server 0 host: 127.0.0.1, port: 6050
+    at Timeout.<anonymous> (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-client/mailboxes/mqtt-mailbox.js:257:16)
+    at ontimeout (timers.js:436:11)
+    at tryOnTimeout (timers.js:300:5)
+    at listOnTimeout (timers.js:263:5)
+    at Timer.processTimers (timers.js:223:10)
+[2019-03-01 23:14:12.742] [ERROR] pomelo-rpc - [31m[failprocess] [39mrpc failed with error, remote server: chat-server-1, msg: {"namespace":"user","serverType":"chat","service":"hallRemote","method":"joinHall","args":["connector-server-1"]}, error code: 5
+[2019-03-01 23:14:13.054] [ERROR] pomelo-rpc - [31m[mqtt-mailbox] [39mrpc connector-server-1 callback timeout 30000, remote server 1 host: 127.0.0.1, port: 6050
+[2019-03-01 23:14:13.054] [ERROR] pomelo-rpc - [31m[MailStation] [39m[pomelo-rpc] fail to send message Error: rpc connector-server-1 callback timeout 30000, remote server 1 host: 127.0.0.1, port: 6050
+    at Timeout.<anonymous> (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-client/mailboxes/mqtt-mailbox.js:257:16)
+    at ontimeout (timers.js:436:11)
+    at tryOnTimeout (timers.js:300:5)
+    at listOnTimeout (timers.js:263:5)
+    at Timer.processTimers (timers.js:223:10)
+[2019-03-01 23:14:13.055] [ERROR] pomelo-rpc - [31m[failprocess] [39mrpc failed with error, remote server: chat-server-1, msg: {"namespace":"user","serverType":"chat","service":"hallRemote","method":"leaveHall","args":["connector-server-1"]}, error code: 5
+[2019-03-01 23:16:24.308] [ERROR] pomelo-rpc - [31m[mqtt-mailbox] [39mrpc connector-server-1 callback timeout 30000, remote server 0 host: 127.0.0.1, port: 6050
+[2019-03-01 23:16:24.309] [ERROR] pomelo-rpc - [31m[MailStation] [39m[pomelo-rpc] fail to send message Error: rpc connector-server-1 callback timeout 30000, remote server 0 host: 127.0.0.1, port: 6050
+    at Timeout.<anonymous> (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-client/mailboxes/mqtt-mailbox.js:257:16)
+    at ontimeout (timers.js:436:11)
+    at tryOnTimeout (timers.js:300:5)
+    at listOnTimeout (timers.js:263:5)
+    at Timer.processTimers (timers.js:223:10)
+[2019-03-01 23:16:24.309] [ERROR] pomelo-rpc - [31m[failprocess] [39mrpc failed with error, remote server: chat-server-1, msg: {"namespace":"user","serverType":"chat","service":"hallRemote","method":"joinHall","args":["222222"]}, error code: 5
+[2019-03-01 23:16:24.632] [ERROR] pomelo-rpc - [31m[mqtt-mailbox] [39mrpc connector-server-1 callback timeout 30000, remote server 1 host: 127.0.0.1, port: 6050
+[2019-03-01 23:16:24.632] [ERROR] pomelo-rpc - [31m[MailStation] [39m[pomelo-rpc] fail to send message Error: rpc connector-server-1 callback timeout 30000, remote server 1 host: 127.0.0.1, port: 6050
+    at Timeout.<anonymous> (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-client/mailboxes/mqtt-mailbox.js:257:16)
+    at ontimeout (timers.js:436:11)
+    at tryOnTimeout (timers.js:300:5)
+    at listOnTimeout (timers.js:263:5)
+    at Timer.processTimers (timers.js:223:10)
+[2019-03-01 23:16:24.633] [ERROR] pomelo-rpc - [31m[failprocess] [39mrpc failed with error, remote server: chat-server-1, msg: {"namespace":"user","serverType":"chat","service":"hallRemote","method":"leaveHall","args":["connector-server-1"]}, error code: 5
+[2019-03-01 23:17:58.974] [ERROR] pomelo-rpc - [31m[mqtt-mailbox] [39mrpc connector-server-1 callback timeout 30000, remote server 0 host: 127.0.0.1, port: 6050
+[2019-03-01 23:17:58.975] [ERROR] pomelo-rpc - [31m[MailStation] [39m[pomelo-rpc] fail to send message Error: rpc connector-server-1 callback timeout 30000, remote server 0 host: 127.0.0.1, port: 6050
+    at Timeout.<anonymous> (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-client/mailboxes/mqtt-mailbox.js:257:16)
+    at ontimeout (timers.js:436:11)
+    at tryOnTimeout (timers.js:300:5)
+    at listOnTimeout (timers.js:263:5)
+    at Timer.processTimers (timers.js:223:10)
+[2019-03-01 23:17:58.976] [ERROR] pomelo-rpc - [31m[failprocess] [39mrpc failed with error, remote server: chat-server-1, msg: {"namespace":"user","serverType":"chat","service":"hallRemote","method":"joinHall","args":["222222"]}, error code: 5
+[2019-03-01 23:17:59.326] [ERROR] pomelo-rpc - [31m[mqtt-mailbox] [39mrpc connector-server-1 callback timeout 30000, remote server 1 host: 127.0.0.1, port: 6050
+[2019-03-01 23:17:59.327] [ERROR] pomelo-rpc - [31m[MailStation] [39m[pomelo-rpc] fail to send message Error: rpc connector-server-1 callback timeout 30000, remote server 1 host: 127.0.0.1, port: 6050
+    at Timeout.<anonymous> (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-client/mailboxes/mqtt-mailbox.js:257:16)
+    at ontimeout (timers.js:436:11)
+    at tryOnTimeout (timers.js:300:5)
+    at listOnTimeout (timers.js:263:5)
+    at Timer.processTimers (timers.js:223:10)
+[2019-03-01 23:17:59.328] [ERROR] pomelo-rpc - [31m[failprocess] [39mrpc failed with error, remote server: chat-server-1, msg: {"namespace":"user","serverType":"chat","service":"hallRemote","method":"leaveHall","args":["connector-server-1"]}, error code: 5
+[2019-03-01 23:19:11.310] [ERROR] pomelo-rpc - [31m[mqtt-acceptor] [39mprocess rpc message error TypeError: Cannot set property 'users' of undefined
+    at HallRemote.joinHall (/Users/coco/Documents/GitHub/mumuserver/app/servers/chat/remote/hallRemote.js:29:18)
+    at Dispatcher.pro.route (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/dispatcher.js:52:10)
+    at Acceptor.cb (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/gateway.js:22:16)
+    at processMsg (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/acceptors/mqtt-acceptor.js:138:12)
+    at Connection.<anonymous> (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/acceptors/mqtt-acceptor.js:62:11)
+    at Connection.emit (events.js:182:13)
+    at Connection.emitPacket (/Users/coco/Documents/GitHub/mumuserver/node_modules/mqtt-connection/connection.js:14:8)
+    at Connection.emit (events.js:182:13)
+    at addChunk (/Users/coco/Documents/GitHub/mumuserver/node_modules/duplexify/node_modules/readable-stream/lib/_stream_readable.js:291:12)
+    at readableAddChunk (/Users/coco/Documents/GitHub/mumuserver/node_modules/duplexify/node_modules/readable-stream/lib/_stream_readable.js:278:11)
+[2019-03-01 23:19:41.694] [ERROR] pomelo-rpc - [31m[mqtt-mailbox] [39mrpc connector-server-2 callback timeout 30000, remote server 1 host: 127.0.0.1, port: 6050
+[2019-03-01 23:19:41.695] [ERROR] pomelo-rpc - [31m[MailStation] [39m[pomelo-rpc] fail to send message Error: rpc connector-server-2 callback timeout 30000, remote server 1 host: 127.0.0.1, port: 6050
+    at Timeout.<anonymous> (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-client/mailboxes/mqtt-mailbox.js:257:16)
+    at ontimeout (timers.js:436:11)
+    at tryOnTimeout (timers.js:300:5)
+    at listOnTimeout (timers.js:263:5)
+    at Timer.processTimers (timers.js:223:10)
+[2019-03-01 23:19:41.696] [ERROR] pomelo-rpc - [31m[failprocess] [39mrpc failed with error, remote server: chat-server-1, msg: {"namespace":"user","serverType":"chat","service":"hallRemote","method":"leaveHall","args":["connector-server-2"]}, error code: 5
+[2019-03-01 23:22:34.172] [ERROR] pomelo-rpc - [31m[mqtt-acceptor] [39mprocess rpc message error ReferenceError: roomname is not defined
+    at HallRemote.joinHall (/Users/coco/Documents/GitHub/mumuserver/app/servers/chat/remote/hallRemote.js:21:47)
+    at Dispatcher.pro.route (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/dispatcher.js:52:10)
+    at Acceptor.cb (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/gateway.js:22:16)
+    at processMsg (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/acceptors/mqtt-acceptor.js:138:12)
+    at Connection.<anonymous> (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/acceptors/mqtt-acceptor.js:62:11)
+    at Connection.emit (events.js:182:13)
+    at Connection.emitPacket (/Users/coco/Documents/GitHub/mumuserver/node_modules/mqtt-connection/connection.js:14:8)
+    at Connection.emit (events.js:182:13)
+    at addChunk (/Users/coco/Documents/GitHub/mumuserver/node_modules/duplexify/node_modules/readable-stream/lib/_stream_readable.js:291:12)
+    at readableAddChunk (/Users/coco/Documents/GitHub/mumuserver/node_modules/duplexify/node_modules/readable-stream/lib/_stream_readable.js:278:11)
+[2019-03-01 23:23:31.525] [ERROR] pomelo-rpc - [31m[mqtt-acceptor] [39mprocess rpc message error ReferenceError: roomname is not defined
+    at HallRemote.joinHall (/Users/coco/Documents/GitHub/mumuserver/app/servers/chat/remote/hallRemote.js:21:47)
+    at Dispatcher.pro.route (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/dispatcher.js:52:10)
+    at Acceptor.cb (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/gateway.js:22:16)
+    at processMsg (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/acceptors/mqtt-acceptor.js:138:12)
+    at Connection.<anonymous> (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/acceptors/mqtt-acceptor.js:62:11)
+    at Connection.emit (events.js:182:13)
+    at Connection.emitPacket (/Users/coco/Documents/GitHub/mumuserver/node_modules/mqtt-connection/connection.js:14:8)
+    at Connection.emit (events.js:182:13)
+    at addChunk (/Users/coco/Documents/GitHub/mumuserver/node_modules/duplexify/node_modules/readable-stream/lib/_stream_readable.js:291:12)
+    at readableAddChunk (/Users/coco/Documents/GitHub/mumuserver/node_modules/duplexify/node_modules/readable-stream/lib/_stream_readable.js:278:11)
+[2019-03-01 23:24:12.508] [ERROR] pomelo-rpc - [31m[mqtt-acceptor] [39mprocess rpc message error ReferenceError: roomname is not defined
+    at HallRemote.joinHall (/Users/coco/Documents/GitHub/mumuserver/app/servers/chat/remote/hallRemote.js:21:47)
+    at Dispatcher.pro.route (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/dispatcher.js:52:10)
+    at Acceptor.cb (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/gateway.js:22:16)
+    at processMsg (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/acceptors/mqtt-acceptor.js:138:12)
+    at Connection.<anonymous> (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/acceptors/mqtt-acceptor.js:62:11)
+    at Connection.emit (events.js:182:13)
+    at Connection.emitPacket (/Users/coco/Documents/GitHub/mumuserver/node_modules/mqtt-connection/connection.js:14:8)
+    at Connection.emit (events.js:182:13)
+    at addChunk (/Users/coco/Documents/GitHub/mumuserver/node_modules/duplexify/node_modules/readable-stream/lib/_stream_readable.js:291:12)
+    at readableAddChunk (/Users/coco/Documents/GitHub/mumuserver/node_modules/duplexify/node_modules/readable-stream/lib/_stream_readable.js:278:11)
+[2019-03-01 23:24:42.785] [ERROR] pomelo-rpc - [31m[mqtt-mailbox] [39mrpc connector-server-2 callback timeout 30000, remote server 1 host: 127.0.0.1, port: 6050
+[2019-03-01 23:24:42.786] [ERROR] pomelo-rpc - [31m[MailStation] [39m[pomelo-rpc] fail to send message Error: rpc connector-server-2 callback timeout 30000, remote server 1 host: 127.0.0.1, port: 6050
+    at Timeout.<anonymous> (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-client/mailboxes/mqtt-mailbox.js:257:16)
+    at ontimeout (timers.js:436:11)
+    at tryOnTimeout (timers.js:300:5)
+    at listOnTimeout (timers.js:263:5)
+    at Timer.processTimers (timers.js:223:10)
+[2019-03-01 23:24:42.787] [ERROR] pomelo-rpc - [31m[failprocess] [39mrpc failed with error, remote server: chat-server-1, msg: {"namespace":"user","serverType":"chat","service":"hallRemote","method":"leaveHall","args":["connector-server-2"]}, error code: 5
+[2019-03-01 23:26:52.466] [ERROR] pomelo-rpc - [31m[mqtt-acceptor] [39mprocess rpc message error TypeError: cb is not a function
+    at HallRemote.leaveHall (/Users/coco/Documents/GitHub/mumuserver/app/servers/chat/remote/hallRemote.js:21:5)
+    at Dispatcher.pro.route (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/dispatcher.js:52:10)
+    at Acceptor.cb (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/gateway.js:22:16)
+    at processMsg (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/acceptors/mqtt-acceptor.js:138:12)
+    at Connection.<anonymous> (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/acceptors/mqtt-acceptor.js:62:11)
+    at Connection.emit (events.js:182:13)
+    at Connection.emitPacket (/Users/coco/Documents/GitHub/mumuserver/node_modules/mqtt-connection/connection.js:14:8)
+    at Connection.emit (events.js:182:13)
+    at addChunk (/Users/coco/Documents/GitHub/mumuserver/node_modules/duplexify/node_modules/readable-stream/lib/_stream_readable.js:291:12)
+    at readableAddChunk (/Users/coco/Documents/GitHub/mumuserver/node_modules/duplexify/node_modules/readable-stream/lib/_stream_readable.js:278:11)
+[2019-03-01 23:30:22.032] [ERROR] pomelo-rpc - [31m[mqtt-acceptor] [39mprocess rpc message error TypeError: cb is not a function
+    at HallRemote.joinHall (/Users/coco/Documents/GitHub/mumuserver/app/servers/chat/remote/hallRemote.js:15:5)
+    at Dispatcher.pro.route (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/dispatcher.js:52:10)
+    at Acceptor.cb (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/gateway.js:22:16)
+    at processMsg (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/acceptors/mqtt-acceptor.js:138:12)
+    at Connection.<anonymous> (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/acceptors/mqtt-acceptor.js:62:11)
+    at Connection.emit (events.js:182:13)
+    at Connection.emitPacket (/Users/coco/Documents/GitHub/mumuserver/node_modules/mqtt-connection/connection.js:14:8)
+    at Connection.emit (events.js:182:13)
+    at addChunk (/Users/coco/Documents/GitHub/mumuserver/node_modules/duplexify/node_modules/readable-stream/lib/_stream_readable.js:291:12)
+    at readableAddChunk (/Users/coco/Documents/GitHub/mumuserver/node_modules/duplexify/node_modules/readable-stream/lib/_stream_readable.js:278:11)

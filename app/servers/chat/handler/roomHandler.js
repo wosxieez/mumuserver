@@ -18,15 +18,6 @@ var handler = Handler.prototype;
  * @param  {Function} next next stemp callback
  *
  */
-handler.send = function (msg, session, next) {
-	var roomname = session.get('roomname')
-	var username = session.get('username')
-	var channelService = this.app.get('channelService');
-	channel = channelService.getChannel(roomname, false);
-	channel.pushMessage({ from: username, route: 'onChat', content: msg.content });
-
-	next(null, { code: 0 });
-}
 
 handler.sendAction = function (action, session, next) {
 	this.app.rpc.chat.roomRemote.onAction(session, this.app.get('serverId'), session.get('roomname'),

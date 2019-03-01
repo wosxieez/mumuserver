@@ -19,6 +19,7 @@ var RoomRemote = function (app) {
  * @param {*} callback
  */
 RoomRemote.prototype.createRoom = function (sid, roomname, roominfo, username, callback) {
+	console.log(sid, roomname, roominfo, username, callback)
 	var channel = this.channelService.getChannel(roomname, false)
 	if (!!channel) {
 		callback({ code: 400, error: '房间已经存在' })

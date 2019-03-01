@@ -9,7 +9,7 @@ exp.chat = function(session, msg, app, cb) {
 		return;
 	}
 
-	var res = dispatcher.dispatch(session.get('roomname'), chatServers);
+	var res = dispatcher.dispatch(session.get('username'), chatServers);
 
 	cb(null, res.id);
 };
