@@ -8,8 +8,6 @@ exp.chat = function(session, msg, app, cb) {
 		cb(new Error('can not find chat servers.'));
 		return;
 	}
-
-	var res = dispatcher.dispatch(session.get('username'), chatServers);
-
+	var res = dispatcher.dispatch(session.get('groupname'), chatServers);
 	cb(null, res.id);
 };

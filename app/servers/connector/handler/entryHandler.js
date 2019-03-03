@@ -5,7 +5,6 @@ module.exports = function (app) {
 var Handler = function (app) {
 	this.app = app;
 	this.sessionService = this.app.get('sessionService')
-	this.channelService = app.get('channelService')
 };
 
 var handler = Handler.prototype;
@@ -18,14 +17,16 @@ var handler = Handler.prototype;
  * @param {*} session
  * @param {*} next
  */
-handler.login = function (msg, session, next) {
+handler.joinGroup = function (msg, session, next) {
 	// 设置session
-	let username = msg.username
-	let password = msg.password
+	const username = msg.username   // 用户名
+	const groupname = 'group' + msg.groupid // 群名
+	const sid = this.app.get('serverId')
 
 	// 判断是否重复登录
 	if (!!this.sessionService.getByUid(username)) {
-		next(null, { code: 500, error: '重复登录' })
+		next(null, { code: 500, error: '重复加入' })
+		console('用户重复加入')
 		return
 	}
 
@@ -37,148 +38,24 @@ handler.login = function (msg, session, next) {
 			console.error('set username for session service failed! error is : %j', err.stack)
 		}
 	})
-
-	// 数据库查询
-	const sql = "select * from users where username='" + username + "' and password='" + password + "'"
-	let dbclient = this.app.get('dbclient')
-	dbclient.query(sql, [], (err, res) => {
-		console.log('查询到结果', sql, err, res)
+	session.set('groupname', groupname)
+	session.push('groupname', function (err) {
 		if (err) {
-			next(null, { code: 501, error: '登录失败' })
-		} else {
-			if (res && res.length > 0) {
-				//put user into channel
-				this.app.rpc.chat.hallRemote.joinHall(session, this.app.get('serverId'), username, null)
-				next(null, { code: 0, data: res[0] })
-			} else {
-				next(null, { code: 502, error: '登录失败' })
-			}
+			console.error('set groupname for session service failed! error is : %j', err.stack)
 		}
+	})
+
+	this.app.rpc.chat.groupRemote.joinGroup(session, sid, groupname, username, function (result) {
+		next(null, result)
 	})
 }
 
-
-/**
- * 创建群
- *
- * @param {*} msg
- * @param {*} session
- * @param {*} next
- */
-handler.createGroup = function (msg, session, next) {
-	let name = msg.name
-	var sql = "select * from groups where name='" + name + "'"
-	let dbclient = this.app.get('dbclient')
-	dbclient.query(sql, [], (err, res) => {
-		if (err) {
-			next(null, { code: 501, error: '创建群失败' })
-		} else {
-			if (res && res.length > 0) {
-				next(null, { code: 500, error: '创建群失败，改群已存在' })
-			} else {
-				dbclient.query('INSERT INTO groups SET ?', { name: name, admin: session.get('username') },
-					function (err, res) {
-						if (err) {
-							next(null, { code: 500, error: '创建群失败' })
-						} else {
-							next(null, { code: 0 })
-						}
-					})
-			}
-		}
-	})
+handler.leaveGroup = function (msg, session, next) {
+	next(null, { code: 0, data: '离开成功' })
+	setTimeout(() => {
+		this.sessionService.kick(session.uid, '主动断开')
+	}, 200)
 }
-
-/**
- * 获取群信息
- *
- * @param {*} msg
- * @param {*} session
- * @param {*} next
- */
-handler.getGroups = function (msg, session, next) {
-	let username = session.get('username')
-	var sql = "select * from groups where admin='" + username + "'"
-	let dbclient = this.app.get('dbclient')
-	dbclient.query(sql, [], (err, res) => {
-		if (err) {
-			next(null, { code: 500, error: '获取群信息失败' })
-		} else {
-			if (res && res.length > 0) {
-				next(null, { code: 0, data: res })
-			} else {
-				next(null, { code: 51, error: '获取群信息失败' })
-			}
-		}
-	})
-}
-
-/**
- * 创建房间
- *
- * @param {*} msg
- * @param {*} session
- * @param {*} next
- */
-handler.createRoom = function (msg, session, next) {
-	let groupid = msg.groupid
-	let name = msg.name
-	let count = msg.count
-
-	var sql = "select * from rooms where groupid='" + groupid + "' and name='" + name + "'"
-	let dbclient = this.app.get('dbclient')
-	dbclient.query(sql, [], (err, res) => {
-		if (err) {
-			console.log(err)
-			next(null, { code: 501, error: '创建房间失败' })
-		} else {
-			if (res && res.length > 0) {
-				next(null, { code: 500, error: '创建房间失败，改房间已存在' })
-			} else {
-				dbclient.query('INSERT INTO rooms SET ?', { name: name, groupid: groupid, count: count },
-					function (err, res) {
-						if (err) {
-							next(null, { code: 500, error: '创建房间失败' })
-						} else {
-							next(null, { code: 0 })
-						}
-					})
-			}
-		}
-	})
-}
-
-/**
- * 获取房间信息
- *
- * @param {*} msg
- * @param {*} session
- * @param {*} next
- */
-handler.getRooms = function (msg, session, next) {
-	let groupid = msg.groupid
-	var sql = "select * from rooms where groupid=" + groupid
-	let dbclient = this.app.get('dbclient')
-	dbclient.query(sql, [], (err, res) => {
-		if (err) {
-			next(null, { code: 500, error: '获取房间息失败' })
-		} else {
-			if (res && res.length > 0) {
-				next(null, { code: 0, data: res })
-			} else {
-				next(null, { code: 51, error: '获取房间息失败' })
-			}
-		}
-	})
-}
-
-var onSessionClosed = function (app, session) {
-	if (!session || !session.uid) {
-		return;
-	}
-	app.rpc.chat.hallRemote.leaveHall(session, app.get('serverId'), session.get('username'), null)
-	app.rpc.chat.roomRemote.leaveRoom(session, app.get('serverId'), session.get('roomname'), session.get('username'), null);
-};
 
 /**
  *	加入房间
@@ -189,37 +66,55 @@ var onSessionClosed = function (app, session) {
  * @returns
  */
 handler.joinRoom = function (msg, session, next) {
-	var self = this;
-	var roomname = msg.roomname
-	var username = msg.username
-	var sessionService = self.app.get('sessionService');
+	const username = session.get('username')
+	const sid = this.app.get('serverId')
+	const roomname = 'room' + msg.id
 
-	//duplicate log in
-	if (!!sessionService.getByUid(username)) {
-		next(null, {
-			code: 500,
-			error: '重复登录'
-		});
-		return;
-	}
-
-	session.bind(username)
 	session.set('roomname', roomname)
 	session.push('roomname', function (err) {
 		if (err) {
 			console.error('set roomname for session service failed! error is : %j', err.stack)
 		}
 	});
-	session.set('username', username)
-	session.push('username', function (err) {
-		if (err) {
-			console.error('set username for session service failed! error is : %j', err.stack)
-		}
-	})
-	session.on('closed', onUserLeave.bind(null, self.app));
 
-	//put user into channel
-	self.app.rpc.chat.roomRemote.joinRoom(session, self.app.get('serverId'), roomname, username, function (result) {
+	this.app.rpc.chat.roomRemote.joinRoom(session, sid, roomname, username, msg, function (result) {
 		next(null, result)
 	})
+}
+
+handler.leaveRoom = function (msg, session, next) {
+	const username = session.get('username')
+	const roomname = session.get('roomname')
+	const sid = this.app.get('serverId')
+
+	session.set('roomname', null)
+	session.push('roomname', function (err) {
+		if (err) {
+			console.error('set roomname for session service failed! error is : %j', err.stack)
+		}
+	})
+
+	this.app.rpc.chat.roomRemote.leaveRoom(session, sid, roomname, username, function (result) {
+		next(null, result)
+	})
+}
+
+function onSessionClosed(app, session) {
+	if (!session || !session.uid) {
+		return;
+	}
+
+	const username = session.get('username')
+	const sid = app.get('serverId')
+
+	const roomname = session.get('roomname')
+	if (roomname) {
+		app.rpc.chat.roomRemote.leaveRoom(session, sid, roomname, username, function (result) { })
+	}
+	const groupname = session.get('groupname')
+	if (groupname) {
+		app.rpc.chat.groupRemote.leaveGroup(session, sid, groupname, username, function (result) { })
+	}
+
+	console.log(username, '已断开连接')
 }

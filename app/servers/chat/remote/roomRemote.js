@@ -10,55 +10,23 @@ var RoomRemote = function (app) {
 }
 
 /**
- * 创建房间
- *
- * @param {*} sid
- * @param {*} roomname
- * @param {*} roominfo
- * @param {*} username
- * @param {*} callback
- */
-RoomRemote.prototype.createRoom = function (sid, roomname, roominfo, username, callback) {
-	console.log(sid, roomname, roominfo, username, callback)
-	var channel = this.channelService.getChannel(roomname, false)
-	if (!!channel) {
-		callback({ code: 400, error: '房间已经存在' })
-	} else {
-		channel = this.channelService.getChannel(roomname, true)
-		console.log('创建房间' + roomname)
-
-		// 初始化房间信息
-		roominfo.users = []
-		for (var i = 0; i < roominfo.count; i++) {
-			roominfo.users.push({ username: null, handCards: [], groupCards: [], passCards: [], hasCheckTi: false })
-		}
-		roominfo.users[0].username = username
-
-		roominfo.win_username = null                    // 赢的玩家
-		roominfo.banker_username = null  				// 庄家名称
-		roominfo.deal_username = null  					// 发牌者名称
-		roominfo.deal_card = 0  						// 当前发的牌
-		roominfo.cards = shufflePoker(generatePoker())  // 发牌洗牌
-
-		channel.roominfo = roominfo
-		channel.add(username, sid)
-		callback({ code: 0, data: '房间创建成功' })
-	}
-}
-
-/**
  * 加入房间
  *
  * @param {*} sid
  * @param {*} roomname
  * @param {*} username
- * @param {*} callback
+ * @param {*} cb
  */
-RoomRemote.prototype.joinRoom = function (sid, roomname, username, callback) {
+RoomRemote.prototype.joinRoom = function (sid, roomname, username, roominfo, cb) {
+	console.log('---------------------------服务器', this.app.get('serverId'), '---------------------------')
+	
+	const roomcount = roominfo.count
 	var channel = this.channelService.getChannel(roomname, false)
 	if (!!channel) {
-		if (channel.getMembers().length < channel.roominfo.count) {
+		if (channel.getMembers().length < roomcount) {
 			channel.add(username, sid)
+			console.log(sid, username, '已加入房间', roomname)
+			console.log(roomname, '当前前用户', channel.getMembers())
 			channel.roominfo.users.some(user => {
 				if (!user.username) {
 					user.username = username
@@ -67,7 +35,8 @@ RoomRemote.prototype.joinRoom = function (sid, roomname, username, callback) {
 			})
 
 			channel.pushMessage({ route: 'onNotification', name: Notifications.onJoinRoom, data: username })  // 通知其他用户
-			callback({ code: 0, users: channel.getMembers() })
+			console.log('---------------------------------------------------------------------------')
+			cb({ code: 0, data: '加入房间成功' })
 
 			// 人数满了 开始发牌
 			if (channel.getMembers().length === channel.roominfo.count) {
@@ -158,14 +127,35 @@ RoomRemote.prototype.joinRoom = function (sid, roomname, username, callback) {
 			}
 		}
 		else {
-			callback({ code: 402, error: '房间人数已满' })
+			console.log('---------------------------------------------------------------------------')
+			cb({ code: 402, data: '房间人数已满' })
 		}
 	} else {
-		callback({ code: 401, error: '房间不存在' })
+		channel = this.channelService.getChannel(roomname, true)
+		var roominfo = { count: roomcount }
+		// 初始化房间信息
+		roominfo.users = []
+		for (var i = 0; i < roominfo.count; i++) {
+			roominfo.users.push({ username: null, handCards: [], groupCards: [], passCards: [], hasCheckTi: false })
+		}
+		roominfo.users[0].username = username
+
+		roominfo.win_username = null                    // 赢的玩家
+		roominfo.banker_username = null  				// 庄家名称
+		roominfo.deal_username = null  					// 发牌者名称
+		roominfo.deal_card = 0  						// 当前发的牌
+		roominfo.cards = shufflePoker(generatePoker())  // 发牌洗牌
+
+		channel.roominfo = roominfo
+		channel.add(username, sid)
+		console.log(sid, username, '已创建房间', roomname)
+		console.log(roomname, '当前前用户', channel.getMembers())
+		console.log('---------------------------------------------------------------------------')
+		cb({ code: 0, data: '创建房间成功' })
 	}
 }
 
-RoomRemote.prototype.onAction = function (sid, roomname, username, action, callback) {
+RoomRemote.prototype.onAction = function (sid, roomname, username, action, cb) {
 	var channel = this.channelService.getChannel(roomname, false)
 	if (!!channel) {
 		switch (action.name) {
@@ -239,7 +229,7 @@ RoomRemote.prototype.onAction = function (sid, roomname, username, action, callb
 				break
 		}
 	}
-	callback()
+	cb({ code: 0, data: 'ok' })
 }
 
 /**
@@ -323,11 +313,15 @@ function deleteCard(cards, card) {
  * @param {String} name channel name
  *
  */
-RoomRemote.prototype.leaveRoom = function (sid, roomname, username, callback) {
+RoomRemote.prototype.leaveRoom = function (sid, roomname, username, cb) {
+	console.log('---------------------------服务器', this.app.get('serverId'), '---------------------------')
+
 	var channel = this.channelService.getChannel(roomname, false);
 	// leave channel
 	if (!!channel) {
 		channel.leave(username, sid)
+		console.log(sid, username, '已离开房间', roomname)
+		console.log(roomname, '当前前用户', channel.getMembers())
 		channel.roominfo.users.some(user => {
 			if (user.username === username) {
 				user.username = null
@@ -345,7 +339,8 @@ RoomRemote.prototype.leaveRoom = function (sid, roomname, username, callback) {
 			channel.destroy()
 		}
 	}
-	callback();
+	console.log('---------------------------------------------------------------------------')
+	cb({ code: 0, data: 'ok' })
 }
 
 // 生成牌
