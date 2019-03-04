@@ -59,16 +59,16 @@ RoomRemote.prototype.joinRoom = function (sid, groupname, roomname, username, ro
 				//------------------------------------------------------------------------------------------
 				//	测试代码
 				//------------------------------------------------------------------------------------------
-				channel.roominfo.users[1].handCards = [12, 13, 14, 15, 16]
-				channel.roominfo.users[2].handCards = [12, 13, 14, 15, 16]
-				channel.roominfo.cards.push(8)
-				channel.roominfo.cards.push(13)
-				channel.roominfo.users[0].groupCards = [{ name: 'chi', cards: [2, 3, 4] },
-				{ name: 'chi', cards: [4, 5, 6] },
-				{ name: 'chi', cards: [17, 18, 19] },
-				{ name: 'chi', cards: [1, 2, 3] },
-				{ name: 'chi', cards: [4, 5, 6] }]
-				channel.roominfo.users[0].handCards = [8, 8, 8, 11, 11]
+				// channel.roominfo.users[1].handCards = [12, 13, 14, 15, 16]
+				// channel.roominfo.users[2].handCards = [12, 13, 14, 15, 16]
+				// channel.roominfo.cards.push(8)
+				// channel.roominfo.cards.push(13)
+				// channel.roominfo.users[0].groupCards = [{ name: 'chi', cards: [2, 3, 4] },
+				// { name: 'chi', cards: [4, 5, 6] },
+				// { name: 'chi', cards: [17, 18, 19] },
+				// { name: 'chi', cards: [1, 2, 3] },
+				// { name: 'chi', cards: [4, 5, 6] }]
+				// channel.roominfo.users[0].handCards = [8, 8, 8, 11, 11]
 
 				// channel.roominfo.cards.push(1)
 				// channel.roominfo.cards.push(1)
