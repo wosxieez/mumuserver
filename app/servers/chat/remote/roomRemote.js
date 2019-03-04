@@ -155,7 +155,6 @@ RoomRemote.prototype.joinRoom = function (sid, groupname, roomname, username, ro
 
 		// 通过群渠道通知
 		const groupChannel = this.channelService.getChannel(groupname, false)
-		console.log(groupChannel, groupname, 'fdsfdsfads')
 		if (groupChannel) {
 			groupChannel.pushMessage({ route: 'onGroup', name: Notifications.onJoinRoom, data: { roomname, username } })  // 通知其他用户
 		}

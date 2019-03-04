@@ -25,8 +25,11 @@ handler.joinGroup = function (msg, session, next) {
 
 	// 判断是否重复登录
 	if (!!this.sessionService.getByUid(username)) {
-		next(null, { code: 500, error: '重复加入' })
-		console('用户重复加入')
+		next(null, { code: 500, data: '重复加入' })
+		console.log('用户重复加入')
+		setTimeout(() => {
+			this.sessionService.kick(session.uid, '主动断开')
+		}, 200)
 		return
 	}
 
