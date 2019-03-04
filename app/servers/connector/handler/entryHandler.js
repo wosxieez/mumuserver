@@ -66,9 +66,10 @@ handler.leaveGroup = function (msg, session, next) {
  * @returns
  */
 handler.joinRoom = function (msg, session, next) {
-	const username = session.get('username')
 	const sid = this.app.get('serverId')
+	const groupname = session.get('groupname')
 	const roomname = 'room' + msg.id
+	const username = session.get('username')
 
 	session.set('roomname', roomname)
 	session.push('roomname', function (err) {
@@ -77,15 +78,16 @@ handler.joinRoom = function (msg, session, next) {
 		}
 	});
 
-	this.app.rpc.chat.roomRemote.joinRoom(session, sid, roomname, username, msg, function (result) {
+	this.app.rpc.chat.roomRemote.joinRoom(session, sid, groupname, roomname, username, msg, function (result) {
 		next(null, result)
 	})
 }
 
 handler.leaveRoom = function (msg, session, next) {
-	const username = session.get('username')
-	const roomname = session.get('roomname')
 	const sid = this.app.get('serverId')
+	const groupname = session.get('groupname')
+	const roomname = session.get('roomname')
+	const username = session.get('username')
 
 	session.set('roomname', null)
 	session.push('roomname', function (err) {
@@ -94,7 +96,7 @@ handler.leaveRoom = function (msg, session, next) {
 		}
 	})
 
-	this.app.rpc.chat.roomRemote.leaveRoom(session, sid, roomname, username, function (result) {
+	this.app.rpc.chat.roomRemote.leaveRoom(session, sid, groupname, roomname, username, function (result) {
 		next(null, result)
 	})
 }
@@ -104,14 +106,14 @@ function onSessionClosed(app, session) {
 		return;
 	}
 
-	const username = session.get('username')
 	const sid = app.get('serverId')
-
-	const roomname = session.get('roomname')
-	if (roomname) {
-		app.rpc.chat.roomRemote.leaveRoom(session, sid, roomname, username, function (result) { })
-	}
 	const groupname = session.get('groupname')
+	const roomname = session.get('roomname')
+	const username = session.get('username')
+
+	if (roomname) {
+		app.rpc.chat.roomRemote.leaveRoom(session, sid, groupname, roomname, username, function (result) { })
+	}
 	if (groupname) {
 		app.rpc.chat.groupRemote.leaveGroup(session, sid, groupname, username, function (result) { })
 	}

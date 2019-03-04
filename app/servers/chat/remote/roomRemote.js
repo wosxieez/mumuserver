@@ -1,4 +1,6 @@
 const CardUtil = require('../../../util/cardUtil')
+const Actions = require('../../../util/Actions')
+const Notifications = require('../../../util/Notifications')
 
 module.exports = function (app) {
 	return new RoomRemote(app)
@@ -17,13 +19,18 @@ var RoomRemote = function (app) {
  * @param {*} username
  * @param {*} cb
  */
-RoomRemote.prototype.joinRoom = function (sid, roomname, username, roominfo, cb) {
+RoomRemote.prototype.joinRoom = function (sid, groupname, roomname, username, roominfo, cb) {
 	console.log('---------------------------服务器', this.app.get('serverId'), '---------------------------')
-	
+	console.log('joinRoom')
 	const roomcount = roominfo.count
 	var channel = this.channelService.getChannel(roomname, false)
 	if (!!channel) {
 		if (channel.getMembers().length < roomcount) {
+			// 通过群渠道通知
+			const groupChannel = this.channelService.getChannel(groupname, false)
+			if (groupChannel) {
+				groupChannel.pushMessage({ route: 'onGroup', name: Notifications.onJoinRoom, data: { roomname, username } })  // 通知其他用户
+			}
 			channel.add(username, sid)
 			console.log(sid, username, '已加入房间', roomname)
 			console.log(roomname, '当前前用户', channel.getMembers())
@@ -33,8 +40,6 @@ RoomRemote.prototype.joinRoom = function (sid, roomname, username, roominfo, cb)
 					return true
 				}
 			})
-
-			channel.pushMessage({ route: 'onNotification', name: Notifications.onJoinRoom, data: username })  // 通知其他用户
 			console.log('---------------------------------------------------------------------------')
 			cb({ code: 0, data: '加入房间成功' })
 
@@ -147,6 +152,13 @@ RoomRemote.prototype.joinRoom = function (sid, roomname, username, roominfo, cb)
 		roominfo.cards = shufflePoker(generatePoker())  // 发牌洗牌
 
 		channel.roominfo = roominfo
+
+		// 通过群渠道通知
+		const groupChannel = this.channelService.getChannel(groupname, false)
+		console.log(groupChannel, groupname, 'fdsfdsfads')
+		if (groupChannel) {
+			groupChannel.pushMessage({ route: 'onGroup', name: Notifications.onJoinRoom, data: { roomname, username } })  // 通知其他用户
+		}
 		channel.add(username, sid)
 		console.log(sid, username, '已创建房间', roomname)
 		console.log(roomname, '当前前用户', channel.getMembers())
@@ -155,7 +167,9 @@ RoomRemote.prototype.joinRoom = function (sid, roomname, username, roominfo, cb)
 	}
 }
 
-RoomRemote.prototype.onAction = function (sid, roomname, username, action, cb) {
+RoomRemote.prototype.onAction = function (sid, groupname, roomname, username, action, cb) {
+	console.log('---------------------------服务器', this.app.get('serverId'), '---------------------------')
+	console.log('onAction')
 	var channel = this.channelService.getChannel(roomname, false)
 	if (!!channel) {
 		switch (action.name) {
@@ -229,6 +243,7 @@ RoomRemote.prototype.onAction = function (sid, roomname, username, action, cb) {
 				break
 		}
 	}
+	console.log('---------------------------------------------------------------------------')
 	cb({ code: 0, data: 'ok' })
 }
 
@@ -313,9 +328,9 @@ function deleteCard(cards, card) {
  * @param {String} name channel name
  *
  */
-RoomRemote.prototype.leaveRoom = function (sid, roomname, username, cb) {
+RoomRemote.prototype.leaveRoom = function (sid, groupname, roomname, username, cb) {
 	console.log('---------------------------服务器', this.app.get('serverId'), '---------------------------')
-
+	console.log('leaveRoom')
 	var channel = this.channelService.getChannel(roomname, false);
 	// leave channel
 	if (!!channel) {
@@ -329,7 +344,11 @@ RoomRemote.prototype.leaveRoom = function (sid, roomname, username, cb) {
 			}
 		})
 
-		channel.pushMessage({ route: 'onNotification', name: Notifications.onLevelRoom, data: username })
+		// 通过群渠道通知
+		const groupChannel = this.channelService.getChannel(groupname, false)
+		if (groupChannel) {
+			groupChannel.pushMessage({ route: 'onGroup', name: Notifications.onLevelRoom, data: {roomname, username} })  // 通知其他用户
+		}
 
 		if (channel.getMembers().length === 0) {
 			clearTimeout(channel.autoCheckTimeoutID)
@@ -610,35 +629,4 @@ function autoCheckHuPengChi(channel) {
 		default:
 			break;
 	}
-}
-
-var Actions = {
-	NewCard: 'newCard',         // 出牌
-	Ti: "ti",         // 提
-	Pao: "pao",       // 跑
-	Wei: "wei",       // 偎
-	Peng: "peng",     // 碰
-	Hu: "hu",         // 胡牌
-	Chi: "chi",       // 吃牌
-	Cancel: "cancel", // 取消 
-	Idle: "idle"      // 无操作
-}
-
-var Notifications = {
-	onJoinRoom: 1,    // 新玩家加入通知
-	onLevelRoom: 101, // 玩家离开通知
-	onNewRound: 2,    // 开局通知
-	onDisCard: 3,     //等待玩家出牌
-	onCard: 4,    	  // 玩家出的牌
-	onEat: 5,         // 玩家吃牌
-	onPeng: 11,       // 玩家碰牌
-	onWei: 6,         // 玩家偎牌
-	onWin: 7,         // 玩家胡牌
-	onTi: 8,          // 玩家提牌
-	onPao: 9,         // 玩家跑牌
-	onNewCard: 10,    // 新底牌
-	checkPeng: 12,    // 检查碰
-	checkEat: 13,     // 检查吃
-	checkNewCard: 14, // 检查出牌
-	checkHu: 15       // 检查胡
 }
