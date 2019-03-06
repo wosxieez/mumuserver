@@ -259,6 +259,7 @@ function startGame(channel) {
 // 检查玩家第一次提牌
 //---------------------------------------------------------------------------------------------------------------
 function checkFirstTi(channel, user) {
+	if (!user) return false
 	if (!user.hasCheckTi) {
 		user.hasCheckTi = true
 
