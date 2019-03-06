@@ -29,7 +29,7 @@ GroupRemote.prototype.leaveGroup = function (sid, groupname, username, cb) {
     var channel = this.channelService.getChannel(groupname, false) // 创建群渠道
     if (!!channel) {
         channel.leave(username, sid)
-        channel.pushMessage({ route: 'onGroup', name: Notifications.onLevelGroup, data: { username } })
+        channel.pushMessage({ route: 'onGroup', name: Notifications.onLeaveGroup, data: { username } })
         console.log(sid, username, '离开群', groupname)
         console.log(groupname, '群前用户', channel.getMembers())
         if (channel.getMembers().length === 0) {

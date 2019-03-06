@@ -15,8 +15,8 @@ handler.sendAction = function (action, session, next) {
 	console.log('---------------------------服务器', this.app.get('serverId'), '---------------------------')
 	console.log('sendAction')
 	this.app.rpc.chat.roomRemote.onAction(session, this.app.get('serverId'), session.get('groupname'), session.get('roomname'),
-		session.get('username'), action, function () {
-			next(null, { code: 0 })
+		session.get('username'), action, function (result) {
+			next(null, result)
 		})
 
 	console.log('---------------------------------------------------------------------------')

@@ -1,8 +1,9 @@
 const Notifications = {
     onJoinRoom: 1,    // 新玩家加入房间
     onJoinGroup: 301, // 新玩家加入群
-    onLevelRoom: 101, // 玩家离开房间
-    onLevelGroup: 401,// 玩家离开群
+    onLeaveRoom: 101, // 玩家离开房间
+    onLeaveGroup: 401,// 玩家离开群
+    onReady: 501,     // 有玩家准备
     onNewRound: 2,    // 开局通知
     onDisCard: 3,     //等待玩家出牌
     onCard: 4,    	  // 玩家出的牌
@@ -16,7 +17,8 @@ const Notifications = {
     checkPeng: 12,    // 检查碰
     checkEat: 13,     // 检查吃
     checkNewCard: 14, // 检查出牌
-    checkHu: 15       // 检查胡
+    checkHu: 15,       // 检查胡
+    onRoundEnd: 999,  // 一轮游戏结束
 }
 
 module.exports = Notifications

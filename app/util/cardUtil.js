@@ -496,7 +496,7 @@ CardUtil.canChi = function (cards, currentCard) {
   }
 
   if (countedCards[currentCard + 1]) {
-    if (countedCards[currentCard + 2]) {
+    if (countedCards[currentCard + 2] && currentCard !== 9 && currentCard !== 10) {
       canChiCards.push([currentCard + 1, currentCard + 2]) // 判断8在首部 查询 '8' 9 10 首牌不能等于 9 10
     }
   }
@@ -516,6 +516,7 @@ CardUtil.canChi = function (cards, currentCard) {
       canChiCards.push([currentCard - 10, currentCard - 10]) // 判断 8 18 18
     }
 
+    console.log('检查吃', currentCard, canChiCards)
     if (canChiCards.length > 0) {
       return canChiCards
     } else {

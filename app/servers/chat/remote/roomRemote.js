@@ -11,153 +11,46 @@ var RoomRemote = function (app) {
 	this.channelService = app.get('channelService')
 }
 
-/**
- * 加入房间
- *
- * @param {*} sid
- * @param {*} roomname
- * @param {*} username
- * @param {*} cb
- */
+//---------------------------------------------------------------------------------------------------------------
+// 加入房间
+//---------------------------------------------------------------------------------------------------------------
 RoomRemote.prototype.joinRoom = function (sid, groupname, roomname, username, roominfo, cb) {
 	console.log('---------------------------服务器', this.app.get('serverId'), '---------------------------')
 	console.log('joinRoom')
-	const roomcount = roominfo.count
+
 	var channel = this.channelService.getChannel(roomname, false)
+
 	if (!!channel) {
-		if (channel.getMembers().length < roomcount) {
-			// 通过群渠道通知
+
+		// 群已经存在了 看看群人数有没有满 
+		// 人数没有满的话 可以加入
+		// 人数如果已经满了的话 则无法加入
+		if (channel.roominfo.users.length < channel.roominfo.count) {
+			// 通过群渠道通知其他玩家有人加入房间了
 			const groupChannel = this.channelService.getChannel(groupname, false)
+
 			if (groupChannel) {
 				groupChannel.pushMessage({ route: 'onGroup', name: Notifications.onJoinRoom, data: { roomname, username } })  // 通知其他用户
 			}
+
+			addUser(channel, username)
 			channel.add(username, sid)
 			console.log(sid, username, '已加入房间', roomname)
 			console.log(roomname, '当前前用户', channel.getMembers())
-			channel.roominfo.users.some(user => {
-				if (!user.username) {
-					user.username = username
-					return true
-				}
-			})
 			console.log('---------------------------------------------------------------------------')
 			cb({ code: 0, data: '加入房间成功' })
-
-			// 人数满了 开始发牌
-			if (channel.getMembers().length === channel.roominfo.count) {
-
-				//------------------------------------------------------------------------------------------
-				//	正式代码
-				//------------------------------------------------------------------------------------------
-				for (var i = 0; i < 20; i++) {
-					for (var j = 0; j < channel.roominfo.users.length; j++) {
-						channel.roominfo.users[j].handCards.push(channel.roominfo.cards.pop())
-					}
-				}
-				//------------------------------------------------------------------------------------------
-
-				//------------------------------------------------------------------------------------------
-				//	测试代码
-				//------------------------------------------------------------------------------------------
-				// channel.roominfo.users[1].handCards = [12, 13, 14, 15, 16]
-				// channel.roominfo.users[2].handCards = [12, 13, 14, 15, 16]
-				// channel.roominfo.cards.push(8)
-				// channel.roominfo.cards.push(13)
-				// channel.roominfo.users[0].groupCards = [{ name: 'chi', cards: [2, 3, 4] },
-				// { name: 'chi', cards: [4, 5, 6] },
-				// { name: 'chi', cards: [17, 18, 19] },
-				// { name: 'chi', cards: [1, 2, 3] },
-				// { name: 'chi', cards: [4, 5, 6] }]
-				// channel.roominfo.users[0].handCards = [8, 8, 8, 11, 11]
-
-				// channel.roominfo.cards.push(1)
-				// channel.roominfo.cards.push(1)
-				// channel.roominfo.cards.push(1)
-				// channel.roominfo.cards.push(2)
-				// channel.roominfo.cards.push(2)
-				// channel.roominfo.cards.push(2)
-				// channel.roominfo.cards.push(3)
-				// channel.roominfo.cards.push(3)
-				// channel.roominfo.cards.push(3)
-				// for (var j = 0; j < channel.roominfo.users.length; j++) {
-				// 	channel.roominfo.users[j].groupCards = [{ name: 'peng', cards: [1, 1, 1] },
-				// 	{ name: 'peng', cards: [12, 12, 12] },
-				// 	{ name: 'peng', cards: [11, 11, 11] },
-				// 	{ name: 'ti', cards: [13, 13, 13, 13]},
-				// 	{ name: 'pao', cards: [12, 12, 12, 12] }]
-				// 	channel.roominfo.users[j].handCards = [5, 6, 7, 8, 9, 10, 1, 1, 2, 2, 3, 3, 4, 4]
-				// }
-				//------------------------------------------------------------------------------------------
-
-				// 随机选择一个庄=并且给庄家多发一张牌
-				const banker = channel.roominfo.users[0] // 庄家
-				const newcard = channel.roominfo.cards.pop()
-				channel.roominfo.banker_username = banker.username
-				banker.handCards.push(newcard)      // 庄家多发一张牌
-				channel.roominfo.deal_card = newcard // 记录最后一张牌 用于告诉其他玩家 庄家最后一张牌是什么
-
-				// 新的一轮开始了 通知每个玩家
-				channel.pushMessage({ route: 'onNotification', name: Notifications.onNewRound, data: channel.roominfo })
-
-				// 看庄家有没有能提的牌
-				if (!banker.hasCheckTi) {
-					banker.hasCheckTi = true // 起手提只检查一次
-					const hasTiCards = CardUtil.hasTi(banker.handCards)
-					if (!!hasTiCards) {
-						console.log('发现庄稼可以提', hasTiCards)
-						hasTiCards.forEach(group => {
-							group.forEach(card => {
-								deleteCard(banker.handCards, card)
-							})
-							banker.groupCards.push({ name: 'ti', cards: group })
-							return group
-						})
-
-						// 通知有人提了
-						channel.pushMessage({ route: 'onNotification', name: Notifications.onTi, data: channel.roominfo })
-
-						setTimeout(() => {
-							notificationUserCheckNewCard(channel, banker.username)
-						}, 2000)
-					} else {
-						setTimeout(() => {
-							notificationUserCheckNewCard(channel, banker.username)
-						}, 2000)
-					}
-				} else {
-					setTimeout(() => {
-						notificationUserCheckNewCard(channel, banker.username)
-					}, 500)
-				}
-			}
 		}
 		else {
 			console.log('---------------------------------------------------------------------------')
-			cb({ code: 402, data: '房间人数已满' })
+			cb({ code: 402, data: '加入失败，房间人数已满' })
 		}
 	} else {
+		// 当前群不存在 开始创建群
+		// channel.roominfo = {count: 3, users: [{username: 'wosxieez'}]}
 		channel = this.channelService.getChannel(roomname, true)
-		var roominfo = { count: roomcount }
-		// 初始化房间信息
-		roominfo.users = []
-		for (var i = 0; i < roominfo.count; i++) {
-			roominfo.users.push({ username: null, handCards: [], groupCards: [], passCards: [], hasCheckTi: false })
-		}
-		roominfo.users[0].username = username
+		channel.roominfo = { count: roominfo.count, users: [] }
 
-		roominfo.win_username = null                    // 赢的玩家
-		roominfo.banker_username = null  				// 庄家名称
-		roominfo.deal_username = null  					// 发牌者名称
-		roominfo.deal_card = 0  						// 当前发的牌
-		roominfo.cards = shufflePoker(generatePoker())  // 发牌洗牌
-
-		channel.roominfo = roominfo
-
-		// 通过群渠道通知
-		const groupChannel = this.channelService.getChannel(groupname, false)
-		if (groupChannel) {
-			groupChannel.pushMessage({ route: 'onGroup', name: Notifications.onJoinRoom, data: { roomname, username } })  // 通知其他用户
-		}
+		addUser(channel, username)
 		channel.add(username, sid)
 		console.log(sid, username, '已创建房间', roomname)
 		console.log(roomname, '当前前用户', channel.getMembers())
@@ -166,15 +59,59 @@ RoomRemote.prototype.joinRoom = function (sid, groupname, roomname, username, ro
 	}
 }
 
+//---------------------------------------------------------------------------------------------------------------
+// 离开房间
+//---------------------------------------------------------------------------------------------------------------
+RoomRemote.prototype.leaveRoom = function (sid, groupname, roomname, username, cb) {
+	console.log('---------------------------服务器', this.app.get('serverId'), '---------------------------')
+	console.log('leaveRoom')
+
+	var channel = this.channelService.getChannel(roomname, false)
+
+	if (!!channel) {
+		deleteUser(channel, username)
+		channel.leave(username, sid)
+		console.log(sid, username, '已离开房间', roomname)
+		console.log(roomname, '当前前用户', channel.getMembers())
+
+		// 通过群渠道通知
+		const groupChannel = this.channelService.getChannel(groupname, false)
+		if (groupChannel) {
+			groupChannel.pushMessage({ route: 'onGroup', name: Notifications.onLeaveRoom, data: { roomname, username } })  // 通知其他用户
+		}
+
+		if (channel.getMembers().length === 0) {
+			clearTimeout(channel.autoCheckTimeoutID)
+			clearTimeout(channel.isWatingForNewCardTimeoutID)
+			clearTimeout(channel.isWatingForHuTimeoutID)
+			console.log('删除房间' + roomname)
+			channel.destroy()
+		}
+	}
+
+	console.log('---------------------------------------------------------------------------')
+	cb({ code: 0, data: 'ok' })
+}
+
+//---------------------------------------------------------------------------------------------------------------
+// 收到玩家指令
+//---------------------------------------------------------------------------------------------------------------
 RoomRemote.prototype.onAction = function (sid, groupname, roomname, username, action, cb) {
 	console.log('---------------------------服务器', this.app.get('serverId'), '---------------------------')
 	console.log('onAction')
 	var channel = this.channelService.getChannel(roomname, false)
+
 	if (!!channel) {
 		switch (action.name) {
+			case Actions.Ready: // 准备指令
+				getUser(channel, username).isReady = action.data
+				channel.pushMessage({ route: 'onNotification', name: Notifications.onReady, data: channel.roominfo })
+				checkStart(channel)
+				break
 			case Actions.Hu: // 收到胡牌指令
 				console.log('收到胡牌指令')
 				console.log(action.data)
+
 				if (username === channel.isWatingForHuUsername) {
 					clearTimeout(channel.isWatingForHuTimeoutID)
 					clearTimeout(channel.isWatingForNewCardTimeoutID)
@@ -188,14 +125,16 @@ RoomRemote.prototype.onAction = function (sid, groupname, roomname, username, ac
 				}
 				break
 			case Actions.NewCard: // 收到出牌指令
+
 				if (channel.isWatingForNewCard && username === channel.isWatingForNewCardUsername) {
 					clearTimeout(channel.isWatingForNewCardTimeoutID)
 					channel.isWatingForNewCard = false
 					const card = action.data
-					dealPoker(channel, username, card)
+					dealPoker(channel, username, card, false)
 				}
 				break
 			case Actions.Cancel: // 收到玩家无操纵指令
+
 				// 无操作指令 会在  是否胡  是否吃/碰 的时候返回
 				if (channel.isWatingForHu && username === channel.isWatingForHuUsername) {
 					notificationUserCheckHuTimeout(channel, username)
@@ -205,13 +144,13 @@ RoomRemote.prototype.onAction = function (sid, groupname, roomname, username, ac
 				}
 				break
 			case Actions.Peng: // 收到玩家碰牌操纵
+
 				if (channel.checkUsername === username) {
 					clearTimeout(channel.autoCheckTimeoutID)
 					// 把手中的牌拿出来 跟 桌上的牌组合放到 组合牌中去
 					var canPengData = action.data
 					canPengData.forEach(card => {
-						deleteUserCard(channel, username, card)
-						return card
+						deleteCard(getUser(channel, username).handCards, card)
 					})
 					canPengData.push(channel.roominfo.deal_card)
 					getUser(channel, username).groupCards.push({ name: 'peng', cards: canPengData })
@@ -222,13 +161,13 @@ RoomRemote.prototype.onAction = function (sid, groupname, roomname, username, ac
 				}
 				break
 			case Actions.Chi: // 收到玩家吃牌操纵
+
 				if (channel.checkUsername === username) {
 					clearTimeout(channel.autoCheckTimeoutID)
 					// 把手中的牌拿出来 跟 桌上的牌组合放到 组合牌中去
-					var canChiData = action.data[0]
+					var canChiData = action.data
 					canChiData.forEach(card => {
-						deleteUserCard(channel, username, card)
-						return card
+						deleteCard(getUser(channel, username).handCards, card)
 					})
 					canChiData.push(channel.roominfo.deal_card)
 					getUser(channel, username).groupCards.push({ name: 'chi', cards: canChiData })
@@ -242,164 +181,112 @@ RoomRemote.prototype.onAction = function (sid, groupname, roomname, username, ac
 				break
 		}
 	}
+
 	console.log('---------------------------------------------------------------------------')
 	cb({ code: 0, data: 'ok' })
 }
 
-/**
- * 通知玩家胡
- *
- * @param {*} channel
- * @param {*} username
- */
-function notificationUserCheckHu(channel, username, canHuData) {
-	channel.isWatingForHu = true
-	channel.isWatingForHuUsername = username
-	channel.pushMessage({ route: 'onNotification', name: Notifications.checkHu, data: { username: username, data: canHuData } })
-	channel.isWatingForHuTimeoutID = setTimeout(notificationUserCheckHuTimeout.bind(null, channel, username), 5000)
+//---------------------------------------------------------------------------------------------------------------
+// 检查是否都准备好了  开局
+//---------------------------------------------------------------------------------------------------------------
+function checkStart(channel) {
+	if (channel.roominfo.count !== channel.roominfo.users.length) {
+		return
+	}
+
+	for (var i = 0; i < channel.roominfo.users.length; i++) {
+		if (!channel.roominfo.users[i].isReady) {
+			return
+		}
+	}
+
+	startGame(channel)
 }
 
-function notificationUserCheckHuTimeout(channel, username) {
-	// 胡牌超时了
-	channel.isWatingForHu = false
-	clearTimeout(channel.isWatingForHuTimeoutID)
-	notificationUserCheckNewCard(channel, username)
-}
-
-
-/**
- * 通知玩家出牌
- *
- * @param {*} channel
- * @param {*} username
- */
-function notificationUserCheckNewCard(channel, username) {
-	channel.isWatingForNewCard = true
-	channel.isWatingForNewCardUsername = username
-	channel.pushMessage({ route: 'onNotification', name: Notifications.checkNewCard, data: { username: username, data: '请出牌' } })
-	channel.isWatingForNewCardTimeoutID = setTimeout(notificationUserCheckNewCardTimeout.bind(null, channel, username), 5000)
-}
-
-function notificationUserCheckNewCardTimeout(channel, username) {
-	// 出牌超时了
-	channel.isWatingForNewCard = false
+//---------------------------------------------------------------------------------------------------------------
+// 游戏开始
+//---------------------------------------------------------------------------------------------------------------
+function startGame(channel) {
+	// 清除定时器
+	clearTimeout(channel.autoCheckTimeoutID)
 	clearTimeout(channel.isWatingForNewCardTimeoutID)
-	const user = getUser(channel, username)
-	const card = user.handCards[0]
-	dealPoker(channel, username, card)
-}
+	clearTimeout(channel.isWatingForHuTimeoutID)
 
-function getUser(channel, username) {
-	var user
-	channel.roominfo.users.some(u => {
-		if (u.username === username) {
-			user = u
-			return true
-		}
+	// 初始化房间信息
+	channel.roominfo.win_username = null                    // 赢的玩家
+	channel.roominfo.banker_username = null  				// 庄家名称
+	channel.roominfo.deal_username = null  					// 发牌者名称
+	channel.roominfo.deal_card = 0  						// 当前发的牌
+	channel.roominfo.cards = shufflePoker(generatePoker())  // 发牌洗牌
+
+	channel.roominfo.users.forEach(user => {
+		user.handCards = []
+		user.groupCards = []
+		user.passCards = []
+		user.hasCheckTi = false
 	})
-	return user
-}
 
-function deleteUserCard(channel, username, card) {
-	const user = getUser(channel, username)
-	for (var i = 0; i < user.handCards.length; i++) {
-		if (user.handCards[i] === card) {
-			user.handCards.splice(i, 1)
-			break
+	// 每家发20张牌
+	for (var i = 0; i < 20; i++) {
+		for (var j = 0; j < channel.roominfo.users.length; j++) {
+			channel.roominfo.users[j].handCards.push(channel.roominfo.cards.pop())
 		}
 	}
-}
 
-function deleteCard(cards, card) {
-	for (var i = 0; i < cards.length; i++) {
-		if (cards[i] == card) {
-			cards.splice(i, 1)
-			break
+	// 随机选择一个庄=并且给庄家多发一张牌
+	const banker = channel.roominfo.users[0] // 庄家
+	const newcard = channel.roominfo.cards.pop()
+	channel.roominfo.banker_username = banker.username
+	banker.handCards.push(newcard)      // 庄家多发一张牌
+	channel.roominfo.deal_card = newcard // 记录最后一张牌 用于告诉其他玩家 庄家最后一张牌是什么
+
+	// 新的一轮开始了 通知每个玩家
+	channel.pushMessage({ route: 'onNotification', name: Notifications.onNewRound, data: channel.roominfo })
+
+	// 看庄家有没有能提的牌
+	setTimeout(() => {
+		if (checkFirstTi(channel, banker)) {
+			setTimeout(() => {
+				notificationUserCheckNewCard(channel, banker.username)
+			}, 2000)
+		} else {
+			notificationUserCheckNewCard(channel, banker.username)
 		}
-	}
+	}, 5000);
 }
 
-/**
- * Kick user out chat channel.
- *
- * @param {String} uid unique id for user
- * @param {String} sid server id
- * @param {String} name channel name
- *
- */
-RoomRemote.prototype.leaveRoom = function (sid, groupname, roomname, username, cb) {
-	console.log('---------------------------服务器', this.app.get('serverId'), '---------------------------')
-	console.log('leaveRoom')
-	var channel = this.channelService.getChannel(roomname, false);
-	// leave channel
-	if (!!channel) {
-		channel.leave(username, sid)
-		console.log(sid, username, '已离开房间', roomname)
-		console.log(roomname, '当前前用户', channel.getMembers())
-		channel.roominfo.users.some(user => {
-			if (user.username === username) {
-				user.username = null
-				return true
-			}
-		})
+//---------------------------------------------------------------------------------------------------------------
+// 检查玩家第一次提牌
+//---------------------------------------------------------------------------------------------------------------
+function checkFirstTi(channel, user) {
+	if (!user.hasCheckTi) {
+		user.hasCheckTi = true
 
-		// 通过群渠道通知
-		const groupChannel = this.channelService.getChannel(groupname, false)
-		if (groupChannel) {
-			groupChannel.pushMessage({ route: 'onGroup', name: Notifications.onLevelRoom, data: {roomname, username} })  // 通知其他用户
+		const hasTiCards = CardUtil.hasTi(user.handCards)
+		if (!!hasTiCards) {
+			hasTiCards.forEach(group => {
+				group.forEach(card => {
+					deleteCard(user.handCards, card)
+				})
+				user.groupCards.push({ name: 'ti', cards: group })
+			})
+
+			// 通知有人提了
+			channel.pushMessage({ route: 'onNotification', name: Notifications.onTi, data: channel.roominfo })
+
+			return true
+		} else {
+			return false
 		}
-
-		if (channel.getMembers().length === 0) {
-			clearTimeout(channel.autoCheckTimeoutID)
-			clearTimeout(channel.isWatingForNewCardTimeoutID)
-			clearTimeout(channel.isWatingForHuTimeoutID)
-			console.log('删除房间' + roomname)
-			channel.destroy()
-		}
+	} else {
+		return false
 	}
-	console.log('---------------------------------------------------------------------------')
-	cb({ code: 0, data: 'ok' })
 }
 
-// 生成牌
-function generatePoker() {
-	var cardValue = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-	var allCards = []
-	let card
-	for (var j = 0; j < cardValue.length; j++) {
-		card = cardValue[j]
-		allCards.push(card)
-		allCards.push(card)
-		allCards.push(card)
-		allCards.push(card)
-	}
-	return allCards
-}
-
-// 洗牌
-function shufflePoker(arr) {
-	if (!arr) {
-		throw '错误，请传入正确数组';
-	}
-	var newArr = arr.slice(0);
-	for (var i = newArr.length - 1; i >= 0; i--) {
-		var randomIndex = Math.floor(Math.random() * (i + 1))
-		var itemAtIndex = newArr[randomIndex]
-		newArr[randomIndex] = newArr[i]
-		newArr[i] = itemAtIndex
-	}
-
-	return newArr
-}
-
-function prepareDealPoker(channel) {
-	const nextCard = channel.roominfo.cards.pop()
-	channel.nextUser.handCards.push(nextCard) // 发牌给下个玩家
-	dealPoker(channel, channel.nextUser.username, nextCard)
-}
-
-// 开始发牌 处理发牌逻辑
-function dealPoker(channel, username, card) {
+//---------------------------------------------------------------------------------------------------------------
+// 发牌操作
+//---------------------------------------------------------------------------------------------------------------
+function dealPoker(channel, username, card, isPopCard) {
 	// 玩家起了一张牌 设置好参数 让服务器自动对这轮进行判断
 	console.log('发牌操作', username, card)
 
@@ -429,16 +316,19 @@ function dealPoker(channel, username, card) {
 
 	channel.pushMessage({ route: 'onNotification', name: Notifications.onNewCard, data: channel.roominfo })
 
+	// 如果不是翻开的牌，是自己出的牌，那么后续检查将不会检查自己
+	if (!isPopCard) {
+		channel.checkUsers.shift()
+	}
+
 	// 2s后 检查有没有玩家能 提/跑 / 偎
-	setTimeout(autoCheckTiWei.bind(this, channel), 3000)
+	setTimeout(autoCheckTiWei.bind(this, channel), 2000)
 }
 
 
-/**
- * 自动检查 提 / 跑 /  偎
- *
- * @param {*} channel
- */
+//---------------------------------------------------------------------------------------------------------------
+// 自动检查 提 / 跑 /  偎
+//---------------------------------------------------------------------------------------------------------------
 function autoCheckTiWei(channel) {
 	var canTiUser = null
 	channel.checkUsers.some(user => {
@@ -501,11 +391,9 @@ function autoCheckTiWei(channel) {
 	}
 }
 
-/**
- * 自动检查胡/碰/吃
- *
- * @param {*} channel
- */
+//---------------------------------------------------------------------------------------------------------------
+// 自动检查胡/碰/吃
+//---------------------------------------------------------------------------------------------------------------
 function autoCheckHuPengChi(channel) {
 	console.log('自动检查处理')
 	clearTimeout(channel.autoCheckTimeoutID)
@@ -524,6 +412,10 @@ function autoCheckHuPengChi(channel) {
 				// 如果还没有检查完的用户 继续检查
 				channel.checkUsername = channel.checkUsernames.shift()
 				const currentUser = getUser(channel, channel.checkUsername)
+				if (currentUser) {
+					autoCheckHuPengChi(channel)
+					return
+				}
 				const canHuData = CardUtil.canHu(currentUser.handCards, currentUser.groupCards, channel.dealCard)
 				if (canHuData && canHuData[0]) {
 					// 通知玩家是否胡
@@ -535,7 +427,7 @@ function autoCheckHuPengChi(channel) {
 					// 加一个超时操作
 					channel.autoCheckTimeoutID = setTimeout(() => {
 						autoCheckHuPengChi(channel)
-					}, 5000)
+					}, 15000)
 				} else {
 					autoCheckHuPengChi(channel)
 				}
@@ -554,15 +446,25 @@ function autoCheckHuPengChi(channel) {
 			if (channel.checkUsernames.length > 0) {
 				// 如果还没有检查完的用户 继续检查
 				channel.checkUsername = channel.checkUsernames.shift()
-				channel.pushMessage({
-					route: 'onNotification', name: Notifications.checkPeng,
-					data: { username: channel.checkUsername, card: channel.roominfo.deal_card }
-				})
-
-				// 加一个超时操纵
-				channel.autoCheckTimeoutID = setTimeout(() => {
+				const currentUser = getUser(channel, channel.checkUsername)
+				if (currentUser) {
 					autoCheckHuPengChi(channel)
-				}, 5000)
+					return
+				}
+				const canPengData = CardUtil.canPeng(currentUser.handCards, channel.dealCard)
+				if (!!canPengData) { // 如果能碰就去通知玩家
+					channel.pushMessage({
+						route: 'onNotification', name: Notifications.checkPeng,
+						data: { username: channel.checkUsername, group: canPengData }
+					})
+
+					// 加一个超时操纵
+					channel.autoCheckTimeoutID = setTimeout(() => {
+						autoCheckHuPengChi(channel)
+					}, 15000)
+				} else {
+					autoCheckHuPengChi(channel)
+				}
 			} else {
 				// 碰已经检查完了 开始检查 吃
 				channel.checkStatus = '检查吃'
@@ -578,54 +480,177 @@ function autoCheckHuPengChi(channel) {
 			if (channel.checkUsernames.length > 0) {
 				// 如果还没有检查完的用户 继续检查
 				channel.checkUsername = channel.checkUsernames.shift()
-				channel.pushMessage({
-					route: 'onNotification', name: Notifications.checkEat,
-					data: { username: channel.checkUsername, card: channel.roominfo.deal_card }
-				})
-
-				// 加一个超时操纵
-				channel.autoCheckTimeoutID = setTimeout(() => {
+				const currentUser = getUser(channel, channel.checkUsername)
+				if (currentUser) {
 					autoCheckHuPengChi(channel)
-				}, 5000)
+					return
+				}
+				const canChiData = CardUtil.canChi(currentUser.handCards, channel.dealCard)
+				if (!!canChiData && canChiData.length > 0) {
+					channel.pushMessage({
+						route: 'onNotification', name: Notifications.checkEat,
+						data: { username: channel.checkUsername, groups: canChiData }
+					})
+
+					// 加一个超时操纵
+					channel.autoCheckTimeoutID = setTimeout(() => {
+						autoCheckHuPengChi(channel)
+					}, 15000)
+				} else {
+					autoCheckHuPengChi(channel)
+				}
 			} else {
 				console.log('吃已经检查完了 看来没玩家要这张牌了')
 				channel.dealUser.passCards.push(channel.dealCard)
 				if (channel.roominfo.cards.length > 0) {
 					// 发牌给下家了 看下家有没有起手提
-					if (!channel.nextUser.hasCheckTi) {
-						console.log('发牌给下家了 看下家有没有起手提')
-						channel.nextUser.hasCheckTi = true
-						const hasTiCards = CardUtil.hasTi(channel.nextUser.handCards)
-						if (!!hasTiCards) {
-							console.log('发现下家可以提', hasTiCards)
-							hasTiCards.forEach(group => {
-								group.forEach(card => {
-									deleteCard(channel.nextUser.handCards, card)
-								})
-								channel.nextUser.groupCards.push({ name: 'ti', cards: group })
-								return group
-							})
-
-							// 通知有人提了
-							console.log('通知玩家提', hasTiCards)
-							channel.pushMessage({ route: 'onNotification', name: Notifications.onTi, data: channel.roominfo })
-
-							setTimeout(prepareDealPoker.bind(null, channel), 2000)
-						} else {
-							console.log('发现下家不可以提', hasTiCards)
-							prepareDealPoker(channel)
-						}
+					if (checkFirstTi(channel, channel.nextUser)) {
+						setTimeout(prepareDealPoker.bind(null, channel), 2000)
 					} else {
-						console.log('下家已经起手提过了，不检查起手提了')
 						prepareDealPoker(channel)
 					}
 				} else {
 					// todo Game Over
-					console.log('game over')
+					gameOver(channel)
 				}
 			}
 			break;
 		default:
 			break;
 	}
+}
+
+function prepareDealPoker(channel) {
+	const nextCard = channel.roominfo.cards.pop()
+	channel.nextUser.handCards.push(nextCard) // 发牌给下个玩家
+	dealPoker(channel, channel.nextUser.username, nextCard, true)
+}
+
+//---------------------------------------------------------------------------------------------------------------
+// 一局游戏结束
+//---------------------------------------------------------------------------------------------------------------
+function gameOver(channel) {
+	console.log('game over')
+
+	// 初始玩家状态
+	for (var i = 0; i < channel.roominfo.users.length; i++) {
+		channel.roominfo.users[i].isReady = false
+	}
+
+	channel.pushMessage({
+		route: 'onNotification', name: Notifications.onRoundEnd, data: channel.roominfo
+	})
+}
+
+//---------------------------------------------------------------------------------------------------------------
+// 通知玩家出牌
+//---------------------------------------------------------------------------------------------------------------
+function notificationUserCheckNewCard(channel, username) {
+	channel.isWatingForNewCard = true
+	channel.isWatingForNewCardUsername = username
+	channel.pushMessage({ route: 'onNotification', name: Notifications.checkNewCard, data: { username: username, data: '请出牌' } })
+	channel.isWatingForNewCardTimeoutID = setTimeout(notificationUserCheckNewCardTimeout.bind(null, channel, username), 15000)
+}
+
+function notificationUserCheckNewCardTimeout(channel, username) {
+	// 出牌超时了
+	channel.isWatingForNewCard = false
+	clearTimeout(channel.isWatingForNewCardTimeoutID)
+	const user = getUser(channel, username)
+	const card = user.handCards[0]
+	dealPoker(channel, username, card, false)
+}
+
+//---------------------------------------------------------------------------------------------------------------
+// 通知玩家胡
+//---------------------------------------------------------------------------------------------------------------
+function notificationUserCheckHu(channel, username, canHuData) {
+	channel.isWatingForHu = true
+	channel.isWatingForHuUsername = username
+	channel.pushMessage({ route: 'onNotification', name: Notifications.checkHu, data: { username: username, data: canHuData } })
+	channel.isWatingForHuTimeoutID = setTimeout(notificationUserCheckHuTimeout.bind(null, channel, username), 15000)
+}
+
+function notificationUserCheckHuTimeout(channel, username) {
+	// 胡牌超时了
+	channel.isWatingForHu = false
+	clearTimeout(channel.isWatingForHuTimeoutID)
+	notificationUserCheckNewCard(channel, username)
+}
+
+//---------------------------------------------------------------------------------------------------------------
+// 获取用户
+//---------------------------------------------------------------------------------------------------------------
+function getUser(channel, username) {
+	for (var i = 0; i < channel.roominfo.users.length; i++) {
+		if (channel.roominfo.users[i].username === username) {
+			return channel.roominfo.users[i]
+		}
+	}
+}
+
+//---------------------------------------------------------------------------------------------------------------
+// 添加用户
+//---------------------------------------------------------------------------------------------------------------
+function addUser(channel, username) {
+	channel.roominfo.users.push({ username })
+}
+
+//---------------------------------------------------------------------------------------------------------------
+// 删除用户
+//---------------------------------------------------------------------------------------------------------------
+function deleteUser(channel, username) {
+	for (var i = 0; i < channel.roominfo.users.length; i++) {
+		if (channel.roominfo.users[i].username === username) {
+			channel.roominfo.users.splice(i, 1)
+			return
+		}
+	}
+}
+
+//---------------------------------------------------------------------------------------------------------------
+// 删除牌
+//---------------------------------------------------------------------------------------------------------------
+function deleteCard(cards, card) {
+	for (var i = 0; i < cards.length; i++) {
+		if (cards[i] == card) {
+			cards.splice(i, 1)
+			break
+		}
+	}
+}
+
+//---------------------------------------------------------------------------------------------------------------
+// 生成牌
+//---------------------------------------------------------------------------------------------------------------
+function generatePoker() {
+	var cardValue = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+	var allCards = []
+	let card
+	for (var j = 0; j < cardValue.length; j++) {
+		card = cardValue[j]
+		allCards.push(card)
+		allCards.push(card)
+		allCards.push(card)
+		allCards.push(card)
+	}
+	return allCards
+}
+
+//---------------------------------------------------------------------------------------------------------------
+// 洗牌
+//---------------------------------------------------------------------------------------------------------------
+function shufflePoker(arr) {
+	if (!arr) {
+		throw '错误，请传入正确数组';
+	}
+	var newArr = arr.slice(0);
+	for (var i = newArr.length - 1; i >= 0; i--) {
+		var randomIndex = Math.floor(Math.random() * (i + 1))
+		var itemAtIndex = newArr[randomIndex]
+		newArr[randomIndex] = newArr[i]
+		newArr[i] = itemAtIndex
+	}
+
+	return newArr
 }
