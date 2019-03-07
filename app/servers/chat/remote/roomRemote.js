@@ -413,7 +413,7 @@ function autoCheckHuPengChi(channel) {
 				// 如果还没有检查完的用户 继续检查
 				channel.checkUsername = channel.checkUsernames.shift()
 				const currentUser = getUser(channel, channel.checkUsername)
-				if (currentUser) {
+				if (!currentUser) {
 					autoCheckHuPengChi(channel)
 					return
 				}
@@ -433,7 +433,7 @@ function autoCheckHuPengChi(channel) {
 					autoCheckHuPengChi(channel)
 				}
 			} else {
-				// 碰已经检查完了 开始检查 吃
+				// 胡已经检查完了 开始检查 碰
 				channel.checkStatus = '检查碰'
 				channel.checkUsernames = []
 				for (var i = 0; i < channel.checkUsers.length; i++) {
@@ -448,7 +448,7 @@ function autoCheckHuPengChi(channel) {
 				// 如果还没有检查完的用户 继续检查
 				channel.checkUsername = channel.checkUsernames.shift()
 				const currentUser = getUser(channel, channel.checkUsername)
-				if (currentUser) {
+				if (!currentUser) {
 					autoCheckHuPengChi(channel)
 					return
 				}
@@ -473,6 +473,10 @@ function autoCheckHuPengChi(channel) {
 				for (var i = 0; i < channel.checkUsers.length; i++) {
 					channel.checkUsernames.push(channel.checkUsers[i].username)
 				}
+				// 3人情况下 只能下家才可以吃
+				if (channel.roominfo.count === 3 && channel.checkUsernames.length >= 2) {
+					channel.checkUsernames.pop()
+				}
 				autoCheckHuPengChi(channel)
 			}
 			break;
@@ -482,7 +486,7 @@ function autoCheckHuPengChi(channel) {
 				// 如果还没有检查完的用户 继续检查
 				channel.checkUsername = channel.checkUsernames.shift()
 				const currentUser = getUser(channel, channel.checkUsername)
-				if (currentUser) {
+				if (!currentUser) {
 					autoCheckHuPengChi(channel)
 					return
 				}
@@ -558,7 +562,9 @@ function notificationUserCheckNewCardTimeout(channel, username) {
 	channel.isWatingForNewCard = false
 	clearTimeout(channel.isWatingForNewCardTimeoutID)
 	const user = getUser(channel, username)
-	const card = user.handCards[0]
+	const riffleCards = CardUtil.riffle(user.handCards)
+	const lastGroup = riffleCards.pop()
+	const card = lastGroup.pop()
 	dealPoker(channel, username, card, false)
 }
 
