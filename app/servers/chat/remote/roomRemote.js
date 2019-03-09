@@ -22,13 +22,18 @@ RoomRemote.prototype.joinRoom = function (sid, groupname, roomname, username, ro
 
 	if (!!channel) {
 
+		const oldMember = channel.getMember(username)
+		if (!!oldMember) {
+			cb({ code: 403, data: '重复加入房间' })
+			return
+		}
+
 		// 群已经存在了 看看群人数有没有满 
 		// 人数没有满的话 可以加入
 		// 人数如果已经满了的话 则无法加入
 		if (channel.roominfo.users.length < channel.roominfo.count) {
 			// 通过群渠道通知其他玩家有人加入房间了
 			const groupChannel = this.channelService.getChannel(groupname, false)
-
 			if (groupChannel) {
 				groupChannel.pushMessage({ route: 'onGroup', name: Notifications.onJoinRoom, data: { roomname, username } })  // 通知其他用户
 			}
@@ -49,6 +54,11 @@ RoomRemote.prototype.joinRoom = function (sid, groupname, roomname, username, ro
 		// channel.roominfo = {count: 3, users: [{username: 'wosxieez'}]}
 		channel = this.channelService.getChannel(roomname, true)
 		channel.roominfo = { count: roominfo.count, users: [] }
+
+		const groupChannel = this.channelService.getChannel(groupname, false)
+		if (groupChannel) {
+			groupChannel.pushMessage({ route: 'onGroup', name: Notifications.onJoinRoom, data: { roomname, username } })  // 通知其他用户
+		}
 
 		addUser(channel, username)
 		channel.add(username, sid)
@@ -121,6 +131,7 @@ RoomRemote.prototype.onAction = function (sid, groupname, roomname, username, ac
 					winUser.groupCards = action.data[2]
 					winUser.handCards = []
 					// 通知所有玩家有碰操纵 并通知玩家继续出牌
+					gameOver(channel)
 					channel.pushMessage({ route: 'onNotification', name: Notifications.onWin, data: channel.roominfo })
 				}
 				break
@@ -225,6 +236,13 @@ function startGame(channel) {
 		user.passCards = []
 		user.hasCheckTi = false
 	})
+
+	// 2人房 随机去掉20张牌
+	if (channel.roominfo.count === 2) {
+		for (var m = 0; m < 20; m++) {
+			channel.roominfo.cards.pop()
+		}
+	}
 
 	// 每家发20张牌
 	for (var i = 0; i < 20; i++) {
@@ -517,6 +535,9 @@ function autoCheckHuPengChi(channel) {
 				} else {
 					// todo Game Over
 					gameOver(channel)
+					channel.pushMessage({
+						route: 'onNotification', name: Notifications.onRoundEnd, data: channel.roominfo
+					})
 				}
 			}
 			break;
@@ -541,10 +562,6 @@ function gameOver(channel) {
 	for (var i = 0; i < channel.roominfo.users.length; i++) {
 		channel.roominfo.users[i].isReady = false
 	}
-
-	channel.pushMessage({
-		route: 'onNotification', name: Notifications.onRoundEnd, data: channel.roominfo
-	})
 }
 
 //---------------------------------------------------------------------------------------------------------------

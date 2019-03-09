@@ -14,6 +14,13 @@ GroupRemote.prototype.joinGroup = function (sid, groupname, username, cb) {
     console.log('joinGroup')
     console.log(groupname)
     var channel = this.channelService.getChannel(groupname, true) // 创建群渠道
+    
+    const oldMember = channel.getMember(username)
+		if (!!oldMember) {
+			cb({ code: 403, data: '重复加入群' })
+			return
+        }
+        
     channel.pushMessage({ route: 'onGroup', name: Notifications.onJoinGroup, data: { username } })
     channel.add(username, sid)
     console.log(sid, username, '加入群', groupname)
