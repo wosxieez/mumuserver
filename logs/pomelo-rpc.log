@@ -694,3 +694,8 @@
     at Connection.emit (events.js:182:13)
     at addChunk (/Users/coco/Documents/GitHub/mumuserver/node_modules/duplexify/node_modules/readable-stream/lib/_stream_readable.js:291:12)
     at readableAddChunk (/Users/coco/Documents/GitHub/mumuserver/node_modules/duplexify/node_modules/readable-stream/lib/_stream_readable.js:278:11)
+[2019-03-13 14:33:06.111] [ERROR] pomelo-rpc - [31m[mqtt-mailbox] [39mmqtt rpc client connector-server-2 checkKeepAlive timeout from remote server chat-server-2 for 20000 lastPing: 1552458766104 lastPong: 1552458756097
+[2019-03-13 14:33:09.252] [ERROR] pomelo-rpc - [31m[mqtt-mailbox] [39mmqtt rpc client connector-server-1 checkKeepAlive timeout from remote server chat-server-2 for 20000 lastPing: 1552458769244 lastPong: 1552458759242
+[2019-03-13 14:33:14.338] [ERROR] pomelo-rpc - [31m[mqtt-mailbox] [39mmqtt rpc client chat-server-2 checkKeepAlive timeout from remote server connector-server-2 for 20000 lastPing: 1552458774327 lastPong: 1552458764324
+[2019-03-13 14:33:14.835] [ERROR] pomelo-rpc - [31m[mqtt-mailbox] [39mmqtt rpc client chat-server-2 checkKeepAlive timeout from remote server connector-server-1 for 20000 lastPing: 1552458774825 lastPong: 1552458764823
+[2019-03-13 14:33:15.578] [ERROR] pomelo-rpc - [31m[mqtt-mailbox] [39mmqtt rpc client chat-server-2 checkKeepAlive timeout from remote server chat-server-2 for 20000 lastPing: 1552458775571 lastPong: 1552458765568

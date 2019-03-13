@@ -307,7 +307,7 @@ function checkFirstTi(channel, user) {
 //---------------------------------------------------------------------------------------------------------------
 function dealPoker(channel, username, card, isPopCard) {
 	// 玩家起了一张牌 设置好参数 让服务器自动对这轮进行判断
-	console.log('发牌操作', username, card)
+	console.log('发牌操作', username, card, isPopCard)
 
 	var dealUser
 	channel.checkUsers = []
@@ -462,7 +462,8 @@ function autoCheckHuPengChi(channel) {
 			break;
 		case '检查碰':
 			console.log('正在检查碰', channel.checkStatus, channel.checkUsernames)
-			if (channel.checkUsernames.length > 0) {
+			// 如果不是pass牌 才会检查碰
+			if (!isPassedCard(channel, channel.dealCard) && channel.checkUsernames.length > 0) {
 				// 如果还没有检查完的用户 继续检查
 				channel.checkUsername = channel.checkUsernames.shift()
 				const currentUser = getUser(channel, channel.checkUsername)
@@ -508,6 +509,19 @@ function autoCheckHuPengChi(channel) {
 					autoCheckHuPengChi(channel)
 					return
 				}
+				// 如果是自己的pass牌，不能再吃了
+				if (isUserPassedCard(currentUser, channel.dealCard)) {
+					autoCheckHuPengChi(channel)
+					return
+				}
+				const preUser = getPreUser(channel, channel.checkUsername)
+				if (preUser) {
+					// 如果是上家的pass牌，不能再吃了
+					if (isUserPassedCard(preUser, channel.dealCard)) {
+						autoCheckHuPengChi(channel)
+						return
+					}
+				}
 				const canChiData = CardUtil.canChi(currentUser.handCards, channel.dealCard)
 				if (!!canChiData && canChiData.length > 0) {
 					channel.pushMessage({
@@ -550,6 +564,23 @@ function prepareDealPoker(channel) {
 	const nextCard = channel.roominfo.cards.pop()
 	channel.nextUser.handCards.push(nextCard) // 发牌给下个玩家
 	dealPoker(channel, channel.nextUser.username, nextCard, true)
+}
+
+//---------------------------------------------------------------------------------------------------------------
+// 是否是Passed的卡牌
+//---------------------------------------------------------------------------------------------------------------
+function isPassedCard(channel, card) {
+	for (var i = 0; i < channel.roominfo.users.length; i++) {
+		if (isUserPassedCard(channel.roominfo.users[i], card)) {
+			return true
+		}
+	}
+
+	return false
+}
+
+function isUserPassedCard(user, card) {
+	return CardUtil.hasCard(user.handCards, card)
 }
 
 //---------------------------------------------------------------------------------------------------------------
@@ -605,12 +636,42 @@ function notificationUserCheckHuTimeout(channel, username) {
 //---------------------------------------------------------------------------------------------------------------
 // 获取用户
 //---------------------------------------------------------------------------------------------------------------
+function getPreUser(channel, username) {
+	for (var i = 0; i < channel.roominfo.users.length; i++) {
+		if (channel.roominfo.users[i].username == username) {
+			var endUsers = channel.roominfo.users.slice(i)
+			var startUsers = channel.roominfo.users.slice(0, i)
+			var sortUsers = endUsers.concat(startUsers)
+			return sortUsers.pop()
+		}
+	}
+
+	return null
+}
 function getUser(channel, username) {
 	for (var i = 0; i < channel.roominfo.users.length; i++) {
 		if (channel.roominfo.users[i].username === username) {
 			return channel.roominfo.users[i]
 		}
 	}
+
+	return null
+}
+function getNextUser(channel, username) {
+	for (var i = 0; i < channel.roominfo.users.length; i++) {
+		if (channel.roominfo.users[i].username == username) {
+			var endUsers = channel.roominfo.users.slice(i)
+			var startUsers = channel.roominfo.users.slice(0, i)
+			var sortUsers = endUsers.concat(startUsers)
+			if (sortUsers.length > 1) {
+				return sortUsers[1]
+			} else {
+				return null
+			}
+		}
+	}
+
+	return null
 }
 
 //---------------------------------------------------------------------------------------------------------------

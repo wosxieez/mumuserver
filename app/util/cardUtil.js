@@ -298,7 +298,6 @@ CardUtil.canTi = function (cardsOnHand, currentCard) {
  * @returns
  */
 CardUtil.canTi2 = function (cardsOnGroup, currentCard) {
-  console.log('查询能否提', cardsOnGroup, currentCard)
 
   var group
   var can = false
@@ -477,6 +476,7 @@ CardUtil.canPeng = function (cardsOnHand, currentCard) {
 // 2. 2、7、10
 // 3. 大小混搭
 CardUtil.canChi = function (cards, currentCard) {
+  console.log('checkeat:', cards, currentCard)
   var canChiCards = []
   var countedCards = _.countBy(cards, function (c) { return c; });
   _.each(countedCards, function (value, key) {
@@ -484,6 +484,11 @@ CardUtil.canChi = function (cards, currentCard) {
       delete countedCards[key];
     }
   });
+
+  console.log('checkeat countedCards', countedCards)
+  console.log(countedCards[currentCard - 1])
+  console.log(countedCards[currentCard])
+  console.log(countedCards[currentCard + 1])
 
   // 比方 currentCard = 8
   if (countedCards[currentCard - 1]) {
@@ -501,27 +506,51 @@ CardUtil.canChi = function (cards, currentCard) {
     }
   }
 
+  var diff
   if (currentCard < 11) {
+    // 8
     if (countedCards[currentCard] && countedCards[currentCard + 10]) {
       canChiCards.push([currentCard, currentCard + 10]) // 判断 8 8 18
     }
-    if (countedCards[currentCard + 10] > 2) {
+    if (countedCards[currentCard + 10] >= 2) {
       canChiCards.push([currentCard + 10, currentCard + 10]) // 判断 8 18 18
     }
-  } else {
-    if (countedCards[currentCard] && countedCards[currentCard - 10]) {
-      canChiCards.push([currentCard, currentCard - 10]) // 判断 8 8 18
+
+    // 2 7 10
+    diff = _.difference([2, 7, 10], currentCard)
+    if (diff.length !== 3 && countedCards[diff[0]] && countedCards[diff[1]]) {
+      canChiCards.push(diff)
     }
-    if (countedCards[currentCard - 10] > 2) {
-      canChiCards.push([currentCard - 10, currentCard - 10]) // 判断 8 18 18
+  } else {
+    // 18
+    if (countedCards[currentCard] && countedCards[currentCard - 10]) {
+      canChiCards.push([currentCard, currentCard - 10]) // 判断 18 18 8
+    }
+    if (countedCards[currentCard - 10] >= 2) {
+      canChiCards.push([currentCard - 10, currentCard - 10]) // 判断 18 8 8
     }
 
-    console.log('检查吃', currentCard, canChiCards)
+    // 12 17 20
+     diff = _.difference([12, 17, 20], currentCard)
+     if (diff.length !== 3 && countedCards[diff[0]] && countedCards[diff[1]]) {
+       canChiCards.push(diff)
+     }
+  }
+
+  console.log('check eat', currentCard, canChiCards)
     if (canChiCards.length > 0) {
       return canChiCards
     } else {
       return null
     }
+}
+
+CardUtil.hasCard = function (cards, card) {
+  var countedCards = _.countBy(cards, function (c) { return c; });
+  if (countedCards[card]) {
+    return true
+  } else {
+    return false
   }
 }
 
