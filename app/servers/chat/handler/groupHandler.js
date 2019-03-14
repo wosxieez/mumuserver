@@ -18,8 +18,8 @@ var handler = Handler.prototype;
  */
 
 handler.pushMessage = function (message, session, next) {
-	console.log('---------------------------服务器', this.app.get('serverId'), '---------------------------')
-	console.log('pushMessage')
+	// console.log('---------------------------服务器', this.app.get('serverId'), '---------------------------')
+	// console.log('pushMessage')
 	const groupname = session.get('groupname')
 	channel = this.app.get('channelService').getChannel(groupname, false)
 	if (!!channel) {
@@ -29,5 +29,5 @@ handler.pushMessage = function (message, session, next) {
 		next(null, { code: 500, data: '发送失败, 该群不存在' })
 	}
 
-	console.log('---------------------------------------------------------------------------')
+	// console.log('---------------------------------------------------------------------------')
 }

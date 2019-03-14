@@ -12,19 +12,19 @@ var handler = Handler.prototype;
  * Send action to room
  */
 handler.sendAction = function (action, session, next) {
-	console.log('---------------------------服务器', this.app.get('serverId'), '---------------------------')
-	console.log('sendAction')
+	// console.log('---------------------------服务器', this.app.get('serverId'), '---------------------------')
+	// console.log('sendAction')
 	this.app.rpc.chat.roomRemote.onAction(session, this.app.get('serverId'), session.get('groupname'), session.get('roomname'),
 		session.get('username'), action, function (result) {
 			next(null, result)
 		})
 
-	console.log('---------------------------------------------------------------------------')
+	// console.log('---------------------------------------------------------------------------')
 }
 
 handler.getRoomsUsers = function (msg, session, next) {
-	console.log('---------------------------服务器', this.app.get('serverId'), '---------------------------')
-	console.log('getRoomsUsers')
+	// console.log('---------------------------服务器', this.app.get('serverId'), '---------------------------')
+	// console.log('getRoomsUsers')
 
 	var data = {}
 	const roomnames = msg.roomnames
@@ -38,5 +38,5 @@ handler.getRoomsUsers = function (msg, session, next) {
 	})
 	next(null, {code: 0, data})
 
-	console.log('---------------------------------------------------------------------------')
+	// console.log('---------------------------------------------------------------------------')
 }

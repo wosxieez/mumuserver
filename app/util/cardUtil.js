@@ -323,6 +323,18 @@ CardUtil.canTi2 = function (cardsOnGroup, currentCard) {
   return null
 }
 
+CardUtil.hasTiPao = function (cardsOnGroup) {
+  var group
+  for (var i = 0; i < cardsOnGroup.length; i++) {
+    group = cardsOnGroup[i]
+    if (group.name === 'ti' || group.name === 'pao') {
+      return true
+    }
+  }
+
+  return false
+}
+
 CardUtil.canHu = function (cardsOnHand, cardsOnTable, currentCard) {
   var huxi = 0;
   var copyedCards = _.clone(cardsOnHand);
@@ -347,6 +359,7 @@ CardUtil.canHu = function (cardsOnHand, cardsOnTable, currentCard) {
     })
 
     const canHu = (huxi >= 15);
+    console.log('能否胡', canHu, huxi)
     return [canHu, huxi, fullGroupCards]
   } else {
     return false
@@ -366,7 +379,7 @@ CardUtil.shouShun = function (cards) {
     const card = parseInt(key)
     // 三张的剔出来
     if (value === 3) {
-      results.push({name: 'peng', cards: [card, card, card]});
+      results.push({ name: 'peng', cards: [card, card, card] });
       delete countedCards[key];
     }
   })
@@ -426,12 +439,12 @@ CardUtil.shouShun = function (cards) {
   };
 
   // 处理单张
-  _.each(countedCards, function(value, key){
+  _.each(countedCards, function (value, key) {
     if (value === 1) {
       const card = parseInt(key)
       const shunzi = findShunzi(card)
       if (!!shunzi) {
-        results.push({name: 'chi', cards: shunzi})
+        results.push({ name: 'chi', cards: shunzi })
       }
     }
   })
@@ -444,13 +457,13 @@ CardUtil.shouShun = function (cards) {
   })
 
   var keys = _.keys(countedCards)
-  if (keys.length >1) {
+  if (keys.length > 1) {
     return false
   } else if (keys.length == 1) {
     if (countedCards[keys[0]] === 2) {
-      results.push({name: 'dui', cards: [parseInt(keys[0]), parseInt(keys[0])]})
+      results.push({ name: 'dui', cards: [parseInt(keys[0]), parseInt(keys[0])] })
     } else {
-      return false 
+      return false
     }
   }
 
@@ -476,7 +489,6 @@ CardUtil.canPeng = function (cardsOnHand, currentCard) {
 // 2. 2、7、10
 // 3. 大小混搭
 CardUtil.canChi = function (cards, currentCard) {
-  console.log('checkeat:', cards, currentCard)
   var canChiCards = []
   var countedCards = _.countBy(cards, function (c) { return c; });
   _.each(countedCards, function (value, key) {
@@ -484,11 +496,6 @@ CardUtil.canChi = function (cards, currentCard) {
       delete countedCards[key];
     }
   });
-
-  console.log('checkeat countedCards', countedCards)
-  console.log(countedCards[currentCard - 1])
-  console.log(countedCards[currentCard])
-  console.log(countedCards[currentCard + 1])
 
   // 比方 currentCard = 8
   if (countedCards[currentCard - 1]) {
@@ -517,7 +524,7 @@ CardUtil.canChi = function (cards, currentCard) {
     }
 
     // 2 7 10
-    diff = _.difference([2, 7, 10], currentCard)
+    diff = _.difference([2, 7, 10], [currentCard])
     if (diff.length !== 3 && countedCards[diff[0]] && countedCards[diff[1]]) {
       canChiCards.push(diff)
     }
@@ -531,18 +538,17 @@ CardUtil.canChi = function (cards, currentCard) {
     }
 
     // 12 17 20
-     diff = _.difference([12, 17, 20], currentCard)
-     if (diff.length !== 3 && countedCards[diff[0]] && countedCards[diff[1]]) {
-       canChiCards.push(diff)
-     }
+    diff = _.difference([12, 17, 20], [currentCard])
+    if (diff.length !== 3 && countedCards[diff[0]] && countedCards[diff[1]]) {
+      canChiCards.push(diff)
+    }
   }
 
-  console.log('check eat', currentCard, canChiCards)
-    if (canChiCards.length > 0) {
-      return canChiCards
-    } else {
-      return null
-    }
+  if (canChiCards.length > 0) {
+    return canChiCards
+  } else {
+    return null
+  }
 }
 
 CardUtil.hasCard = function (cards, card) {
