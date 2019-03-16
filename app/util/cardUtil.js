@@ -323,16 +323,16 @@ CardUtil.canTi2 = function (cardsOnGroup, currentCard) {
   return null
 }
 
-CardUtil.hasTiPao = function (cardsOnGroup) {
-  var group
+CardUtil.tiPaoCount = function (cardsOnGroup) {
+  var group, count = 0
   for (var i = 0; i < cardsOnGroup.length; i++) {
     group = cardsOnGroup[i]
     if (group.name === 'ti' || group.name === 'pao') {
-      return true
+      count++
     }
   }
 
-  return false
+  return count
 }
 
 CardUtil.canHu = function (cardsOnHand, cardsOnTable, currentCard) {
@@ -560,6 +560,10 @@ CardUtil.hasCard = function (cards, card) {
   }
 }
 
+CardUtil.has3Ti5Kan = function (cards) {
+  return false
+}
+
 CardUtil.Actions = {
   NewCard: 'newCard',         // 出牌
   Ti: "ti",         // 提
@@ -571,5 +575,42 @@ CardUtil.Actions = {
   Cancel: "cancel", // 取消 
   Idle: "idle"      // 无操作
 }
+
+
+//---------------------------------------------------------------------------------------------------------------
+// 生成牌
+//---------------------------------------------------------------------------------------------------------------
+CardUtil.generatePoker = function () {
+	var cardValue = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+	var allCards = []
+	let card
+	for (var j = 0; j < cardValue.length; j++) {
+		card = cardValue[j]
+		allCards.push(card)
+		allCards.push(card)
+		allCards.push(card)
+		allCards.push(card)
+	}
+	return allCards
+}
+
+//---------------------------------------------------------------------------------------------------------------
+// 洗牌
+//---------------------------------------------------------------------------------------------------------------
+CardUtil.shufflePoker = function (arr) {
+	if (!arr) {
+		throw '错误，请传入正确数组';
+	}
+	var newArr = arr.slice(0);
+	for (var i = newArr.length - 1; i >= 0; i--) {
+		var randomIndex = Math.floor(Math.random() * (i + 1))
+		var itemAtIndex = newArr[randomIndex]
+		newArr[randomIndex] = newArr[i]
+		newArr[i] = itemAtIndex
+	}
+
+	return newArr
+}
+
 
 module.exports = CardUtil

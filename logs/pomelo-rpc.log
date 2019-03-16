@@ -699,3 +699,79 @@
 [2019-03-13 14:33:14.338] [ERROR] pomelo-rpc - [31m[mqtt-mailbox] [39mmqtt rpc client chat-server-2 checkKeepAlive timeout from remote server connector-server-2 for 20000 lastPing: 1552458774327 lastPong: 1552458764324
 [2019-03-13 14:33:14.835] [ERROR] pomelo-rpc - [31m[mqtt-mailbox] [39mmqtt rpc client chat-server-2 checkKeepAlive timeout from remote server connector-server-1 for 20000 lastPing: 1552458774825 lastPong: 1552458764823
 [2019-03-13 14:33:15.578] [ERROR] pomelo-rpc - [31m[mqtt-mailbox] [39mmqtt rpc client chat-server-2 checkKeepAlive timeout from remote server chat-server-2 for 20000 lastPing: 1552458775571 lastPong: 1552458765568
+[2019-03-14 16:04:46.542] [ERROR] pomelo-rpc - [31m[mqtt-mailbox] [39mmqtt rpc client chat-server-1 checkKeepAlive timeout from remote server chat-server-1 for 20000 lastPing: 1552550666536 lastPong: 1552550656534
+[2019-03-14 16:04:47.285] [ERROR] pomelo-rpc - [31m[mqtt-mailbox] [39mmqtt rpc client connector-server-3 checkKeepAlive timeout from remote server chat-server-1 for 20000 lastPing: 1552550667278 lastPong: 1552550657277
+[2019-03-14 16:04:48.240] [ERROR] pomelo-rpc - [31m[mqtt-mailbox] [39mmqtt rpc client chat-server-1 checkKeepAlive timeout from remote server connector-server-3 for 20000 lastPing: 1552550668235 lastPong: 1552550658233
+[2019-03-14 16:04:49.986] [ERROR] pomelo-rpc - [31m[mqtt-mailbox] [39mmqtt rpc client connector-server-1 checkKeepAlive timeout from remote server chat-server-1 for 20000 lastPing: 1552550669983 lastPong: 1552550659979
+[2019-03-14 16:04:54.905] [ERROR] pomelo-rpc - [31m[mqtt-mailbox] [39mmqtt rpc client chat-server-1 checkKeepAlive timeout from remote server connector-server-1 for 20000 lastPing: 1552550674900 lastPong: 1552550664899
+[2019-03-14 18:54:25.878] [ERROR] pomelo-rpc - [31m[mqtt-mailbox] [39mmqtt rpc client chat-server-1 checkKeepAlive timeout from remote server connector-server-1 for 20000 lastPing: 1552560845876 lastPong: 1552560835873
+[2019-03-14 18:54:27.625] [ERROR] pomelo-rpc - [31m[mqtt-mailbox] [39mmqtt rpc client chat-server-1 checkKeepAlive timeout from remote server chat-server-1 for 20000 lastPing: 1552560847617 lastPong: 1552560837615
+[2019-03-14 18:54:28.525] [ERROR] pomelo-rpc - [31m[mqtt-mailbox] [39mmqtt rpc client connector-server-3 checkKeepAlive timeout from remote server chat-server-1 for 20000 lastPing: 1552560848519 lastPong: 1552560838515
+[2019-03-14 18:54:32.161] [ERROR] pomelo-rpc - [31m[mqtt-mailbox] [39mmqtt rpc client chat-server-1 checkKeepAlive timeout from remote server connector-server-3 for 20000 lastPing: 1552560852158 lastPong: 1552560842153
+[2019-03-14 18:54:32.175] [ERROR] pomelo-rpc - [31m[mqtt-mailbox] [39mmqtt rpc client connector-server-1 checkKeepAlive timeout from remote server chat-server-1 for 20000 lastPing: 1552560852170 lastPong: 1552560842165
+[2019-03-16 23:09:50.881] [ERROR] pomelo-rpc - [31m[mqtt-acceptor] [39mprocess rpc message error ReferenceError: channel is not defined
+    at Room.selectZhuang (/Users/coco/Documents/GitHub/mumuserver/app/util/Room.js:81:19)
+    at Room.gameStart (/Users/coco/Documents/GitHub/mumuserver/app/util/Room.js:59:10)
+    at Room.checkGameStart (/Users/coco/Documents/GitHub/mumuserver/app/util/Room.js:52:10)
+    at RoomRemote.onAction (/Users/coco/Documents/GitHub/mumuserver/app/servers/chat/remote/room2Remote.js:95:18)
+    at Dispatcher.pro.route (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/dispatcher.js:52:10)
+    at Acceptor.cb (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/gateway.js:22:16)
+    at processMsg (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/acceptors/mqtt-acceptor.js:138:12)
+    at Connection.<anonymous> (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/acceptors/mqtt-acceptor.js:62:11)
+    at Connection.emit (events.js:182:13)
+    at Connection.emitPacket (/Users/coco/Documents/GitHub/mumuserver/node_modules/mqtt-connection/connection.js:14:8)
+[2019-03-16 23:10:14.097] [ERROR] pomelo-rpc - [31m[mqtt-acceptor] [39mprocess rpc message error TypeError: Cannot read property 'push' of undefined
+    at Room.faPai (/Users/coco/Documents/GitHub/mumuserver/app/util/Room.js:96:28)
+    at Room.gameStart (/Users/coco/Documents/GitHub/mumuserver/app/util/Room.js:60:10)
+    at Room.checkGameStart (/Users/coco/Documents/GitHub/mumuserver/app/util/Room.js:52:10)
+    at RoomRemote.onAction (/Users/coco/Documents/GitHub/mumuserver/app/servers/chat/remote/room2Remote.js:95:18)
+    at Dispatcher.pro.route (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/dispatcher.js:52:10)
+    at Acceptor.cb (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/gateway.js:22:16)
+    at processMsg (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/acceptors/mqtt-acceptor.js:138:12)
+    at Connection.<anonymous> (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/acceptors/mqtt-acceptor.js:62:11)
+    at Connection.emit (events.js:182:13)
+    at Connection.emitPacket (/Users/coco/Documents/GitHub/mumuserver/node_modules/mqtt-connection/connection.js:14:8)
+[2019-03-17 00:23:47.497] [ERROR] pomelo-rpc - [31m[mqtt-acceptor] [39mprocess rpc message error TypeError: Feadback is not a constructor
+    at new Room (/Users/coco/Documents/GitHub/mumuserver/app/util/Room.js:9:21)
+    at RoomRemote.joinRoom (/Users/coco/Documents/GitHub/mumuserver/app/servers/chat/remote/room2Remote.js:48:18)
+    at Dispatcher.pro.route (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/dispatcher.js:52:10)
+    at Acceptor.cb (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/gateway.js:22:16)
+    at processMsg (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/acceptors/mqtt-acceptor.js:138:12)
+    at Connection.<anonymous> (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/acceptors/mqtt-acceptor.js:62:11)
+    at Connection.emit (events.js:182:13)
+    at Connection.emitPacket (/Users/coco/Documents/GitHub/mumuserver/node_modules/mqtt-connection/connection.js:14:8)
+    at Connection.emit (events.js:182:13)
+    at addChunk (/Users/coco/Documents/GitHub/mumuserver/node_modules/readable-stream/lib/_stream_readable.js:291:12)
+[2019-03-17 00:33:42.132] [ERROR] pomelo-rpc - [31m[mqtt-acceptor] [39mprocess rpc message error TypeError: this.feadback.send is not a function
+    at Room.gameStart (/Users/coco/Documents/GitHub/mumuserver/app/util/Room.js:67:19)
+    at Room.checkGameStart (/Users/coco/Documents/GitHub/mumuserver/app/util/Room.js:55:10)
+    at RoomRemote.onAction (/Users/coco/Documents/GitHub/mumuserver/app/servers/chat/remote/room2Remote.js:95:18)
+    at Dispatcher.pro.route (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/dispatcher.js:52:10)
+    at Acceptor.cb (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/gateway.js:22:16)
+    at processMsg (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/acceptors/mqtt-acceptor.js:138:12)
+    at Connection.<anonymous> (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/acceptors/mqtt-acceptor.js:62:11)
+    at Connection.emit (events.js:182:13)
+    at Connection.emitPacket (/Users/coco/Documents/GitHub/mumuserver/node_modules/mqtt-connection/connection.js:14:8)
+    at Connection.emit (events.js:182:13)
+[2019-03-17 00:37:56.572] [ERROR] pomelo-rpc - [31m[mqtt-acceptor] [39mprocess rpc message error ReferenceError: cancel is not defined
+    at Feadback.send (/Users/coco/Documents/GitHub/mumuserver/app/util/Feadback.js:5:34)
+    at Room.gameStart (/Users/coco/Documents/GitHub/mumuserver/app/util/Room.js:67:19)
+    at Room.checkGameStart (/Users/coco/Documents/GitHub/mumuserver/app/util/Room.js:55:10)
+    at RoomRemote.onAction (/Users/coco/Documents/GitHub/mumuserver/app/servers/chat/remote/room2Remote.js:95:18)
+    at Dispatcher.pro.route (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/dispatcher.js:52:10)
+    at Acceptor.cb (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/gateway.js:22:16)
+    at processMsg (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/acceptors/mqtt-acceptor.js:138:12)
+    at Connection.<anonymous> (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/acceptors/mqtt-acceptor.js:62:11)
+    at Connection.emit (events.js:182:13)
+    at Connection.emitPacket (/Users/coco/Documents/GitHub/mumuserver/node_modules/mqtt-connection/connection.js:14:8)
+[2019-03-17 00:42:07.172] [ERROR] pomelo-rpc - [31m[mqtt-acceptor] [39mprocess rpc message error TypeError: Cannot read property 'thenCancel' of undefined
+    at Room.gameStart (/Users/coco/Documents/GitHub/mumuserver/app/util/Room.js:69:9)
+    at Room.checkGameStart (/Users/coco/Documents/GitHub/mumuserver/app/util/Room.js:55:10)
+    at RoomRemote.onAction (/Users/coco/Documents/GitHub/mumuserver/app/servers/chat/remote/room2Remote.js:95:18)
+    at Dispatcher.pro.route (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/dispatcher.js:52:10)
+    at Acceptor.cb (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/gateway.js:22:16)
+    at processMsg (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/acceptors/mqtt-acceptor.js:138:12)
+    at Connection.<anonymous> (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/acceptors/mqtt-acceptor.js:62:11)
+    at Connection.emit (events.js:182:13)
+    at Connection.emitPacket (/Users/coco/Documents/GitHub/mumuserver/node_modules/mqtt-connection/connection.js:14:8)
+    at Connection.emit (events.js:182:13)

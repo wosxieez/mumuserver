@@ -14,7 +14,7 @@ var handler = Handler.prototype;
 handler.sendAction = function (action, session, next) {
 	// console.log('---------------------------服务器', this.app.get('serverId'), '---------------------------')
 	// console.log('sendAction')
-	this.app.rpc.chat.roomRemote.onAction(session, this.app.get('serverId'), session.get('groupname'), session.get('roomname'),
+	this.app.rpc.chat.room2Remote.onAction(session, this.app.get('serverId'), session.get('groupname'), session.get('roomname'),
 		session.get('username'), action, function (result) {
 			next(null, result)
 		})

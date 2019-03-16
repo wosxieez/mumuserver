@@ -401,7 +401,12 @@ function autoCheckTiWei(channel) {
 				notificationUserCheckNewCard(channel, canTiUser.username)
 			})
 		} else {
-			notificationUserCheckNewCard(channel, canTiUser.username)
+			// 超过两个提跑，则不用提示玩家出牌了，直接发牌
+			if (CardUtil.tiPaoCount(canTiUser.groupCards) >= 2) {
+				prepareDealPoker(channel)
+			} else {
+				notificationUserCheckNewCard(channel, canTiUser.username)
+			}
 		}
 	} else {
 		autoCheckHuPengChi(channel)

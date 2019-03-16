@@ -81,7 +81,7 @@ handler.joinRoom = function (msg, session, next) {
 		}
 	});
 
-	this.app.rpc.chat.roomRemote.joinRoom(session, sid, groupname, roomname, username, msg, function (result) {
+	this.app.rpc.chat.room2Remote.joinRoom(session, sid, groupname, roomname, username, msg, function (result) {
 		next(null, result)
 	})
 }
@@ -99,7 +99,7 @@ handler.leaveRoom = function (msg, session, next) {
 		}
 	})
 
-	this.app.rpc.chat.roomRemote.leaveRoom(session, sid, groupname, roomname, username, function (result) {
+	this.app.rpc.chat.room2Remote.leaveRoom(session, sid, groupname, roomname, username, function (result) {
 		next(null, result)
 	})
 }
@@ -115,7 +115,7 @@ function onSessionClosed(app, session) {
 	const username = session.get('username')
 
 	if (roomname) {
-		app.rpc.chat.roomRemote.leaveRoom(session, sid, groupname, roomname, username, function (result) { })
+		app.rpc.chat.room2Remote.leaveRoom(session, sid, groupname, roomname, username, function (result) { })
 	}
 	if (groupname) {
 		app.rpc.chat.groupRemote.leaveGroup(session, sid, groupname, username, function (result) { })
