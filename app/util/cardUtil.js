@@ -360,7 +360,11 @@ CardUtil.canHu = function (cardsOnHand, cardsOnTable, currentCard) {
 
     const canHu = (huxi >= 15);
     console.log('能否胡', canHu, huxi)
-    return [canHu, huxi, fullGroupCards]
+    if (canHu) {
+      return [huxi, fullGroupCards]
+    } else {
+      return false
+    }
   } else {
     return false
   }

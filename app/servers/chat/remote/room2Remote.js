@@ -97,6 +97,7 @@ RoomRemote.prototype.onAction = function (sid, groupname, roomname, username, ac
 			case Actions.Hu: // 收到胡牌指令
 				break
 			case Actions.NewCard: // 收到出牌指令
+				channel.room.feadback.doOk(username, action.data)
 				break
 			case Actions.Cancel: // 收到玩家无操纵指令
 				break

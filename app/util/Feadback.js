@@ -1,9 +1,13 @@
 module.exports = function Feadback(channel) {
     this.send = function (username, message) {
         this.username = username
+        this.okFunction = null
+        this.cancelFunction = null
+        clearTimeout(this.timeout)
+        
         channel.pushMessage(message)
         this.timeout = setTimeout(() => {
-            this.cancel()
+            this.doCancel()
         }, 15000)
         return this
     }
@@ -15,7 +19,7 @@ module.exports = function Feadback(channel) {
         this.cancelFunction = cb
         return this
     }
-    this.ok = function (username, data) {
+    this.doOk = function (username, data) {
         if (username === this.username) {
             if (this.okFunction) {
                 this.okFunction(data)
@@ -26,7 +30,7 @@ module.exports = function Feadback(channel) {
             clearTimeout(this.timeout)
         }
     }
-    this.cancel = function () {
+    this.doCancel = function () {
         if (this.cancelFunction) {
             this.cancelFunction()
         }

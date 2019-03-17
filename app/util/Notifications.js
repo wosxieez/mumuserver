@@ -1,24 +1,25 @@
 const Notifications = {
     onJoinRoom: 1,    // 新玩家加入房间
-    onJoinGroup: 301, // 新玩家加入群
-    onLeaveRoom: 101, // 玩家离开房间
-    onLeaveGroup: 401,// 玩家离开群
-    onReady: 501,     // 有玩家准备
-    onNewRound: 2,    // 开局通知
-    onDisCard: 3,     //等待玩家出牌
-    onCard: 4,    	  // 玩家出的牌
-    onEat: 5,         // 玩家吃牌
+    onJoinGroup: 2, // 新玩家加入群
+    onLeaveRoom: 3, // 玩家离开房间
+    onLeaveGroup: 4,// 玩家离开群
+    onReady: 5,     // 有玩家准备
+    onNewRound: 6,    // 开局通知
+    onGameStart: 7, // 游戏正式开始
+    onDisCard: 8,     //等待玩家出牌
+    onCard: 9,    	  // 玩家出的牌
+    onEat: 10,         // 玩家吃牌
     onPeng: 11,       // 玩家碰牌
-    onWei: 6,         // 玩家偎牌
-    onWin: 7,         // 玩家胡牌
-    onTi: 8,          // 玩家提牌
-    onPao: 9,         // 玩家跑牌
-    onNewCard: 10,    // 新底牌
-    checkPeng: 12,    // 检查碰
-    checkEat: 13,     // 检查吃
-    checkNewCard: 14, // 检查出牌
-    checkHu: 15,       // 检查胡
-    onRoundEnd: 999,  // 一轮游戏结束
+    onWei: 12,         // 玩家偎牌
+    onWin: 13,         // 玩家胡牌
+    onTi: 14,          // 玩家提牌
+    onPao: 15,         // 玩家跑牌
+    onNewCard: 16,    // 新底牌
+    checkPeng: 17,    // 检查碰
+    checkEat: 18,     // 检查吃
+    checkNewCard: 19, // 检查出牌
+    checkHu: 20,       // 检查胡
+    onRoundEnd: 21,  // 一轮游戏结束
 }
 
 module.exports = Notifications
