@@ -51,6 +51,10 @@ Room.prototype.setReady = function (username, isReady) {
 // 检查游戏是否能开始
 //---------------------------------------------------------------------------------------------------------------
 Room.prototype.checkGameStart = function () {
+    if (this.users.length < this.count) {
+        return
+    }
+
     for (var i = 0; i < this.users.length; i++) {
         if (!this.users[i].isReady) {
             return
@@ -75,7 +79,7 @@ Room.prototype.gameStart = function () {
     this.channel.pushMessage({
         route: 'onNotification',
         name: Notifications.onNewRound,
-        data: { users: this.users, zc: this.zhuang_card, zn: this.zhuang.username }
+        data: { users: this.users, zc: this.zhuang_card, zn: this.zhuang.username, cc: this.cards.length }
     })
 
     this.timeout = setTimeout(this.checkAllUserCanHuWith3Ti5Kan.bind(this), 3000)
@@ -357,6 +361,7 @@ Room.prototype.loopOtherUserCanHuWithPlayerCard = function () {
                 })
                 .thenOk((data) => {
                     // todo 胡牌操作
+                    this.noticeAllUserOnWin()
                 })
                 .thenCancel(() => { this.loopOtherUserCanHuWithPlayerCard() })
         } else {
@@ -592,6 +597,7 @@ Room.prototype.passCard = function () {
         this.nextPlayCard(this.player)
     } else {
         // todo game over 荒庄
+        this.noticeAllUserOnRoundEnd()
     }
 }
 
@@ -709,6 +715,7 @@ Room.prototype.checkPlayerUserCanHuWithPlayerCard = function () {
             data: { username: this.player.username, data: canHuData }
         }).thenOk((data) => {
             // todo 翻牌玩家胡牌操作
+            this.noticeAllUserOnWin()
         }).thenCancel(() => {
             // 翻牌玩家不想胡 / 超时
             this.checkOtherUserCanHuWithPlayerCard()
@@ -733,6 +740,7 @@ Room.prototype.checkPlayerUserCanHuWithPlayerCard2 = function () {
             data: { username: this.player.username, data: canHuData }
         }).thenOk((data) => {
             // todo 翻牌玩家胡牌操作
+            this.noticeAllUserOnWin()
         }).thenCancel(() => {
             // 翻牌玩家不想胡 / 超时
             this.playerPlayCard(this.player)
@@ -792,13 +800,14 @@ Room.prototype.checkOtherUserCanHuWithPlayerCard2 = function () {
             break
         }
     }
+    console.log(this.loopUsers)
     this.loopOtherUserCanHuWithPlayerCard2()
 }
 Room.prototype.loopOtherUserCanHuWithPlayerCard2 = function () {
     const user = this.loopUsers.shift()
     if (user) {
         const canHuData = CardUtil.canHu(user.handCards, user.groupCards, this.player_card)
-        if (canHuData && canHuData[0]) {
+        if (canHuData) {
             this.feadback.send(user.username,
                 {
                     route: 'onNotification',
@@ -807,6 +816,7 @@ Room.prototype.loopOtherUserCanHuWithPlayerCard2 = function () {
                 })
                 .thenOk((data) => {
                     // todo 胡牌操作
+                    this.noticeAllUserOnWin()
                 })
                 .thenCancel(() => { this.loopOtherUserCanHuWithPlayerCard2() })
         } else {
@@ -987,6 +997,16 @@ Room.prototype.checkNextUserCanChiWithPlayerCard2 = function () {
 
 
 /**
+ * 通知所有玩家有准备操作
+ */
+Room.prototype.noticeAllUserOnReady = function () {
+    this.channel.pushMessage({
+        route: 'onNotification',
+        name: Notifications.onReady,
+        data: { users: this.users, zc: this.zhuang_card, zn: this.zhuang.username }
+    })
+}
+/**
  * 通知所有玩家有跑操作
  */
 Room.prototype.noticeAllUserOnPao = function () {
@@ -1036,7 +1056,6 @@ Room.prototype.noticeAllUserOnWei = function () {
         data: { users: this.users, zc: this.zhuang_card, zn: this.zhuang.username }
     })
 }
-
 Room.prototype.noticeAllUserOnNewCard = function () {
     this.channel.pushMessage({
         route: 'onNotification',
@@ -1046,11 +1065,44 @@ Room.prototype.noticeAllUserOnNewCard = function () {
             zn: this.zhuang.username,
             zc: this.zhuang_card,
             pn: this.player.username,
+            pc: this.player_card,
+            cc: this.cards.length
+        }
+    })
+}
+Room.prototype.noticeAllUserOnWin = function () {
+    this.users.forEach(user => {
+        user.isReady = false
+    })
+
+    this.channel.pushMessage({
+        route: 'onNotification',
+        name: Notifications.onWin,
+        data: {
+            users: this.users,
+            zn: this.zhuang.username,
+            zc: this.zhuang_card,
+            pn: this.player.username,
             pc: this.player_card
         }
     })
-
 }
-
+Room.prototype.noticeAllUserOnRoundEnd = function () {
+    this.users.forEach(user => {
+        user.isReady = false
+    })
+    
+    this.channel.pushMessage({
+        route: 'onNotification',
+        name: Notifications.onRoundEnd,
+        data: {
+            users: this.users,
+            zn: this.zhuang.username,
+            zc: this.zhuang_card,
+            pn: this.player.username,
+            pc: this.player_card
+        }
+    })
+}
 
 module.exports = Room

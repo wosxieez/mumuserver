@@ -819,3 +819,6 @@
     at RoomRemote.onAction (/Users/coco/Documents/GitHub/mumuserver/app/servers/chat/remote/room2Remote.js:100:27)
     at Dispatcher.pro.route (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/dispatcher.js:52:10)
     at Acceptor.cb (/Users/coco/Documents/GitHub/mumuserver/node_modules/pomelo-rpc/lib/rpc-server/gateway.js:22:16)
+[2019-03-18 16:31:15.744] [ERROR] pomelo-rpc - [31m[mqtt-mailbox] [39mmqtt rpc client connector-server-3 checkKeepAlive timeout from remote server chat-server-1 for 20000 lastPing: 1552897855738 lastPong: 1552897845731
+[2019-03-18 16:31:16.250] [ERROR] pomelo-rpc - [31m[mqtt-mailbox] [39mmqtt rpc client chat-server-1 checkKeepAlive timeout from remote server connector-server-3 for 20000 lastPing: 1552897856244 lastPong: 1552897846241
+[2019-03-18 16:31:17.460] [ERROR] pomelo-rpc - [31m[mqtt-mailbox] [39mmqtt rpc client chat-server-1 checkKeepAlive timeout from remote server chat-server-1 for 20000 lastPing: 1552897857451 lastPong: 1552897847449

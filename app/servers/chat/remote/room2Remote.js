@@ -16,27 +16,21 @@ var RoomRemote = function (app) {
 //---------------------------------------------------------------------------------------------------------------
 RoomRemote.prototype.joinRoom = function (sid, groupname, roomname, username, config, cb) {
 	var channel = this.channelService.getChannel(roomname, false)
-
 	if (!!channel) {
-
 		const oldMember = channel.getMember(username)
 		if (!!oldMember) {
-			cb({ code: 403, data: '重复加入房间' })
+			cb({ code: 0, data: '加入房间成功' })
 			return
 		}
 
-		// 群已经存在了 看看群人数有没有满 
-		// 人数没有满的话 可以加入
-		// 人数如果已经满了的话 则无法加入
-		if (channel.roominfo.users.length < channel.roominfo.count) {
-			// 通过群渠道通知其他玩家有人加入房间了
+		if (channel.getMembers().length < config.count) {
 			const groupChannel = this.channelService.getChannel(groupname, false)
 			if (groupChannel) {
 				groupChannel.pushMessage({ route: 'onGroup', name: Notifications.onJoinRoom, data: { roomname, username } })  // 通知其他用户
 			}
-
+			channel.room.addUser(username)
 			channel.add(username, sid)
-
+			console.log(roomname, '当前前用户', channel.getMembers())
 			cb({ code: 0, data: '加入房间成功' })
 		}
 		else {
@@ -54,7 +48,7 @@ RoomRemote.prototype.joinRoom = function (sid, groupname, roomname, username, co
 
 		channel.room.addUser(username)
 		channel.add(username, sid)
-
+		console.log(roomname, '当前前用户', channel.getMembers())
 		cb({ code: 0, data: '创建房间成功' })
 	}
 }
@@ -91,6 +85,7 @@ RoomRemote.prototype.leaveRoom = function (sid, groupname, roomname, username, c
 //---------------------------------------------------------------------------------------------------------------
 RoomRemote.prototype.onAction = function (sid, groupname, roomname, username, action, cb) {
 	var channel = this.channelService.getChannel(roomname, false)
+	console.log('收到指令', action)
 	if (!!channel) {
 		switch (action.name) {
 			case Actions.Ready:

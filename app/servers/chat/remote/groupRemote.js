@@ -17,7 +17,7 @@ GroupRemote.prototype.joinGroup = function (sid, groupname, username, cb) {
     
     const oldMember = channel.getMember(username)
 		if (!!oldMember) {
-			cb({ code: 403, data: '重复加入群' })
+			cb({ code: 0, data: channel.getMembers() })
 			return
         }
         
