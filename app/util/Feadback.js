@@ -4,11 +4,10 @@ module.exports = function Feadback(channel) {
         this.okFunction = null
         this.cancelFunction = null
         clearTimeout(this.timeout)
-        
+
         channel.pushMessage(message)
-        this.timeout = setTimeout(() => {
-            this.doCancel()
-        }, 15000)
+
+        this.timeout = setTimeout(this.doCancel.bind(this, username), 15000)
         return this
     }
     this.thenOk = function (cb) {
@@ -21,22 +20,28 @@ module.exports = function Feadback(channel) {
     }
     this.doOk = function (username, data) {
         if (username === this.username) {
-            if (this.okFunction) {
-                this.okFunction(data)
-            }
+            const doFunction = this.okFunction
             this.username = null
             this.okFunction = null
             this.cancelFunction = null
             clearTimeout(this.timeout)
+
+            if (doFunction) {
+                doFunction(data)
+            }
         }
     }
-    this.doCancel = function () {
-        if (this.cancelFunction) {
-            this.cancelFunction()
+    this.doCancel = function (username) {
+        if (username === this.username) {
+            const doFunction = this.cancelFunction
+            this.username = null
+            this.okFunction = null
+            this.cancelFunction = null
+            clearTimeout(this.timeout)
+
+            if (doFunction) {
+                doFunction()
+            }
         }
-        this.username = null
-        this.okFunction = null
-        this.cancelFunction = null
-        clearTimeout(this.timeout)
     }
 }

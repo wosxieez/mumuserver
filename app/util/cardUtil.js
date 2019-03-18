@@ -617,4 +617,14 @@ CardUtil.shufflePoker = function (arr) {
 }
 
 
+CardUtil.deleteCard = function (cards, card) {
+  for (var i = 0; i < cards.length; i++) {
+      if (cards[i] == card) {
+          cards.splice(i, 1)
+          break
+      }
+  }
+}
+
+
 module.exports = CardUtil
