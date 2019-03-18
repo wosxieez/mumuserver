@@ -44,4 +44,11 @@ module.exports = function Feadback(channel) {
             }
         }
     }
+    this.release = function () {
+        console.log('Feadback release')
+        this.username = null
+        this.okFunction = null
+        this.cancelFunction = null
+        clearTimeout(this.timeout)
+    }
 }

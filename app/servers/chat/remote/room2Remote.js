@@ -75,8 +75,11 @@ RoomRemote.prototype.leaveRoom = function (sid, groupname, roomname, username, c
 		}
 
 		if (channel.getMembers().length === 0) {
-			console.log('删除房间' + roomname)
+			channel.room.feadback.release()
+			channel.room.release()
+			channel.room = null
 			channel.destroy()
+			console.log('删除房间' + roomname)
 		}
 	}
 
@@ -90,20 +93,18 @@ RoomRemote.prototype.onAction = function (sid, groupname, roomname, username, ac
 	var channel = this.channelService.getChannel(roomname, false)
 	if (!!channel) {
 		switch (action.name) {
-			case Actions.Ready: // 准备指令
+			case Actions.Ready:
 				channel.room.setReady(username, action.data)
 				channel.room.checkGameStart()
 				break
-			case Actions.Hu: // 收到胡牌指令
-				break
-			case Actions.NewCard: // 收到出牌指令
+			case Actions.Hu:
+			case Actions.NewCard:
+			case Actions.Peng:
+			case Actions.Chi:
 				channel.room.feadback.doOk(username, action.data)
 				break
-			case Actions.Cancel: // 收到玩家无操纵指令
-				break
-			case Actions.Peng: // 收到玩家碰牌操纵
-				break
-			case Actions.Chi: // 收到玩家吃牌操纵
+			case Actions.Cancel:
+				channel.room.feadback.doCancel(username)
 				break
 			default:
 				break
