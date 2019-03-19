@@ -138,7 +138,7 @@ Room.prototype.faZhuangPai = function () {
  * 参见流程图 check1
  */
 Room.prototype.checkAllUserCanHuWith3Ti5Kan = function () {
-    console.log('check1 检查所有玩家是否有三提五坎')
+    console.log('check1')
     for (var i = 0; i < this.users.length; i++) {
         if (CardUtil.has3Ti5Kan(this.users[i].handCards)) {
             // todo 胡操作
@@ -153,7 +153,7 @@ Room.prototype.checkAllUserCanHuWith3Ti5Kan = function () {
  * 参见流程图 check2
  */
 Room.prototype.checkAllUserCanHuWithZhuangCard = function () {
-    console.log('check2 检查所有玩家手里牌 + 庄牌是否胡牌')
+    console.log('check2')
     this.loopUsers = []
     this.users.forEach(user => {
         this.loopUsers.push(user)
@@ -189,7 +189,7 @@ Room.prototype.loopAllUserCanHuWithZhuangCard = function () {
  * 参考流程 Fun1
  */
 Room.prototype.zhuangStart = function () {
-    console.log('Fun1 庄家操作')
+    console.log('Fun1')
     this.zhuang.handCards.push(this.zhuang_card)
 
     // 游戏正式开始 通知每个玩家
@@ -206,7 +206,7 @@ Room.prototype.zhuangStart = function () {
  * 参见流程图 check3
  */
 Room.prototype.checkZhuangCanTi = function () {
-    console.log('check3 检查庄能否提')
+    console.log('check3')
 
     const hasTiCards = CardUtil.hasTi(this.zhuang.handCards)
     if (hasTiCards) {
@@ -235,7 +235,7 @@ Room.prototype.checkZhuangCanTi = function () {
  * 参见流程图 check5
  */
 Room.prototype.checkXianCanTi = function () {
-    console.log('check5 检查闲家能否提')
+    console.log('check5')
 
     var hasTi = false
     this.users.forEach(user => {
@@ -299,7 +299,7 @@ Room.prototype.zhuangPlayCard = function () {
  * 参见流程图 check6
  */
 Room.prototype.checkXianCanTi2 = function () {
-    console.log('check6 检查闲家能否提')
+    console.log('check6')
 
     var hasTi = false
     this.users.forEach(user => {
@@ -336,7 +336,7 @@ Room.prototype.checkXianCanTi2 = function () {
  * 参见流程图 check7
  */
 Room.prototype.checkOtherUserCanHuWithPlayerCard = function () {
-    console.log('check7 检查其他玩家手里牌 + player_card 是否胡牌', this.player.username)
+    console.log('check7')
     for (var i = 0; i < this.users.length; i++) {
         if (this.users[i].username == this.player.username) {
             var endUsers = this.users.slice(i)
@@ -377,7 +377,7 @@ Room.prototype.loopOtherUserCanHuWithPlayerCard = function () {
  * 参见流程图 check8
  */
 Room.prototype.checkOtherUserCanPaoWithPlayerCard = function () {
-    console.log('check8 检查其他玩家手里牌 + player_card 是否能跑')
+    console.log('check8')
     for (var i = 0; i < this.users.length; i++) {
         if (this.users[i].username == this.player.username) {
             var endUsers = this.users.slice(i)
@@ -452,7 +452,7 @@ Room.prototype.loopOtherUserCanPaoWithPlayerCard = function () {
  * 参见流程图 check9
  */
 Room.prototype.checkOtherUserCanPengWithPlayerCard = function () {
-    console.log('check9 检查其他玩家手里牌 + player_card 是否能碰')
+    console.log('check9')
     for (var i = 0; i < this.users.length; i++) {
         if (this.users[i].username == this.player.username) {
             var endUsers = this.users.slice(i)
@@ -467,28 +467,38 @@ Room.prototype.checkOtherUserCanPengWithPlayerCard = function () {
 Room.prototype.loopOtherUserCanPengWithPlayerCard = function () {
     const user = this.loopUsers.shift()
     if (user) {
-        const canPengData = CardUtil.canPeng(user.handCards, this.player_card)
-        if (canPengData) {
-            // 通知玩家是否要碰
-            this.feadback.send(user.username, {
-                route: 'onNotification',
-                name: Notifications.checkPeng,
-                data: { username: user.username, data: canPengData }
-            }).thenOk((data) => {
-                canPengData.forEach(card => {
-                    CardUtil.deleteCard(user.handCards, card)
+        console.log('检查', user.username, '能否碰这张牌', this.player_card)
+        // 判断这张牌 在不在所有玩家的pass牌中，在的话就不能在碰了
+        if (!this.isPassedCard(this.player_card)) {
+            const canPengData = CardUtil.canPeng(user.handCards, this.player_card)
+            if (canPengData) {
+                // 通知玩家是否要碰
+                console.log(user.username, '可以碰这张牌 通知玩家要不要碰')
+                this.feadback.send(user.username, {
+                    route: 'onNotification',
+                    name: Notifications.checkPeng,
+                    data: { username: user.username, data: canPengData }
+                }).thenOk((data) => {
+                    console.log(user.username, '选择了碰这张牌')
+                    canPengData.forEach(card => {
+                        CardUtil.deleteCard(user.handCards, card)
+                    })
+                    canPengData.push(this.player_card)
+                    user.groupCards.push({ name: 'peng', cards: canPengData })
+                    this.noticeAllUserOnPeng()
+                    this.timeout = setTimeout(() => {
+                        this.playerPlayCard(user)
+                    }, 2000)
+                }).thenCancel(() => {
+                    console.log(user.username, '选择了不碰 或者 超时了')
+                    this.loopOtherUserCanPengWithPlayerCard()
                 })
-                canPengData.push(this.player_card)
-                user.groupCards.push({ name: 'peng', cards: canPengData })
-                this.noticeAllUserOnPeng()
-                this.timeout = setTimeout(() => {
-                    this.playerPlayCard(user)
-                }, 2000)
-            }).thenCancel(() => {
+            } else {
+                console.log(user.username, '不可以碰这张牌')
                 this.loopOtherUserCanPengWithPlayerCard()
-            })
+            }
         } else {
-            this.loopOtherUserCanPengWithPlayerCard()
+            console.log(user.username, '不能碰这张牌 因为该牌在pass牌中')
         }
     } else {
         // loop执行完了，没有其他玩家能碰, 判断出牌玩家能否吃
@@ -500,30 +510,62 @@ Room.prototype.loopOtherUserCanPengWithPlayerCard = function () {
  * 参见流程图 check10
  */
 Room.prototype.checkPlayerUserCanChiWithPlayerCard = function () {
-    console.log('check10 检查出牌玩家手里牌 + player_card 是否能吃')
-    const canChiData = CardUtil.canChi(this.player.handCards, this.player_card)
-    if (canChiData) {
-        // 通知出牌玩家是否要吃
-        this.feadback.send(this.player.username, {
-            route: 'onNotification',
-            name: Notifications.checkEat,
-            data: { username: this.player.username, data: canChiData }
-        }).thenOk((data) => {
-            console.log('收到吃操作', data)
-            data.forEach(card => {
-                CardUtil.deleteCard(this.player.handCards, card)
+    console.log('check10')
+    console.log('检查', this.player.username, '能否吃这张牌', this.player_card)
+
+    // 找到上家
+    var preUser
+    for (var i = 0; i < this.users.length; i++) {
+        if (this.users[i].username == this.player.username) {
+            var endUsers = this.users.slice(i)
+            var startUsers = this.users.slice(0, i)
+            var orderUsers = endUsers.concat(startUsers)
+            orderUsers.shift()
+            if (orderUsers.length > 0) {
+                preUser = orderUsers.pop()
+            } else {
+                preUser = null
+            }
+            break
+        }
+    }
+
+    var isPreUserPassedCard = false
+    if (preUser && CardUtil.hasCard(preUser.passCards, this.player_card)) {
+        isPreUserPassedCard = true 
+    }
+
+    // 不在自己 跟上家的pass牌中就可以吃
+    if (!isPreUserPassedCard && CardUtil.hasCard(this.player.passCards, this.player_card)) {
+        const canChiData = CardUtil.canChi(this.player.handCards, this.player_card)
+        if (canChiData) {
+            // 通知出牌玩家是否要吃
+            console.log(this.player.username, '可以吃牌 通知玩家要不要吃牌')
+            this.feadback.send(this.player.username, {
+                route: 'onNotification',
+                name: Notifications.checkEat,
+                data: { username: this.player.username, data: canChiData }
+            }).thenOk((data) => {
+                console.log(this.player.username, '选择了吃牌')
+                data.forEach(card => {
+                    CardUtil.deleteCard(this.player.handCards, card)
+                })
+                data.push(this.player_card)
+                this.player.groupCards.push({ name: 'chi', cards: data })
+                this.noticeAllUserOnChi()
+                this.timeout = setTimeout(() => { this.playerPlayCard(this.player) }, 2000)
+            }).thenCancel(() => {
+                // 出牌玩家不想吃 或者 超时了
+                console.log(this.player.username, '选择了不吃牌 或者 超时了')
+                this.checkNextUserCanChiWithPlayerCard()
             })
-            data.push(this.player_card)
-            this.player.groupCards.push({ name: 'chi', cards: data })
-            this.noticeAllUserOnChi()
-            this.timeout = setTimeout(() => { this.playerPlayCard(this.player) }, 2000)
-        }).thenCancel(() => {
-            // 出牌玩家不想吃 或者 超时了
-            console.log('出牌玩家不想吃 或者 超时了')
+        } else {
+            // 出牌玩家不能吃
+            console.log(this.player.username, '不能吃牌')
             this.checkNextUserCanChiWithPlayerCard()
-        })
+        }
     } else {
-        // 出牌玩家不能吃
+        console.log(this.player.username, '不能吃牌 因为已经在pass牌中')
         this.checkNextUserCanChiWithPlayerCard()
     }
 }
@@ -552,28 +594,38 @@ Room.prototype.checkNextUserCanChiWithPlayerCard = function () {
     }
 
     if (nextUser) {
-        const canChiData = CardUtil.canChi(nextUser.handCards, this.player_card)
-        if (canChiData) {
-            // 通知出牌玩家是否要吃
-            this.feadback.send(nextUser.username, {
-                route: 'onNotification',
-                name: Notifications.checkEat,
-                data: { username: nextUser.username, data: canChiData }
-            }).thenOk((data) => {
-                console.log('收到吃操作', data)
-                data.forEach(card => {
-                    CardUtil.deleteCard(nextUser.handCards, card)
+        console.log('检查', nextUser.username, '能否吃这张牌', this.player_card)
+        // 这张牌不在 自己跟上家的pass牌中，才可以吃
+        if (!CardUtil.hasCard(nextUser.passCards, this.player_card) &&
+            !CardUtil.hasCard(this.player.passCards, this.player_card)) {
+            const canChiData = CardUtil.canChi(nextUser.handCards, this.player_card)
+            if (canChiData) {
+                console.log(nextUser.username, '可以吃牌 通知用户要不要吃')
+                // 通知出牌玩家是否要吃
+                this.feadback.send(nextUser.username, {
+                    route: 'onNotification',
+                    name: Notifications.checkEat,
+                    data: { username: nextUser.username, data: canChiData }
+                }).thenOk((data) => {
+                    console.log(nextUser.username, '选择了吃牌操作')
+                    data.forEach(card => {
+                        CardUtil.deleteCard(nextUser.handCards, card)
+                    })
+                    data.push(this.player_card)
+                    nextUser.groupCards.push({ name: 'chi', cards: data })
+                    this.noticeAllUserOnChi()
+                    this.timeout = setTimeout(() => { this.playerPlayCard(nextUser) }, 2000)
+                }).thenCancel(() => {
+                    // 下家不想吃 或者 超时了
+                    console.log(nextUser.username, '选择了不吃牌 或者 超时了')
+                    this.passCard()
                 })
-                data.push(this.player_card)
-                nextUser.groupCards.push({ name: 'chi', cards: data })
-                this.noticeAllUserOnChi()
-                this.timeout = setTimeout(() => { this.playerPlayCard(nextUser) }, 2000)
-            }).thenCancel(() => {
-                // 下家不想吃 或者 超时了
+            } else {
+                // 下家不能吃
                 this.passCard()
-            })
+            }
         } else {
-            // 下家不能吃
+            console.log(nextUser.username, '不能吃了 因为该牌在废弃牌中')
             this.passCard()
         }
     } else {
@@ -581,7 +633,6 @@ Room.prototype.checkNextUserCanChiWithPlayerCard = function () {
         this.passCard()
     }
 }
-
 
 /**
  * 废牌操作
@@ -912,28 +963,37 @@ Room.prototype.checkOtherUserCanPengWithPlayerCard2 = function () {
 Room.prototype.loopOtherUserCanPengWithPlayerCard2 = function () {
     const user = this.loopUsers.shift()
     if (user) {
-        const canPengData = CardUtil.canPeng(user.handCards, this.player_card)
-        if (canPengData) {
-            // 通知玩家是否要碰
-            this.feadback.send(user.username, {
-                route: 'onNotification',
-                name: Notifications.checkPeng,
-                data: { username: user.username, data: canPengData }
-            }).thenOk((data) => {
-                canPengData.forEach(card => {
-                    CardUtil.deleteCard(user.handCards, card)
+        console.log('检查', user.username, '能否碰这张牌', this.player_card)
+        if (!this.isPassedCard(this.player_card)) {
+            const canPengData = CardUtil.canPeng(user.handCards, this.player_card)
+            if (canPengData) {
+                console.log(user.username, '可以碰这张牌 通知玩家要不要碰')
+                // 通知玩家是否要碰
+                this.feadback.send(user.username, {
+                    route: 'onNotification',
+                    name: Notifications.checkPeng,
+                    data: { username: user.username, data: canPengData }
+                }).thenOk((data) => {
+                    console.log(user.username, '选择了碰')
+                    canPengData.forEach(card => {
+                        CardUtil.deleteCard(user.handCards, card)
+                    })
+                    canPengData.push(this.player_card)
+                    user.groupCards.push({ name: 'peng', cards: canPengData })
+                    this.noticeAllUserOnPeng()
+                    this.timeout = setTimeout(() => {
+                        this.playerPlayCard(user)
+                    }, 2000)
+                }).thenCancel(() => {
+                    console.log(user.username, '选择了不碰 或者 超时了')
+                    this.loopOtherUserCanPengWithPlayerCard2()
                 })
-                canPengData.push(this.player_card)
-                user.groupCards.push({ name: 'peng', cards: canPengData })
-                this.noticeAllUserOnPeng()
-                this.timeout = setTimeout(() => {
-                    this.playerPlayCard(user)
-                }, 2000)
-            }).thenCancel(() => {
+            } else {
+                console.log(user.username, '不可以碰这张牌')
                 this.loopOtherUserCanPengWithPlayerCard2()
-            })
+            }
         } else {
-            this.loopOtherUserCanPengWithPlayerCard2()
+            console.log(user.username, '不能碰这张牌 因为该牌已经在pass牌中了')
         }
     } else {
         // loop执行完了，没有其他玩家能碰, 判断出牌玩家能否吃
@@ -965,28 +1025,39 @@ Room.prototype.checkNextUserCanChiWithPlayerCard2 = function () {
     }
 
     if (nextUser) {
-        const canChiData = CardUtil.canChi(nextUser.handCards, this.player_card)
-        if (canChiData) {
-            // 通知出牌玩家是否要吃
-            this.feadback.send(nextUser.username, {
-                route: 'onNotification',
-                name: Notifications.checkEat,
-                data: { username: nextUser.username, data: canChiData }
-            }).thenOk((data) => {
-                console.log('收到吃操作', data)
-                data.forEach(card => {
-                    CardUtil.deleteCard(nextUser.handCards, card)
+        console.log('检查', nextUser.username, '能否吃这张牌', this.player_card)
+        // 这张牌不在 自己跟上家的pass牌中，才可以吃
+        if (!CardUtil.hasCard(nextUser.passCards, this.player_card) &&
+            !CardUtil.hasCard(this.player.passCards, this.player_card)) {
+            const canChiData = CardUtil.canChi(nextUser.handCards, this.player_card)
+            if (canChiData) {
+                console.log(nextUser.username, '可以吃这张牌，通知玩家要不要吃')
+                // 通知出牌玩家是否要吃
+                this.feadback.send(nextUser.username, {
+                    route: 'onNotification',
+                    name: Notifications.checkEat,
+                    data: { username: nextUser.username, data: canChiData }
+                }).thenOk((data) => {
+                    console.log(nextUser.username, '选择了吃牌')
+                    data.forEach(card => {
+                        CardUtil.deleteCard(nextUser.handCards, card)
+                    })
+                    data.push(this.player_card)
+                    nextUser.groupCards.push({ name: 'chi', cards: data })
+                    this.noticeAllUserOnChi()
+                    this.timeout = setTimeout(() => { this.playerPlayCard(nextUser) }, 2000)
+                }).thenCancel(() => {
+                    // 下家不想吃 或者 超时了
+                    console.log(nextUser.username, '选择了不吃 或者 超时了')
+                    this.passCard()
                 })
-                data.push(this.player_card)
-                nextUser.groupCards.push({ name: 'chi', cards: data })
-                this.noticeAllUserOnChi()
-                this.timeout = setTimeout(() => { this.playerPlayCard(nextUser) }, 2000)
-            }).thenCancel(() => {
-                // 下家不想吃 或者 超时了
+            } else {
+                // 下家不能吃
+                console.log(nextUser.username, '不可以吃这张牌')
                 this.passCard()
-            })
+            }
         } else {
-            // 下家不能吃
+            console.log(nextUser.username, '不可以吃这张牌 因为已经在pass牌中')
             this.passCard()
         }
     } else {
@@ -1091,7 +1162,7 @@ Room.prototype.noticeAllUserOnRoundEnd = function () {
     this.users.forEach(user => {
         user.isReady = false
     })
-    
+
     this.channel.pushMessage({
         route: 'onNotification',
         name: Notifications.onRoundEnd,
@@ -1103,6 +1174,16 @@ Room.prototype.noticeAllUserOnRoundEnd = function () {
             pc: this.player_card
         }
     })
+}
+
+Room.prototype.isPassedCard = function (card) {
+    this.users.forEach(user => {
+        if (CardUtil.hasCard(user.handCards, card)) {
+            return true
+        }
+    })
+
+    return false
 }
 
 module.exports = Room
