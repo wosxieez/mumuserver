@@ -85,7 +85,7 @@ RoomRemote.prototype.leaveRoom = function (sid, groupname, roomname, username, c
 //---------------------------------------------------------------------------------------------------------------
 RoomRemote.prototype.onAction = function (sid, groupname, roomname, username, action, cb) {
 	var channel = this.channelService.getChannel(roomname, false)
-	console.log('收到指令', action)
+	console.log('收到指令', username, action)
 	if (!!channel) {
 		switch (action.name) {
 			case Actions.Ready:

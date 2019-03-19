@@ -484,16 +484,9 @@ CardUtil.canPeng = function (cardsOnHand, currentCard) {
   return canPeng;
 }
 
-/**
- * 玩家是否能吃拍
- * @param cards: 手中的牌。
- * @param currentCard: 新翻开的底牌，或者上家出的牌。
- */
-// 1. 顺子
-// 2. 2、7、10
-// 3. 大小混搭
 CardUtil.canChi = function (cards, currentCard) {
-  var canChiCards = []
+  console.log('能否吃牌', cards, currentCard)
+  var canChiDatas = []
   var countedCards = _.countBy(cards, function (c) { return c; });
   _.each(countedCards, function (value, key) {
     if (value === 3) {
@@ -504,16 +497,16 @@ CardUtil.canChi = function (cards, currentCard) {
   // 比方 currentCard = 8
   if (countedCards[currentCard - 1]) {
     if (countedCards[currentCard - 2] && currentCard !== 11 && currentCard !== 12) {
-      canChiCards.push([currentCard - 1, currentCard - 2]) // 判断8在尾部 查询 6 7 '8'  尾牌不能等于 11 12
+      canChiDatas.push({ name: 'chi', cards: [currentCard - 1, currentCard - 2] }) // 判断8在尾部 查询 6 7 '8'  尾牌不能等于 11 12
     }
     if (countedCards[currentCard + 1] && currentCard !== 10 && currentCard !== 11) {
-      canChiCards.push([currentCard - 1, currentCard + 1]) // 判断8在中部 查询 7 '8' 9  中牌不能等于 10 11
+      canChiDatas.push({ name: 'chi', cards: [currentCard - 1, currentCard + 1] }) // 判断8在中部 查询 7 '8' 9  中牌不能等于 10 11
     }
   }
 
   if (countedCards[currentCard + 1]) {
     if (countedCards[currentCard + 2] && currentCard !== 9 && currentCard !== 10) {
-      canChiCards.push([currentCard + 1, currentCard + 2]) // 判断8在首部 查询 '8' 9 10 首牌不能等于 9 10
+      canChiDatas.push({ name: 'chi', cards: [currentCard + 1, currentCard + 2] }) // 判断8在首部 查询 '8' 9 10 首牌不能等于 9 10
     }
   }
 
@@ -521,41 +514,124 @@ CardUtil.canChi = function (cards, currentCard) {
   if (currentCard < 11) {
     // 8
     if (countedCards[currentCard] && countedCards[currentCard + 10]) {
-      canChiCards.push([currentCard, currentCard + 10]) // 判断 8 8 18
+      canChiDatas.push({ name: 'chi', cards: [currentCard, currentCard + 10] }) // 判断 8 8 18
     }
     if (countedCards[currentCard + 10] >= 2) {
-      canChiCards.push([currentCard + 10, currentCard + 10]) // 判断 8 18 18
+      canChiDatas.push({ name: 'chi', cards: [currentCard + 10, currentCard + 10] }) // 判断 8 18 18
     }
 
     // 2 7 10
     diff = _.difference([2, 7, 10], [currentCard])
     if (diff.length !== 3 && countedCards[diff[0]] && countedCards[diff[1]]) {
-      canChiCards.push(diff)
+      canChiDatas.push({ name: 'chi', cards: diff })
     }
   } else {
     // 18
     if (countedCards[currentCard] && countedCards[currentCard - 10]) {
-      canChiCards.push([currentCard, currentCard - 10]) // 判断 18 18 8
+      canChiDatas.push({ name: 'chi', cards: [currentCard, currentCard - 10] }) // 判断 18 18 8
     }
     if (countedCards[currentCard - 10] >= 2) {
-      canChiCards.push([currentCard - 10, currentCard - 10]) // 判断 18 8 8
+      canChiDatas.push({ name: 'chi', cards: [currentCard - 10, currentCard - 10] }) // 判断 18 8 8
     }
 
     // 12 17 20
     diff = _.difference([12, 17, 20], [currentCard])
     if (diff.length !== 3 && countedCards[diff[0]] && countedCards[diff[1]]) {
-      canChiCards.push(diff)
+      canChiDatas.push({ name: 'chi', cards: diff })
     }
   }
 
-  if (canChiCards.length > 0) {
-    return canChiCards
+  canChiDatas.forEach(chiData => {
+    chiData.bi = CardUtil.canBi(_.clone(cards), chiData.cards, currentCard)
+  })
+
+  console.log('吃的结果', JSON.stringify(canChiDatas))
+
+  if (canChiDatas.length > 0) {
+    return canChiDatas
   } else {
     return null
   }
 }
 
+CardUtil.canBi = function (cards, needDeleteCards, currentCard) {
+  // 删除要删除的卡牌
+  needDeleteCards.forEach(card => {
+    CardUtil.deleteCard(cards, card)
+  })
+
+  var countedCards = _.countBy(cards, function (c) { return c; });
+  _.each(countedCards, function (value, key) {
+    if (value === 3) {
+      delete countedCards[key];
+    }
+  })
+
+  // 如果没有2 返回null
+  if (!countedCards[currentCard]) {
+    return null
+  }
+
+  var biDatas = []
+
+  // 比方 currentCard = 8
+  if (countedCards[currentCard - 1]) {
+    if (countedCards[currentCard - 2] && currentCard !== 11 && currentCard !== 12) {
+      biDatas.push({name: 'bi', cards: [currentCard, currentCard - 1, currentCard - 2]}) // 判断8在尾部 查询 6 7 '8'  尾牌不能等于 11 12
+    }
+    if (countedCards[currentCard + 1] && currentCard !== 10 && currentCard !== 11) {
+      biDatas.push({name: 'bi', cards: [currentCard - 1, currentCard, currentCard + 1]}) // 判断8在中部 查询 7 '8' 9  中牌不能等于 10 11
+    }
+  }
+
+  if (countedCards[currentCard + 1]) {
+    if (countedCards[currentCard + 2] && currentCard !== 9 && currentCard !== 10) {
+      biDatas.push({name: 'bi', cards: [currentCard, currentCard + 1, currentCard + 2]}) // 判断8在首部 查询 '8' 9 10 首牌不能等于 9 10
+    }
+  }
+
+  var diff
+  if (currentCard < 11) {
+    // 8
+    if (countedCards[currentCard] >= 2 && countedCards[currentCard + 10]) {
+      biDatas.push({name: 'bi', cards: [currentCard, currentCard, currentCard + 10]}) // 判断 8 8 18
+    }
+    if (countedCards[currentCard + 10] >= 2) {
+      biDatas.push({name: 'bi', cards: [currentCard, currentCard + 10, currentCard + 10]}) // 判断 8 18 18
+    }
+
+    // 2 7 10
+    diff = _.difference([2, 7, 10], [currentCard])
+    if (diff.length !== 3 && countedCards[diff[0]] && countedCards[diff[1]]) {
+      diff.push(currentCard)
+      biDatas.push({name: 'bi', cards: diff})
+    }
+  } else {
+    // 18
+    if (countedCards[currentCard] >= 2 && countedCards[currentCard - 10]) {
+      biDatas.push({name: 'bi', cards: [currentCard, currentCard, currentCard - 10]}) // 判断 18 18 8
+    }
+    if (countedCards[currentCard - 10] >= 2) {
+      biDatas.push({name: 'bi', cards: [currentCard, currentCard - 10, currentCard - 10]}) // 判断 18 8 8
+    }
+
+    // 12 17 20
+    diff = _.difference([12, 17, 20], [currentCard])
+    if (diff.length !== 3 && countedCards[diff[0]] && countedCards[diff[1]]) {
+      diff.push(currentCard)
+      biDatas.push({name: 'bi', cards: diff})
+    }
+  }
+  
+  biDatas.forEach(biData => {
+    biData.bi = CardUtil.canBi(_.clone(cards), biData.cards, currentCard)
+  })
+
+  return biDatas
+}
+
 CardUtil.hasCard = function (cards, card) {
+  console.log('看牌是否已经存在', cards, card)
   var countedCards = _.countBy(cards, function (c) { return c; });
   if (countedCards[card]) {
     return true
@@ -585,44 +661,44 @@ CardUtil.Actions = {
 // 生成牌
 //---------------------------------------------------------------------------------------------------------------
 CardUtil.generatePoker = function () {
-	var cardValue = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-	var allCards = []
-	let card
-	for (var j = 0; j < cardValue.length; j++) {
-		card = cardValue[j]
-		allCards.push(card)
-		allCards.push(card)
-		allCards.push(card)
-		allCards.push(card)
-	}
-	return allCards
+  var cardValue = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+  var allCards = []
+  let card
+  for (var j = 0; j < cardValue.length; j++) {
+    card = cardValue[j]
+    allCards.push(card)
+    allCards.push(card)
+    allCards.push(card)
+    allCards.push(card)
+  }
+  return allCards
 }
 
 //---------------------------------------------------------------------------------------------------------------
 // 洗牌
 //---------------------------------------------------------------------------------------------------------------
 CardUtil.shufflePoker = function (arr) {
-	if (!arr) {
-		throw '错误，请传入正确数组';
-	}
-	var newArr = arr.slice(0);
-	for (var i = newArr.length - 1; i >= 0; i--) {
-		var randomIndex = Math.floor(Math.random() * (i + 1))
-		var itemAtIndex = newArr[randomIndex]
-		newArr[randomIndex] = newArr[i]
-		newArr[i] = itemAtIndex
-	}
+  if (!arr) {
+    throw '错误，请传入正确数组';
+  }
+  var newArr = arr.slice(0);
+  for (var i = newArr.length - 1; i >= 0; i--) {
+    var randomIndex = Math.floor(Math.random() * (i + 1))
+    var itemAtIndex = newArr[randomIndex]
+    newArr[randomIndex] = newArr[i]
+    newArr[i] = itemAtIndex
+  }
 
-	return newArr
+  return newArr
 }
 
 
 CardUtil.deleteCard = function (cards, card) {
   for (var i = 0; i < cards.length; i++) {
-      if (cards[i] == card) {
-          cards.splice(i, 1)
-          break
-      }
+    if (cards[i] == card) {
+      cards.splice(i, 1)
+      break
+    }
   }
 }
 
