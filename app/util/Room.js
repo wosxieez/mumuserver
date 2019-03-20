@@ -529,11 +529,17 @@ Room.prototype.checkPlayerUserCanChiWithPlayerCard = function () {
                 data: { username: this.player.username, data: canChiData }
             }).thenOk((data) => {
                 console.log(this.player.username, '选择了吃牌')
-                data.forEach(card => {
-                    CardUtil.deleteCard(this.player.handCards, card)
+                data.forEach(group => {
+                    group.cards.forEach(card => {
+                        CardUtil.deleteCard(this.player.handCards, card) 
+                    })
+
+                    if (group.name === 'chi') {
+                        group.cards.push(this.player_card)
+                    }
+
+                    this.player.groupCards.push(group)
                 })
-                data.push(this.player_card)
-                this.player.groupCards.push({ name: 'chi', cards: data })
                 this.noticeAllUserOnChi()
                 this.timeout = setTimeout(() => { this.playerPlayCard(this.player) }, 2000)
             }).thenCancel(() => {
@@ -590,11 +596,17 @@ Room.prototype.checkNextUserCanChiWithPlayerCard = function () {
                     data: { username: nextUser.username, data: canChiData }
                 }).thenOk((data) => {
                     console.log(nextUser.username, '选择了吃牌操作')
-                    data.forEach(card => {
-                        CardUtil.deleteCard(nextUser.handCards, card)
+                    data.forEach(group => {
+                        group.cards.forEach(card => {
+                            CardUtil.deleteCard(nextUser.handCards, card) 
+                        })
+
+                        if (group.name === 'chi') {
+                            group.cards.push(this.player_card)
+                        }
+
+                        nextUser.groupCards.push(group)
                     })
-                    data.push(this.player_card)
-                    nextUser.groupCards.push({ name: 'chi', cards: data })
                     this.noticeAllUserOnChi()
                     this.timeout = setTimeout(() => { this.playerPlayCard(nextUser) }, 2000)
                 }).thenCancel(() => {
@@ -1027,11 +1039,17 @@ Room.prototype.checkNextUserCanChiWithPlayerCard2 = function () {
                     data: { username: nextUser.username, data: canChiData }
                 }).thenOk((data) => {
                     console.log(nextUser.username, '选择了吃牌')
-                    data.forEach(card => {
-                        CardUtil.deleteCard(nextUser.handCards, card)
+                    data.forEach(group => {
+                        group.cards.forEach(card => {
+                            CardUtil.deleteCard(nextUser.handCards, card) 
+                        })
+
+                        if (group.name === 'chi') {
+                            group.cards.push(this.player_card)
+                        }
+
+                        nextUser.groupCards.push(group)
                     })
-                    data.push(this.player_card)
-                    nextUser.groupCards.push({ name: 'chi', cards: data })
                     this.noticeAllUserOnChi()
                     this.timeout = setTimeout(() => { this.playerPlayCard(nextUser) }, 2000)
                 }).thenCancel(() => {

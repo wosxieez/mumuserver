@@ -541,14 +541,23 @@ CardUtil.canChi = function (cards, currentCard) {
     }
   }
 
+  var validChiDatas = [] // 有效的吃数据
   canChiDatas.forEach(chiData => {
-    chiData.bi = CardUtil.canBi(_.clone(cards), chiData.cards, currentCard)
+    var subBi = CardUtil.canBi(_.clone(cards), chiData.cards, currentCard)
+    if (subBi) {
+      if (subBi.length > 0) {
+        chiData.bi = subBi
+        validChiDatas.push(chiData) // 有效吃
+      }
+    } else {
+      validChiDatas.push(chiData) // 有效吃
+    }
   })
 
-  console.log('吃的结果', JSON.stringify(canChiDatas))
+  console.log('吃的结果', JSON.stringify(validChiDatas))
 
-  if (canChiDatas.length > 0) {
-    return canChiDatas
+  if (validChiDatas.length > 0) {
+    return validChiDatas
   } else {
     return null
   }
@@ -569,7 +578,7 @@ CardUtil.canBi = function (cards, needDeleteCards, currentCard) {
 
   // 如果没有2 返回null
   if (!countedCards[currentCard]) {
-    return null
+    return null 
   }
 
   var biDatas = []
@@ -622,12 +631,21 @@ CardUtil.canBi = function (cards, needDeleteCards, currentCard) {
       biDatas.push({name: 'bi', cards: diff})
     }
   }
-  
+
+  var validBiDatas = []
   biDatas.forEach(biData => {
-    biData.bi = CardUtil.canBi(_.clone(cards), biData.cards, currentCard)
+    var subBi = CardUtil.canBi(_.clone(cards), biData.cards, currentCard)
+    if (subBi) {
+      if (subBi.length > 0) {
+        biData.bi = subBi
+        validBiDatas.push(biData) // 返回的长度大于0 为有效比
+      }
+    } else {
+      validBiDatas.push(biData) // 返回false 为有效比 没有子比了
+    }
   })
 
-  return biDatas
+  return validBiDatas
 }
 
 CardUtil.hasCard = function (cards, card) {
