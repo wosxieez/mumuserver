@@ -151,27 +151,21 @@ CardUtil.riffle = function (cards) {
   }
 
   return riffledCards;
-};
+}
 
-/**
- * 返回胡息数, 最小单位是四张，三张，一句话(二七十，一二三; 壹贰叁、贰柒拾)
- * @param cards 
- * @param type: CardUtil.Actions 中的一种，包括: 提，跑，偎，碰，吃
- * @return huxi
- */
-// 1. 四张大牌--提 12 胡息
-// 2. 四张小牌--提 9 胡
-// 3. 四张大牌--跑 9 胡息
-// 4. 四张小牌--跑 6 胡
+CardUtil.getHuXi = function (cardsOnGroup, huAcation) {
+  console.log('获取胡息', cardsOnGroup)
+  var huxi = 0
+  cardsOnGroup.forEach(group => {
+    huxi += CardUtil.getGroupHuXi(group)
+  })
+  console.log('胡息为', huxi)
+  return huxi
+}
 
-// 5. 三张大牌--偎 6 胡
-// 6. 三张小牌--偎 3 胡
-// 7. 三张大牌-碰 3 胡
-// 8. 三张小牌-碰 1 胡
-
-// 9. 壹贰叁、贰柒拾--吃 6 胡
-// 10. 一二三、二七十--吃 3 胡
-CardUtil.getHuXi = function (cards, type) {
+CardUtil.getGroupHuXi = function (group) {
+  var cards = group.cards
+  var type = group.name
   var huxi = 0;
   if ((_.union(cards, [])).length === 1) {
     // 1. 四张大牌--提 12 胡息
@@ -335,36 +329,15 @@ CardUtil.tiPaoCount = function (cardsOnGroup) {
   return count
 }
 
-CardUtil.canHu = function (cardsOnHand, cardsOnTable, currentCard) {
-  var huxi = 0;
+CardUtil.canHu = function (cardsOnHand, cardsOnGroup, currentCard) {
   var copyedCards = _.clone(cardsOnHand);
   if (currentCard !== 0) {
     copyedCards.push(currentCard);
   }
+  // 看手里牌跟 打的牌或者翻的牌 能够组成顺子
   var onHand = CardUtil.shouShun(copyedCards);
   if (onHand && onHand.length) {
-    const fullGroupCards = cardsOnTable.concat(onHand)
-    _.each(fullGroupCards, function (group) {
-      if (group.name === CardUtil.Actions.Peng) {
-        huxi += CardUtil.getHuXi(group.cards, CardUtil.Actions.Peng)
-      } else if (group.name === CardUtil.Actions.Wei) {
-        huxi += CardUtil.getHuXi(group.cards, CardUtil.Actions.Wei)
-      } else if (group.name === CardUtil.Actions.Ti) {
-        huxi += CardUtil.getHuXi(group.cards, CardUtil.Actions.Ti)
-      } else if (group.name === CardUtil.Actions.Pao) {
-        huxi += CardUtil.getHuXi(group.cards, CardUtil.Actions.Pao)
-      } else if (group.name === CardUtil.Actions.Chi) {
-        huxi += CardUtil.getHuXi(group.cards, CardUtil.Actions.Chi)
-      }
-    })
-
-    const canHu = (huxi >= 15);
-    console.log('能否胡', canHu, huxi)
-    if (canHu) {
-      return [huxi, fullGroupCards]
-    } else {
-      return false
-    }
+    return cardsOnGroup.concat(onHand)
   } else {
     return false
   }
@@ -578,7 +551,7 @@ CardUtil.canBi = function (cards, needDeleteCards, currentCard) {
 
   // 如果没有2 返回null
   if (!countedCards[currentCard]) {
-    return null 
+    return null
   }
 
   var biDatas = []
@@ -586,16 +559,16 @@ CardUtil.canBi = function (cards, needDeleteCards, currentCard) {
   // 比方 currentCard = 8
   if (countedCards[currentCard - 1]) {
     if (countedCards[currentCard - 2] && currentCard !== 11 && currentCard !== 12) {
-      biDatas.push({name: 'bi', cards: [currentCard, currentCard - 1, currentCard - 2]}) // 判断8在尾部 查询 6 7 '8'  尾牌不能等于 11 12
+      biDatas.push({ name: 'bi', cards: [currentCard, currentCard - 1, currentCard - 2] }) // 判断8在尾部 查询 6 7 '8'  尾牌不能等于 11 12
     }
     if (countedCards[currentCard + 1] && currentCard !== 10 && currentCard !== 11) {
-      biDatas.push({name: 'bi', cards: [currentCard - 1, currentCard, currentCard + 1]}) // 判断8在中部 查询 7 '8' 9  中牌不能等于 10 11
+      biDatas.push({ name: 'bi', cards: [currentCard - 1, currentCard, currentCard + 1] }) // 判断8在中部 查询 7 '8' 9  中牌不能等于 10 11
     }
   }
 
   if (countedCards[currentCard + 1]) {
     if (countedCards[currentCard + 2] && currentCard !== 9 && currentCard !== 10) {
-      biDatas.push({name: 'bi', cards: [currentCard, currentCard + 1, currentCard + 2]}) // 判断8在首部 查询 '8' 9 10 首牌不能等于 9 10
+      biDatas.push({ name: 'bi', cards: [currentCard, currentCard + 1, currentCard + 2] }) // 判断8在首部 查询 '8' 9 10 首牌不能等于 9 10
     }
   }
 
@@ -603,32 +576,32 @@ CardUtil.canBi = function (cards, needDeleteCards, currentCard) {
   if (currentCard < 11) {
     // 8
     if (countedCards[currentCard] >= 2 && countedCards[currentCard + 10]) {
-      biDatas.push({name: 'bi', cards: [currentCard, currentCard, currentCard + 10]}) // 判断 8 8 18
+      biDatas.push({ name: 'bi', cards: [currentCard, currentCard, currentCard + 10] }) // 判断 8 8 18
     }
     if (countedCards[currentCard + 10] >= 2) {
-      biDatas.push({name: 'bi', cards: [currentCard, currentCard + 10, currentCard + 10]}) // 判断 8 18 18
+      biDatas.push({ name: 'bi', cards: [currentCard, currentCard + 10, currentCard + 10] }) // 判断 8 18 18
     }
 
     // 2 7 10
     diff = _.difference([2, 7, 10], [currentCard])
     if (diff.length !== 3 && countedCards[diff[0]] && countedCards[diff[1]]) {
       diff.push(currentCard)
-      biDatas.push({name: 'bi', cards: diff})
+      biDatas.push({ name: 'bi', cards: diff })
     }
   } else {
     // 18
     if (countedCards[currentCard] >= 2 && countedCards[currentCard - 10]) {
-      biDatas.push({name: 'bi', cards: [currentCard, currentCard, currentCard - 10]}) // 判断 18 18 8
+      biDatas.push({ name: 'bi', cards: [currentCard, currentCard, currentCard - 10] }) // 判断 18 18 8
     }
     if (countedCards[currentCard - 10] >= 2) {
-      biDatas.push({name: 'bi', cards: [currentCard, currentCard - 10, currentCard - 10]}) // 判断 18 8 8
+      biDatas.push({ name: 'bi', cards: [currentCard, currentCard - 10, currentCard - 10] }) // 判断 18 8 8
     }
 
     // 12 17 20
     diff = _.difference([12, 17, 20], [currentCard])
     if (diff.length !== 3 && countedCards[diff[0]] && countedCards[diff[1]]) {
       diff.push(currentCard)
-      biDatas.push({name: 'bi', cards: diff})
+      biDatas.push({ name: 'bi', cards: diff })
     }
   }
 
@@ -659,21 +632,24 @@ CardUtil.hasCard = function (cards, card) {
 }
 
 CardUtil.has3Ti5Kan = function (cards) {
-  return false
+  console.log('看牌是否存在3提5坎', cards)
+  var countedCards = _.countBy(cards, function (c) { return c; })
+  var tiCount = 0
+  var kanCount = 0
+  _.each(countedCards, function (value, key) {
+    if (value === 3) {
+      kanCount++
+    } else if (value === 4) {
+      tiCount++
+    }
+  })
+  console.log('提数', tiCount, '坎数', kanCount)
+  if (tiCount >= 3 || kanCount >= 5) {
+    return true
+  } else {
+    return false
+  }
 }
-
-CardUtil.Actions = {
-  NewCard: 'newCard',         // 出牌
-  Ti: "ti",         // 提
-  Pao: "pao",       // 跑
-  Wei: "wei",       // 偎
-  Peng: "peng",     // 碰
-  Hu: "hu",         // 胡牌
-  Chi: "chi",       // 吃牌
-  Cancel: "cancel", // 取消 
-  Idle: "idle"      // 无操作
-}
-
 
 //---------------------------------------------------------------------------------------------------------------
 // 生成牌
