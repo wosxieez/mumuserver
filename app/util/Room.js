@@ -1,13 +1,15 @@
 const CardUtil = require('./CardUtil')
 const Notifications = require('./Notifications')
-const HuTypes = require('./HuTypes')
+const HuXiUtil = require('./HuXiUtil')
 const HuActions = require('./HuActions')
+const Actions = require('./Actions')
 const Feadback = require('./Feadback')
 
 function Room(channel, config) {
     this.channel = channel
     this.count = config.count
     this.users = []
+    this.huxi = 5 // need to config
     this.isZhuangFirstOutCard = false
     this.feadback = new Feadback(channel)
     this.timeout = 0
@@ -148,7 +150,7 @@ Room.prototype.checkAllUserCanHuWith3Ti5Kan = function () {
     for (var i = 0; i < this.users.length; i++) {
         if (CardUtil.has3Ti5Kan(this.users[i].handCards)) {
             // 胡牌 3提 5坎 胡牌  天胡
-            const huXi = CardUtil.getHuXi(this.users[i].groupCards, HuActions.Is3Ti5KanCard)
+            const huXi = HuXiUtil.getHuXi(this.users[i].groupCards, HuActions.Is3Ti5KanCard)
             this.noticeAllUserOnWin({ wn: this.users[i].username, ...huXi})
             return
         }
@@ -184,7 +186,7 @@ Room.prototype.loopAllUserCanHuWithZhuangCard = function () {
                     // 玩家能够胡庄牌 天胡
                     user.groupCards = canHuData
                     user.handCards = []
-                    const huXi = CardUtil.getHuXi(canHuData, HuActions.IsZhuangCard) 
+                    const huXi = HuXiUtil.getHuXi(canHuData, HuActions.IsZhuangCard) 
                     this.noticeAllUserOnWin({wn: user.username, ...huXi})
                 })
                 .thenCancel(() => { this.loopAllUserCanHuWithZhuangCard() })
@@ -226,7 +228,7 @@ Room.prototype.checkZhuangCanTi = function () {
             group.forEach(card => {
                 CardUtil.deleteCard(this.zhuang.handCards, card)
             })
-            this.zhuang.groupCards.push({ name: 'ti', cards: group })
+            this.zhuang.groupCards.push({ name: Actions.Ti, cards: group })
         })
 
         this.noticeAllUserOnTi()
@@ -260,7 +262,7 @@ Room.prototype.checkXianCanTi = function () {
                     group.forEach(card => {
                         CardUtil.deleteCard(user.handCards, card)
                     })
-                    user.groupCards.push({ name: 'ti', cards: group })
+                    user.groupCards.push({ name: Actions.Ti, cards: group })
                 })
             }
         }
@@ -295,7 +297,7 @@ Room.prototype.zhuangPlayCard = function () {
             this.isZhuangFirstOutCard = true
             CardUtil.deleteCard(this.player.handCards, this.player_card)
             this.noticeAllUserOnNewCard()
-            this.timeout = setTimeout(() => { this.checkXianCanTi2() }, 1000)
+            this.timeout = setTimeout(() => { this.checkXianCanTi2() }, 2000)
         })
         .thenCancel(() => {
             const riffleCards = CardUtil.riffle(this.zhuang.handCards)
@@ -305,7 +307,7 @@ Room.prototype.zhuangPlayCard = function () {
             this.isZhuangFirstOutCard = true
             CardUtil.deleteCard(this.player.handCards, this.player_card)
             this.noticeAllUserOnNewCard()
-            this.timeout = setTimeout(() => { this.checkXianCanTi2() }, 1000)
+            this.timeout = setTimeout(() => { this.checkXianCanTi2() }, 2000)
         })
 }
 
@@ -326,7 +328,7 @@ Room.prototype.checkXianCanTi2 = function () {
                     group.forEach(card => {
                         CardUtil.deleteCard(user.handCards, card)
                     })
-                    user.groupCards.push({ name: 'ti', cards: group })
+                    user.groupCards.push({ name: Actions.Ti, cards: group })
                 })
             }
         }
@@ -367,8 +369,8 @@ Room.prototype.loopOtherUserCanHuWithPlayerCard = function () {
     if (user) {
         const canHuData = CardUtil.canHu(user.handCards, user.groupCards, this.player_card)
         if (canHuData) {
-            const huXi = CardUtil.getHuXi(canHuData, HuActions.IsOtherFlopCard)
-            if (huXi.hx >= 15) {
+            const huXi = HuXiUtil.getHuXi(canHuData, HuActions.IsOtherFlopCard, this.cards.length === 0)
+            if (huXi.hx >= this.huxi) {
                 this.feadback.send(user.username,
                     {
                         route: 'onNotification',
@@ -421,7 +423,7 @@ Room.prototype.loopOtherUserCanPaoWithPlayerCard = function () {
                 CardUtil.deleteCard(user.handCards, card)
             })
             canPaoData1.push(this.player_card)
-            user.groupCards.push({ name: 'pao', cards: canPaoData1 })
+            user.groupCards.push({ name: Actions.Pao, cards: canPaoData1 })
 
             // 有玩家跑操作
             this.channel.pushMessage({
@@ -441,7 +443,7 @@ Room.prototype.loopOtherUserCanPaoWithPlayerCard = function () {
             const canPaoData2 = CardUtil.canTi2(user.groupCards, this.player_card)
             if (canPaoData2) {
                 // 组合牌里能跑 跑起操作
-                canPaoData2.name = 'pao'
+                canPaoData2.name = Actions.Pao
                 canPaoData2.cards.push(this.player_card)
 
                 // 有玩家跑操作
@@ -506,7 +508,7 @@ Room.prototype.loopOtherUserCanPengWithPlayerCard = function () {
                         CardUtil.deleteCard(user.handCards, card)
                     })
                     canPengData.push(this.player_card)
-                    user.groupCards.push({ name: 'peng', cards: canPengData })
+                    user.groupCards.push({ name: Actions.Peng, cards: canPengData })
                     this.noticeAllUserOnPeng()
                     this.timeout = setTimeout(() => {
                         this.playerPlayCard(user)
@@ -540,6 +542,9 @@ Room.prototype.checkPlayerUserCanChiWithPlayerCard = function () {
     if (!CardUtil.hasCard(this.player.ucCards, this.player_card)) {
         const canChiData = CardUtil.canChi(this.player.handCards, this.player_card)
         if (canChiData) {
+            canChiData.forEach(canChiItem => {
+                canChiItem.cards.push(this.player_card)
+            })
             // 通知出牌玩家是否要吃
             console.log(this.player.username, '可以吃牌 通知玩家要不要吃牌')
             this.feadback.send(this.player.username, {
@@ -548,15 +553,11 @@ Room.prototype.checkPlayerUserCanChiWithPlayerCard = function () {
                 data: { username: this.player.username, data: canChiData }
             }).thenOk((data) => {
                 console.log(this.player.username, '选择了吃牌')
+                this.player.handCards.push(this.player_card) 
                 data.forEach(group => {
                     group.cards.forEach(card => {
                         CardUtil.deleteCard(this.player.handCards, card)
                     })
-
-                    if (group.name === 'chi') {
-                        group.cards.push(this.player_card)
-                    }
-
                     this.player.groupCards.push(group)
                 })
                 this.noticeAllUserOnChi()
@@ -609,21 +610,20 @@ Room.prototype.checkNextUserCanChiWithPlayerCard = function () {
             if (canChiData) {
                 console.log(nextUser.username, '可以吃牌 通知用户要不要吃')
                 // 通知出牌玩家是否要吃
+                canChiData.forEach(canChiItem => {
+                    canChiItem.cards.push(this.player_card)
+                })
                 this.feadback.send(nextUser.username, {
                     route: 'onNotification',
                     name: Notifications.checkEat,
                     data: { username: nextUser.username, data: canChiData }
                 }).thenOk((data) => {
                     console.log(nextUser.username, '选择了吃牌操作')
+                    nextUser.handCards.push(this.player_card)
                     data.forEach(group => {
                         group.cards.forEach(card => {
                             CardUtil.deleteCard(nextUser.handCards, card)
                         })
-
-                        if (group.name === 'chi') {
-                            group.cards.push(this.player_card)
-                        }
-
                         nextUser.groupCards.push(group)
                     })
                     this.noticeAllUserOnChi()
@@ -710,7 +710,7 @@ Room.prototype.checkPlayerUserCanTiWithPlayerCard = function () {
             CardUtil.deleteCard(this.player.handCards, card)
         })
         canTiData1.push(this.player_card)
-        this.player.groupCards.push({ name: 'ti', cards: canTiData1 })
+        this.player.groupCards.push({ name: Actions.Ti, cards: canTiData1 })
 
         this.noticeAllUserOnTi()
 
@@ -725,7 +725,7 @@ Room.prototype.checkPlayerUserCanTiWithPlayerCard = function () {
     } else {
         const canTiData2 = CardUtil.canTi2(this.player.groupCards, this.player_card)
         if (canTiData2) {
-            canTiData2.name = 'ti'
+            canTiData2.name = Actions.Ti
             canTiData2.cards.push(this.player_card)
 
             this.noticeAllUserOnTi()
@@ -754,7 +754,7 @@ Room.prototype.checkPlayerUserCanWeiWithPlayerCard = function () {
             CardUtil.deleteCard(this.player.handCards, card)
         })
         canWeiData.push(this.player_card)
-        this.player.groupCards.push({ name: 'wei', cards: canWeiData })
+        this.player.groupCards.push({ name: Actions.Wei, cards: canWeiData })
 
         this.noticeAllUserOnWei()
 
@@ -775,8 +775,8 @@ Room.prototype.checkPlayerUserCanHuWithPlayerCard = function () {
     const canHuData = CardUtil.canHu(this.player.handCards, this.player.groupCards, this.player_card)
     if (canHuData) {
         // 通知翻牌玩家是否要胡
-        const huXi = CardUtil.getHuXi(canHuData, HuActions.IsMeFlopCard)
-        if (huXi.hx >= 15) {
+        const huXi = HuXiUtil.getHuXi(canHuData, HuActions.IsMeFlopCard, this.cards.length === 0)
+        if (huXi.hx >= this.huxi) {
             this.feadback.send(this.player.username, {
                 route: 'onNotification',
                 name: Notifications.checkHu,
@@ -808,8 +808,8 @@ Room.prototype.checkPlayerUserCanHuWithPlayerCard2 = function () {
     const canHuData = CardUtil.canHu(this.player.handCards, this.player.groupCards, this.player_card)
     if (canHuData) {
         // 通知翻牌玩家是否要胡
-        const huXi = CardUtil.getHuXi(canHuData, HuActions.IsMeFlopCard)
-        if (huXi.hx >= 15) {
+        const huXi = HuXiUtil.getHuXi(canHuData, HuActions.IsMeFlopCard)
+        if (huXi.hx >= this.huxi) {
             this.feadback.send(this.player.username, {
                 route: 'onNotification',
                 name: Notifications.checkHu,
@@ -901,8 +901,8 @@ Room.prototype.loopOtherUserCanHuWithPlayerCard2 = function () {
                 huAction = HuActions.IsOtherOutCard
             }
             // {hx: 10, hts: []}
-            const huXi = CardUtil.getHuXi(canHuData, huAction)
-            if (huXi.hx >= 15) {
+            const huXi = HuXiUtil.getHuXi(canHuData, huAction)
+            if (huXi.hx >= this.huxi) {
                 this.feadback.send(user.username,
                     {
                         route: 'onNotification',
@@ -955,7 +955,7 @@ Room.prototype.loopOtherUserCanPaoWithPlayerCard2 = function () {
                 CardUtil.deleteCard(user.handCards, card)
             })
             canPaoData1.push(this.player_card)
-            user.groupCards.push({ name: 'pao', cards: canPaoData1 })
+            user.groupCards.push({ name: Actions.Pao, cards: canPaoData1 })
 
             this.noticeAllUserOnPao()
 
@@ -970,7 +970,7 @@ Room.prototype.loopOtherUserCanPaoWithPlayerCard2 = function () {
             const canPaoData2 = CardUtil.canTi2(user.groupCards, this.player_card)
             if (canPaoData2) {
                 // 组合牌里能跑 跑起操作
-                canPaoData2.name = 'pao'
+                canPaoData2.name = Actions.Pao
                 canPaoData2.cards.push(this.player_card)
 
                 this.noticeAllUserOnPao()
@@ -1030,7 +1030,7 @@ Room.prototype.loopOtherUserCanPengWithPlayerCard2 = function () {
                         CardUtil.deleteCard(user.handCards, card)
                     })
                     canPengData.push(this.player_card)
-                    user.groupCards.push({ name: 'peng', cards: canPengData })
+                    user.groupCards.push({ name: Actions.Peng, cards: canPengData })
                     this.noticeAllUserOnPeng()
                     this.timeout = setTimeout(() => {
                         this.playerPlayCard(user)
@@ -1084,6 +1084,9 @@ Room.prototype.checkNextUserCanChiWithPlayerCard2 = function () {
             const canChiData = CardUtil.canChi(nextUser.handCards, this.player_card)
             if (canChiData) {
                 console.log(nextUser.username, '可以吃这张牌，通知玩家要不要吃')
+                canChiData.forEach(canChiItem => {
+                    canChiItem.cards.push(this.player_card)
+                })
                 // 通知出牌玩家是否要吃
                 this.feadback.send(nextUser.username, {
                     route: 'onNotification',
@@ -1091,15 +1094,11 @@ Room.prototype.checkNextUserCanChiWithPlayerCard2 = function () {
                     data: { username: nextUser.username, data: canChiData }
                 }).thenOk((data) => {
                     console.log(nextUser.username, '选择了吃牌')
+                    nextUser.handCards.push(this.player_card)
                     data.forEach(group => {
                         group.cards.forEach(card => {
                             CardUtil.deleteCard(nextUser.handCards, card)
                         })
-
-                        if (group.name === 'chi') {
-                            group.cards.push(this.player_card)
-                        }
-
                         nextUser.groupCards.push(group)
                     })
                     this.noticeAllUserOnChi()

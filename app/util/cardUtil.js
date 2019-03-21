@@ -1,4 +1,5 @@
 const _ = require('underscore')
+const Actions = require('./Actions')
 
 var CardUtil = {};
 
@@ -91,8 +92,6 @@ CardUtil.riffle = function (cards) {
     countedCards[3]--;
   }
 
-
-
   // 6. 对子
   _.each(countedCards, function (value, key) {
     if (value == 2) {
@@ -100,8 +99,6 @@ CardUtil.riffle = function (cards) {
       delete countedCards[key];
     }
   });
-
-
 
   // 7. 一句话
   _.each(countedCards, function (value, key) {
@@ -152,87 +149,6 @@ CardUtil.riffle = function (cards) {
 
   return riffledCards;
 }
-
-CardUtil.getHuXi = function (cardsOnGroup, huAcation) {
-  console.log('获取胡息', cardsOnGroup)
-  var huxi = 0
-  cardsOnGroup.forEach(group => {
-    huxi += CardUtil.getGroupHuXi(group)
-  })
-  console.log('胡息为', huxi)
-  return huxi
-}
-
-CardUtil.getGroupHuXi = function (group) {
-  var cards = group.cards
-  var type = group.name
-  var huxi = 0;
-  if ((_.union(cards, [])).length === 1) {
-    // 1. 四张大牌--提 12 胡息
-    // 2. 四张小牌--提 9 胡
-    // 3. 四张大牌--跑 9 胡息
-    // 4. 四张小牌--跑 6 胡
-    if (cards.length === 4) {
-      switch (type) {
-        case CardUtil.Actions.Ti:
-          if (cards[0] > 10 && cards[0] < 21) {
-            huxi = 12;
-          } else if (cards[0] > 0) {
-            huxi = 9;
-          }
-          break;
-        case CardUtil.Actions.Pao:
-          if (cards[0] > 10 && cards[0] < 21) {
-            huxi = 9;
-          } else if (cards[0] > 0) {
-            huxi = 6;
-          }
-          break;
-        default:
-          break;
-      }
-    }
-
-    // 5. 三张大牌--偎 6 胡
-    // 6. 三张小牌--偎 3 胡
-    // 7. 三张大牌-碰 3 胡
-    // 8. 三张小牌-碰 1 胡
-    if (cards.length === 3) {
-      switch (type) {
-        case CardUtil.Actions.Wei:
-          if (cards[0] > 10 && cards[0] < 21) {
-            huxi = 6;
-          } else if (cards[0] > 0) {
-            huxi = 3;
-          }
-          break;
-        case CardUtil.Actions.Peng:
-          if (cards[0] > 10 && cards[0] < 21) {
-            huxi = 3;
-          } else if (cards[0] > 0) {
-            huxi = 1;
-          }
-          break;
-        default:
-          break;
-      }
-    }
-  }
-
-
-  if (cards.length === 3 && type === CardUtil.Actions.Chi) {
-    // 9. 壹贰叁、贰柒拾 6 胡
-    if (_.difference(cards, [11, 12, 13]).length === 0 || _.difference(cards, [12, 17, 20]).length === 0) {
-      huxi = 6;
-    }
-
-    // 10. 一二三、二七十 3 胡
-    if ((_.difference(cards, [1, 2, 3]).length === 0) || (_.difference(cards, [2, 7, 10]).length === 0)) {
-      huxi = 3;
-    }
-  }
-  return huxi;
-};
 
 CardUtil.hasTi = function (cardsOnHand) {
   var countedCards = _.countBy(cardsOnHand, function (c) { return c; })
@@ -321,7 +237,7 @@ CardUtil.tiPaoCount = function (cardsOnGroup) {
   var group, count = 0
   for (var i = 0; i < cardsOnGroup.length; i++) {
     group = cardsOnGroup[i]
-    if (group.name === 'ti' || group.name === 'pao') {
+    if (group.name === Actions.Ti || group.name === Actions.Pao) {
       count++
     }
   }
@@ -330,12 +246,14 @@ CardUtil.tiPaoCount = function (cardsOnGroup) {
 }
 
 CardUtil.canHu = function (cardsOnHand, cardsOnGroup, currentCard) {
+  console.log('检查能否胡')
   var copyedCards = _.clone(cardsOnHand);
   if (currentCard !== 0) {
     copyedCards.push(currentCard);
   }
   // 看手里牌跟 打的牌或者翻的牌 能够组成顺子
   var onHand = CardUtil.shouShun(copyedCards);
+  console.log('检查能否胡', onHand)
   if (onHand && onHand.length) {
     return cardsOnGroup.concat(onHand)
   } else {
@@ -356,14 +274,14 @@ CardUtil.shouShun = function (cards) {
     const card = parseInt(key)
     // 三张的剔出来
     if (value === 3) {
-      results.push({ name: 'peng', cards: [card, card, card] });
+      results.push({ name: Actions.Kan, cards: [card, card, card] });
       delete countedCards[key];
     }
   })
 
   var findShunzi = function (singleCard) {
     // 贰柒拾
-    var diff = _.difference([12, 17, 20], singleCard);
+    var diff = _.difference([12, 17, 20], [singleCard]);
     if (diff.length !== 3 && countedCards[diff[0]] && countedCards[diff[1]]) {
       countedCards[singleCard]--;
       countedCards[diff[1]]--;
@@ -372,7 +290,7 @@ CardUtil.shouShun = function (cards) {
     }
 
     // 二七十
-    diff = _.difference([2, 7, 10], singleCard);
+    diff = _.difference([2, 7, 10], [singleCard]);
     if (diff.length !== 3 && countedCards[diff[0]] && countedCards[diff[1]]) {
       countedCards[singleCard]--;
       countedCards[diff[1]]--;
@@ -421,7 +339,7 @@ CardUtil.shouShun = function (cards) {
       const card = parseInt(key)
       const shunzi = findShunzi(card)
       if (!!shunzi) {
-        results.push({ name: 'chi', cards: shunzi })
+        results.push({ name: Actions.Chi, cards: shunzi })
       }
     }
   })
@@ -438,7 +356,7 @@ CardUtil.shouShun = function (cards) {
     return false
   } else if (keys.length == 1) {
     if (countedCards[keys[0]] === 2) {
-      results.push({ name: 'dui', cards: [parseInt(keys[0]), parseInt(keys[0])] })
+      results.push({ name: Actions.Jiang, cards: [parseInt(keys[0]), parseInt(keys[0])] })
     } else {
       return false
     }
@@ -470,16 +388,16 @@ CardUtil.canChi = function (cards, currentCard) {
   // 比方 currentCard = 8
   if (countedCards[currentCard - 1]) {
     if (countedCards[currentCard - 2] && currentCard !== 11 && currentCard !== 12) {
-      canChiDatas.push({ name: 'chi', cards: [currentCard - 1, currentCard - 2] }) // 判断8在尾部 查询 6 7 '8'  尾牌不能等于 11 12
+      canChiDatas.push({ name: Actions.Chi, cards: [currentCard - 1, currentCard - 2] }) // 判断8在尾部 查询 6 7 '8'  尾牌不能等于 11 12
     }
     if (countedCards[currentCard + 1] && currentCard !== 10 && currentCard !== 11) {
-      canChiDatas.push({ name: 'chi', cards: [currentCard - 1, currentCard + 1] }) // 判断8在中部 查询 7 '8' 9  中牌不能等于 10 11
+      canChiDatas.push({ name: Actions.Chi, cards: [currentCard - 1, currentCard + 1] }) // 判断8在中部 查询 7 '8' 9  中牌不能等于 10 11
     }
   }
 
   if (countedCards[currentCard + 1]) {
     if (countedCards[currentCard + 2] && currentCard !== 9 && currentCard !== 10) {
-      canChiDatas.push({ name: 'chi', cards: [currentCard + 1, currentCard + 2] }) // 判断8在首部 查询 '8' 9 10 首牌不能等于 9 10
+      canChiDatas.push({ name: Actions.Chi, cards: [currentCard + 1, currentCard + 2] }) // 判断8在首部 查询 '8' 9 10 首牌不能等于 9 10
     }
   }
 
@@ -487,30 +405,30 @@ CardUtil.canChi = function (cards, currentCard) {
   if (currentCard < 11) {
     // 8
     if (countedCards[currentCard] && countedCards[currentCard + 10]) {
-      canChiDatas.push({ name: 'chi', cards: [currentCard, currentCard + 10] }) // 判断 8 8 18
+      canChiDatas.push({ name: Actions.Chi, cards: [currentCard, currentCard + 10] }) // 判断 8 8 18
     }
     if (countedCards[currentCard + 10] >= 2) {
-      canChiDatas.push({ name: 'chi', cards: [currentCard + 10, currentCard + 10] }) // 判断 8 18 18
+      canChiDatas.push({ name: Actions.Chi, cards: [currentCard + 10, currentCard + 10] }) // 判断 8 18 18
     }
 
     // 2 7 10
     diff = _.difference([2, 7, 10], [currentCard])
     if (diff.length !== 3 && countedCards[diff[0]] && countedCards[diff[1]]) {
-      canChiDatas.push({ name: 'chi', cards: diff })
+      canChiDatas.push({ name: Actions.Chi, cards: diff })
     }
   } else {
     // 18
     if (countedCards[currentCard] && countedCards[currentCard - 10]) {
-      canChiDatas.push({ name: 'chi', cards: [currentCard, currentCard - 10] }) // 判断 18 18 8
+      canChiDatas.push({ name: Actions.Chi, cards: [currentCard, currentCard - 10] }) // 判断 18 18 8
     }
     if (countedCards[currentCard - 10] >= 2) {
-      canChiDatas.push({ name: 'chi', cards: [currentCard - 10, currentCard - 10] }) // 判断 18 8 8
+      canChiDatas.push({ name: Actions.Chi, cards: [currentCard - 10, currentCard - 10] }) // 判断 18 8 8
     }
 
     // 12 17 20
     diff = _.difference([12, 17, 20], [currentCard])
     if (diff.length !== 3 && countedCards[diff[0]] && countedCards[diff[1]]) {
-      canChiDatas.push({ name: 'chi', cards: diff })
+      canChiDatas.push({ name: Actions.Chi, cards: diff })
     }
   }
 
@@ -559,16 +477,16 @@ CardUtil.canBi = function (cards, needDeleteCards, currentCard) {
   // 比方 currentCard = 8
   if (countedCards[currentCard - 1]) {
     if (countedCards[currentCard - 2] && currentCard !== 11 && currentCard !== 12) {
-      biDatas.push({ name: 'bi', cards: [currentCard, currentCard - 1, currentCard - 2] }) // 判断8在尾部 查询 6 7 '8'  尾牌不能等于 11 12
+      biDatas.push({ name: Actions.Chi, cards: [currentCard, currentCard - 1, currentCard - 2] }) // 判断8在尾部 查询 6 7 '8'  尾牌不能等于 11 12
     }
     if (countedCards[currentCard + 1] && currentCard !== 10 && currentCard !== 11) {
-      biDatas.push({ name: 'bi', cards: [currentCard - 1, currentCard, currentCard + 1] }) // 判断8在中部 查询 7 '8' 9  中牌不能等于 10 11
+      biDatas.push({ name: Actions.Chi, cards: [currentCard - 1, currentCard, currentCard + 1] }) // 判断8在中部 查询 7 '8' 9  中牌不能等于 10 11
     }
   }
 
   if (countedCards[currentCard + 1]) {
     if (countedCards[currentCard + 2] && currentCard !== 9 && currentCard !== 10) {
-      biDatas.push({ name: 'bi', cards: [currentCard, currentCard + 1, currentCard + 2] }) // 判断8在首部 查询 '8' 9 10 首牌不能等于 9 10
+      biDatas.push({ name: Actions.Chi, cards: [currentCard, currentCard + 1, currentCard + 2] }) // 判断8在首部 查询 '8' 9 10 首牌不能等于 9 10
     }
   }
 
@@ -576,32 +494,32 @@ CardUtil.canBi = function (cards, needDeleteCards, currentCard) {
   if (currentCard < 11) {
     // 8
     if (countedCards[currentCard] >= 2 && countedCards[currentCard + 10]) {
-      biDatas.push({ name: 'bi', cards: [currentCard, currentCard, currentCard + 10] }) // 判断 8 8 18
+      biDatas.push({ name: Actions.Chi, cards: [currentCard, currentCard, currentCard + 10] }) // 判断 8 8 18
     }
     if (countedCards[currentCard + 10] >= 2) {
-      biDatas.push({ name: 'bi', cards: [currentCard, currentCard + 10, currentCard + 10] }) // 判断 8 18 18
+      biDatas.push({ name: Actions.Chi, cards: [currentCard, currentCard + 10, currentCard + 10] }) // 判断 8 18 18
     }
 
     // 2 7 10
     diff = _.difference([2, 7, 10], [currentCard])
     if (diff.length !== 3 && countedCards[diff[0]] && countedCards[diff[1]]) {
       diff.push(currentCard)
-      biDatas.push({ name: 'bi', cards: diff })
+      biDatas.push({ name: Actions.Chi, cards: diff })
     }
   } else {
     // 18
     if (countedCards[currentCard] >= 2 && countedCards[currentCard - 10]) {
-      biDatas.push({ name: 'bi', cards: [currentCard, currentCard, currentCard - 10] }) // 判断 18 18 8
+      biDatas.push({ name: Actions.Chi, cards: [currentCard, currentCard, currentCard - 10] }) // 判断 18 18 8
     }
     if (countedCards[currentCard - 10] >= 2) {
-      biDatas.push({ name: 'bi', cards: [currentCard, currentCard - 10, currentCard - 10] }) // 判断 18 8 8
+      biDatas.push({ name: Actions.Chi, cards: [currentCard, currentCard - 10, currentCard - 10] }) // 判断 18 8 8
     }
 
     // 12 17 20
     diff = _.difference([12, 17, 20], [currentCard])
     if (diff.length !== 3 && countedCards[diff[0]] && countedCards[diff[1]]) {
       diff.push(currentCard)
-      biDatas.push({ name: 'bi', cards: diff })
+      biDatas.push({ name: Actions.Chi, cards: diff })
     }
   }
 
