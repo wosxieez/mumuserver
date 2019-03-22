@@ -204,7 +204,7 @@ HuXiUtil.checkYiDianHong = function (groupCards, huXi, isLatestCard) {
 
 HuXiUtil.checkKaHu = function (groupCards, huXi, isLatestCard) {
   if (huXi.hx === 30) {
-    huxi.hts.push(HuTypes.KaHu)
+    huXi.hts.push(HuTypes.KaHu)
   } else if (huXi === 20) {
     huXi.hts.push(HuTypes.KaHu)
   }
