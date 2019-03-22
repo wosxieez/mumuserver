@@ -6,7 +6,6 @@ const _ = require('underscore')
 const HuXiUtil = {}
 
 HuXiUtil.getHuXi = function (cardsOnGroup, huAcation, isLatestCard = false) {
-  console.log('获取胡息', cardsOnGroup)
   var huXi = { hx: 0, hts: [] }
   switch (huAcation) {
     case HuActions.Is3Ti5KanCard: // 天胡
@@ -35,7 +34,7 @@ HuXiUtil.getHuXi = function (cardsOnGroup, huAcation, isLatestCard = false) {
     default:
       break;
   }
-  console.log('胡息', JSON.stringify(huXi))
+  console.log('胡息', JSON.stringify(cardsOnGroup), JSON.stringify(huXi))
   return huXi
 }
 
@@ -79,10 +78,12 @@ HuXiUtil.getGroupHuXi = function (group) {
       }
     }
 
-    // 5. 三张大牌--偎 6 胡
-    // 6. 三张小牌--偎 3 胡
-    // 7. 三张大牌-碰 3 胡
-    // 8. 三张小牌-碰 1 胡
+    // 三张大牌-偎 6 胡
+    // 三张小牌-偎 3 胡
+    // 三张大牌-碰 3 胡
+    // 三张小牌-碰 1 胡
+    // 三张大牌-坎 6 胡
+    // 三张小牌-坎 3 胡
     if (cards.length === 3) {
       switch (type) {
         case Actions.Wei:
@@ -97,6 +98,13 @@ HuXiUtil.getGroupHuXi = function (group) {
             huxi = 3;
           } else if (cards[0] > 0) {
             huxi = 1;
+          }
+          break;
+          case Actions.Kan:
+          if (cards[0] > 10 && cards[0] < 21) {
+            huxi = 6;
+          } else if (cards[0] > 0) {
+            huxi = 3;
           }
           break;
         default:

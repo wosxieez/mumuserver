@@ -710,17 +710,13 @@ Room.prototype.checkPlayerUserCanTiWithPlayerCard = function () {
             CardUtil.deleteCard(this.player.handCards, card)
         })
         canTiData1.push(this.player_card)
+        this.player_card = 0 // 翻的牌被提起来了
         this.player.groupCards.push({ name: Actions.Ti, cards: canTiData1 })
 
         this.noticeAllUserOnTi()
 
         this.timeout = setTimeout(() => {
-            // 参见流程 check22
-            if (CardUtil.tiPaoCount(this.player.groupCards) >= 2) {
-                this.nextPlayCard(this.player)
-            } else {
-                this.playerPlayCard(this.player)
-            }
+            this.checkPlayerUserCanHuWithPlayerCard3()
         }, 2000)
     } else {
         const canTiData2 = CardUtil.canTi2(this.player.groupCards, this.player_card)
@@ -754,6 +750,7 @@ Room.prototype.checkPlayerUserCanWeiWithPlayerCard = function () {
             CardUtil.deleteCard(this.player.handCards, card)
         })
         canWeiData.push(this.player_card)
+        this.player_card = 0 // 翻的牌被偎起来了
         this.player.groupCards.push({ name: Actions.Wei, cards: canWeiData })
 
         this.noticeAllUserOnWei()
@@ -805,7 +802,7 @@ Room.prototype.checkPlayerUserCanHuWithPlayerCard = function () {
  */
 Room.prototype.checkPlayerUserCanHuWithPlayerCard2 = function () {
     console.log('check16 翻牌玩家是否可以胡')
-    const canHuData = CardUtil.canHu(this.player.handCards, this.player.groupCards, this.player_card)
+    const canHuData = CardUtil.canHu(this.player.handCards, this.player.groupCards, this.player_card) // 
     if (canHuData) {
         // 通知翻牌玩家是否要胡
         const huXi = HuXiUtil.getHuXi(canHuData, HuActions.IsMeFlopCard)
@@ -832,6 +829,51 @@ Room.prototype.checkPlayerUserCanHuWithPlayerCard2 = function () {
     }
 }
 
+/**
+ * 翻牌玩家是否可以胡
+ * 参见流程图 check24
+ */
+Room.prototype.checkPlayerUserCanHuWithPlayerCard3 = function () {
+    console.log('check24 翻牌玩家是否可以胡')
+    const canHuData = CardUtil.canHu(this.player.handCards, this.player.groupCards, this.player_card) 
+    if (canHuData) {
+        // 通知翻牌玩家是否要胡
+        const huXi = HuXiUtil.getHuXi(canHuData, HuActions.IsMeFlopCard)
+        if (huXi.hx >= this.huxi) {
+            this.feadback.send(this.player.username, {
+                route: 'onNotification',
+                name: Notifications.checkHu,
+                data: { username: this.player.username, data: canHuData }
+            }).thenOk((data) => {
+                // 翻牌玩家胡牌操作
+                this.player.groupCards = canHuData
+                this.player.handCards = []
+                this.noticeAllUserOnWin({wn: this.player.username, ...huXi})
+            }).thenCancel(() => {
+                // 翻牌玩家不想胡 / 超时
+                this.checkTiPaoCount()
+            })
+        } else {
+            // 胡息不够 不能胡牌
+            this.checkTiPaoCount()
+        }
+    } else {
+        this.checkTiPaoCount()
+    }
+}
+
+/**
+ * 判断提跑数
+ * 参见流程图 check22
+ */
+Room.prototype.checkTiPaoCount = function () {
+    if (CardUtil.tiPaoCount(this.player.groupCards) >= 2) {
+        this.nextPlayCard(this.player)
+    } else {
+        this.playerPlayCard(this.player)
+    }
+}
+
 
 /**
  * 本人出牌
@@ -851,6 +893,8 @@ Room.prototype.playerPlayCard = function (user) {
             this.player_card = data
             this.isZhuangFirstOutCard = false
             console.log('出的牌为', this.player_card)
+            this.player.ucCards.push(this.player_card)
+            this.player.upCards.push(this.player_card)
             CardUtil.deleteCard(this.player.handCards, this.player_card)
             this.noticeAllUserOnNewCard()
             this.timeout = setTimeout(() => { this.checkOtherUserCanHuWithPlayerCard2() }, 2000);
@@ -863,6 +907,8 @@ Room.prototype.playerPlayCard = function (user) {
             this.player_card = lastGroup.pop()
             this.isZhuangFirstOutCard = false
             console.log('出的牌为', this.player_card)
+            this.player.ucCards.push(this.player_card)
+            this.player.upCards.push(this.player_card)
             CardUtil.deleteCard(this.player.handCards, this.player_card)
             this.noticeAllUserOnNewCard()
             this.timeout = setTimeout(() => {
