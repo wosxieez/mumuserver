@@ -7,7 +7,7 @@ module.exports = function Feadback(channel) {
 
         channel.pushMessage(message)
 
-        this.timeout = setTimeout(this.doCancel.bind(this, username), 15000)
+        this.timeout = setTimeout(this.doCancel.bind(this, username), 60000)
         return this
     }
     this.thenOk = function (cb) {

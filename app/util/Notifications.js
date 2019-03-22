@@ -20,6 +20,7 @@ const Notifications = {
     checkNewCard: 19, // 检查出牌
     checkHu: 20,       // 检查胡
     onRoundEnd: 21,  // 一轮游戏结束
+    onBi: 22,         // 玩家吃牌
 }
 
 module.exports = Notifications

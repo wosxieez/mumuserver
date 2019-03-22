@@ -246,7 +246,7 @@ CardUtil.tiPaoCount = function (cardsOnGroup) {
 }
 
 CardUtil.canHu = function (cardsOnHand, cardsOnGroup, currentCard) {
-  console.log('检查能否胡')
+  console.log('检查能否胡', cardsOnHand, cardsOnGroup, currentCard)
   var copyedCards = _.clone(cardsOnHand);
   if (currentCard !== 0) {
     copyedCards.push(currentCard);
