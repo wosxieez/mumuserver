@@ -254,7 +254,7 @@ CardUtil.canHu = function (cardsOnHand, cardsOnGroup, currentCard) {
   // 看手里牌跟 打的牌或者翻的牌 能够组成顺子
   var onHand = CardUtil.shouShun(copyedCards);
   console.log('检查能否胡', onHand)
-  if (onHand && onHand.length) {
+  if (onHand) {
     return cardsOnGroup.concat(onHand)
   } else {
     return false
@@ -363,6 +363,28 @@ CardUtil.shouShun = function (cards) {
   }
 
   return results
+}
+
+CardUtil.hasValidaOutCards = function (cards) {
+  // 手上没牌了 就不需要出牌了
+  if (cards.length === 0) {
+    return false
+  }
+
+  // 坎牌不能出
+  var countedCards = _.countBy(cards, function (c) { return c })
+  _.each(countedCards, function (value, key) {
+    if (value === 3) {
+      delete countedCards[key];
+    }
+  })
+
+  var keys = _.keys(countedCards)
+  if (keys.length > 0) {
+    return true
+  } else {
+    return false
+  }
 }
 
 

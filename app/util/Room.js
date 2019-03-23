@@ -731,7 +731,7 @@ Room.prototype.checkPlayerUserCanTiWithPlayerCard = function () {
         if (canTiData2) {
             canTiData2.name = Actions.Ti
             canTiData2.cards.push(this.player_card)
-
+            this.player_card = 0 // 翻的牌被提起来了
             this.noticeAllUserOnTi()
 
             this.timeout = setTimeout(() => {
@@ -886,42 +886,46 @@ Room.prototype.checkTiPaoCount = function () {
  */
 Room.prototype.playerPlayCard = function (user) {
     console.log('check17 本人出牌')
-    this.feadback.send(user.username,
-        {
-            route: 'onNotification',
-            name: Notifications.checkNewCard,
-            data: { username: user.username, data: 'oc' }
-        })
-        .thenOk((data) => {
-            console.log('收到出牌', data)
-            this.player = user
-            this.player_card = data
-            this.isZhuangFirstOutCard = false
-            console.log('出的牌为', this.player_card)
-            this.player.ucCards.push(this.player_card)
-            this.player.upCards.push(this.player_card)
-            CardUtil.deleteCard(this.player.handCards, this.player_card)
-            this.noticeAllUserOnNewCard(true)
-            this.timeout = setTimeout(() => { this.checkOtherUserCanHuWithPlayerCard2() }, 2000);
-        })
-        .thenCancel(() => {
-            console.log('取消或无反应')
-            const riffleCards = CardUtil.riffle(user.handCards)
-            const lastGroup = riffleCards.pop()
-            this.player = user
-            this.player_card = lastGroup.pop()
-            this.isZhuangFirstOutCard = false
-            console.log('出的牌为', this.player_card)
-            this.player.ucCards.push(this.player_card)
-            this.player.upCards.push(this.player_card)
-            CardUtil.deleteCard(this.player.handCards, this.player_card)
-            this.noticeAllUserOnNewCard(true)
-            this.timeout = setTimeout(() => {
-                this.checkOtherUserCanHuWithPlayerCard2()
-            }, 2000);
-        })
+    if (CardUtil.hasValidaOutCards(user.handCards)) {
+        this.feadback.send(user.username,
+            {
+                route: 'onNotification',
+                name: Notifications.checkNewCard,
+                data: { username: user.username, data: 'oc' }
+            })
+            .thenOk((data) => {
+                console.log('收到出牌', data)
+                this.player = user
+                this.player_card = data
+                this.isZhuangFirstOutCard = false
+                console.log('出的牌为', this.player_card)
+                this.player.ucCards.push(this.player_card)
+                this.player.upCards.push(this.player_card)
+                CardUtil.deleteCard(this.player.handCards, this.player_card)
+                this.noticeAllUserOnNewCard(true)
+                this.timeout = setTimeout(() => { this.checkOtherUserCanHuWithPlayerCard2() }, 2000);
+            })
+            .thenCancel(() => {
+                console.log('取消或无反应')
+                const riffleCards = CardUtil.riffle(user.handCards)
+                const lastGroup = riffleCards.pop()
+                this.player = user
+                this.player_card = lastGroup.pop()
+                this.isZhuangFirstOutCard = false
+                console.log('出的牌为', this.player_card)
+                this.player.ucCards.push(this.player_card)
+                this.player.upCards.push(this.player_card)
+                CardUtil.deleteCard(this.player.handCards, this.player_card)
+                this.noticeAllUserOnNewCard(true)
+                this.timeout = setTimeout(() => {
+                    this.checkOtherUserCanHuWithPlayerCard2()
+                }, 2000);
+            })
+    } else {
+        // 玩家无法出牌了 直接下家出牌
+        this.nextPlayCard(user)
+    }
 }
-
 
 /**
  * 参见流程图 check18
