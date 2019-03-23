@@ -130,6 +130,13 @@ Room.prototype.selectZhuang = function () {
 
 Room.prototype.faPai = function () {
     console.log('发牌')
+
+    // 删除多余的牌
+    const more = (3 - this.users.length) * 20
+    for (var m = 0; m < more; m++) {
+        this.cards.pop()
+    }
+
     for (var i = 0; i < 20; i++) {
         for (var j = 0; j < this.users.length; j++) {
             this.users[j].handCards.push(this.cards.pop())
