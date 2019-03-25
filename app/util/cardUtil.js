@@ -208,12 +208,44 @@ CardUtil.canTi = function (cardsOnHand, currentCard) {
  * @returns
  */
 CardUtil.canTi2 = function (cardsOnGroup, currentCard) {
-
   var group
   var can = false
   for (var i = 0; i < cardsOnGroup.length; i++) {
     group = cardsOnGroup[i]
     if (group.cards.length == 3) {
+      can = true
+      for (var j = 0; j < group.cards.length; j++) {
+        if (group.cards[j] != currentCard) {
+          can = false
+          break
+        }
+      }
+    } else {
+      can = false
+    }
+
+    if (can) {
+      return group
+    }
+  }
+
+  return null
+}
+
+/**
+ * 看组合牌中能不能 跑 / 提,  
+ * 但是碰的牌将不能再跑 / 提
+ *
+ * @param {*} cardsOnGroup
+ * @param {*} currentCard
+ * @returns
+ */
+CardUtil.canTi3 = function (cardsOnGroup, currentCard) {
+  var group
+  var can = false
+  for (var i = 0; i < cardsOnGroup.length; i++) {
+    group = cardsOnGroup[i]
+    if (group.cards.length == 3 && group.name !== Actions.Peng) {
       can = true
       for (var j = 0; j < group.cards.length; j++) {
         if (group.cards[j] != currentCard) {
@@ -272,8 +304,11 @@ CardUtil.shouShun = function (cards) {
   // 1. 处理三张，并找出所有单张
   _.each(countedCards, function (value, key) {
     const card = parseInt(key)
-    // 三张的剔出来
-    if (value === 3) {
+    // 四张 三张的剔出来
+    if (value === 4) {
+      results.push({ name: Actions.Pao, cards: [card, card, card, card] });
+      delete countedCards[key];
+    } else if (value === 3) {
       results.push({ name: Actions.Kan, cards: [card, card, card] });
       delete countedCards[key];
     }
