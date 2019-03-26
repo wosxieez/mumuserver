@@ -334,20 +334,20 @@ CardUtil.shouShun = function (cards) {
     }
 
     // 顺子
-    if (countedCards[singleCard + 1] && countedCards[singleCard + 2]) {
+    if (countedCards[singleCard + 1] && countedCards[singleCard + 2] && singleCard !== 9 && singleCard !== 10) {
       countedCards[singleCard]--;
       countedCards[singleCard + 1]--;
       countedCards[singleCard + 2]--;
       return [singleCard, singleCard + 1, singleCard + 2];
     }
-    if (countedCards[singleCard + 1] && countedCards[singleCard - 1]) {
+    if (countedCards[singleCard + 1] && countedCards[singleCard - 1] && singleCard !== 10 && singleCard !== 11) { // 
       countedCards[singleCard]--;
       countedCards[singleCard + 1]--;
       countedCards[singleCard - 1]--;
       return [singleCard - 1, singleCard, singleCard + 1];
     }
 
-    if (countedCards[singleCard - 1] && countedCards[singleCard - 2]) {
+    if (countedCards[singleCard - 1] && countedCards[singleCard - 2] && singleCard !== 11 && singleCard !== 12) {
       countedCards[singleCard]--;
       countedCards[singleCard - 1]--;
       countedCards[singleCard - 2]--;

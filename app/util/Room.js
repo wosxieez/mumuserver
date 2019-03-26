@@ -10,7 +10,7 @@ function Room(channel, config) {
     this.channel = channel
     this.count = config.count
     this.users = []
-    this.huxi = 5 // need to config
+    this.huxi = config.huxi
     this.isZhuangFirstOutCard = false
     this.feadback = new Feadback(channel)
     this.timeout = 0
