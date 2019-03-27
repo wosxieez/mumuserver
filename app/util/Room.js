@@ -792,6 +792,7 @@ Room.prototype.checkPlayerUserCanHuWithPlayerCard = function () {
     if (canHuData) {
         // 通知翻牌玩家是否要胡
         const huXi = HuXiUtil.getHuXi(canHuData, HuActions.IsMeFlopCard, this.cards.length === 0)
+        logger.info('计算胡息', huXi.hx, '胡牌胡息', this.huxi)
         if (huXi.hx >= this.huxi) {
             this.feadback.send(this.player.username, {
                 route: 'onNotification',
