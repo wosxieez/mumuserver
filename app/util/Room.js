@@ -89,7 +89,7 @@ Room.prototype.gameStart = function () {
         data: { users: this.users, zc: this.zhuang_card, zn: this.zhuang.username, cc: this.cards.length }
     })
 
-    this.timeout = setTimeout(this.checkAllUserCanHuWith3Ti5Kan.bind(this), 3000)
+    this.timeout = setTimeout(this.checkAllUserCanHuWith3Ti5Kan.bind(this), 2000)
 }
 
 Room.prototype.initRoom = function () {
@@ -302,6 +302,9 @@ Room.prototype.zhuangPlayCard = function () {
             // 庄家出牌
             this.player_card = data
             this.player = this.zhuang
+            logger.info('庄家出牌', this.player_card)
+            this.player.ucCards.push(this.player_card)
+            this.player.upCards.push(this.player_card)
             this.isZhuangFirstOutCard = true
             CardUtil.deleteCard(this.player.handCards, this.player_card)
             this.noticeAllUserOnNewCard(true)
@@ -312,6 +315,9 @@ Room.prototype.zhuangPlayCard = function () {
             const lastGroup = riffleCards.pop()
             this.player_card = lastGroup.pop()
             this.player = this.zhuang
+            logger.info('庄家出牌', this.player_card)
+            this.player.ucCards.push(this.player_card)
+            this.player.upCards.push(this.player_card)
             this.isZhuangFirstOutCard = true
             CardUtil.deleteCard(this.player.handCards, this.player_card)
             this.noticeAllUserOnNewCard(true)
