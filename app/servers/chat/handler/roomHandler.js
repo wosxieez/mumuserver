@@ -29,14 +29,16 @@ handler.getRoomsUsers = function (msg, session, next) {
 	var data = {}
 	const roomnames = msg.roomnames
 	roomnames.forEach(roomname => {
+		data[roomname] = []
 		var channel = channel = this.app.get('channelService').getChannel(roomname, false)
 		if (!!channel) {
-			data[roomname] = channel.getMembers()
+			channel.getMembers().forEach(username => {
+				data[roomname].push(username)
+			})
 		} else {
-			data[roomname] = []
 		}
 	})
-	next(null, {code: 0, data})
+	next(null, { code: 0, data })
 
 	// console.log('---------------------------------------------------------------------------')
 }

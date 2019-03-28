@@ -81,6 +81,16 @@ handler.joinRoom = function (msg, session, next) {
 	})
 }
 
+handler.resumeRoom = function (msg, session, next) {
+	const sid = this.app.get('serverId')
+	const groupname = session.get('groupname')
+	const roomname = session.get('roomname')
+	const username = session.get('username')
+	this.app.rpc.chat.room2Remote.resumeRoom(session, sid, groupname, roomname, username, function (result) {
+		next(null, result)
+	})
+}
+
 handler.leaveRoom = function (msg, session, next) {
 	const sid = this.app.get('serverId')
 	const groupname = session.get('groupname')
