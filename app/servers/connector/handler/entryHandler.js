@@ -5,6 +5,7 @@ module.exports = function (app) {
 var Handler = function (app) {
 	this.app = app;
 	this.sessionService = this.app.get('sessionService')
+	this.channelService = this.app.get('channelService')
 };
 
 var handler = Handler.prototype;
@@ -111,18 +112,14 @@ handler.leaveRoom = function (msg, session, next) {
 
 
 /**
- *	加入群房间
+ *	创建群房间
  */
-handler.joinGroupRoom = function (msg, session, next) {
+handler.createGroupRoom = function (msg, session, next) {
 	// 设置session
 	const username = msg.username   // 用户名
-	const groupname = 'group' + msg.groupid // 群名
 	const sid = this.app.get('serverId')
-
-	// 判断是否重复登录
-	if (!!this.sessionService.getByUid(username)) {
-		console.log('用户重复登录')
-	}
+	const groupid = (Math.floor(Math.random() * 9000) + 1000)
+	const groupname = 'group' + groupid
 
 	session.bind(username)
 	session.on('closed', onSessionClosed2.bind(null, this.app))
@@ -139,7 +136,41 @@ handler.joinGroupRoom = function (msg, session, next) {
 		}
 	})
 
-	this.app.rpc.chat.groupRoomRemote.joinGroupRoom(session, sid, groupname, username, {count: 1, huxi: 15}, function (result) {
+	this.app.rpc.chat.groupRoomRemote.createGroupRoom(session, sid, groupname, username, { count: 2, huxi: 15 }, function (result) {
+		if (result.code === 0) {
+			next(null, { code: 0, data: groupid })
+		} else {
+			next(null, result)
+		}
+	})
+}
+
+
+/**
+ *	加入群房间
+ */
+handler.joinGroupRoom = function (msg, session, next) {
+	// 设置session
+	const username = msg.username   // 用户名
+	const groupname = 'group' + msg.groupid // 群名
+	const sid = this.app.get('serverId')
+
+	session.bind(username)
+	session.on('closed', onSessionClosed2.bind(null, this.app))
+	session.set('username', username)
+	session.push('username', function (err) {
+		if (err) {
+			console.error('set username for session service failed! error is : %j', err.stack)
+		}
+	})
+	session.set('groupname', groupname)
+	session.push('groupname', function (err) {
+		if (err) {
+			console.error('set groupname for session service failed! error is : %j', err.stack)
+		}
+	})
+
+	this.app.rpc.chat.groupRoomRemote.joinGroupRoom(session, sid, groupname, username, { count: 1, huxi: 15 }, function (result) {
 		next(null, result)
 	})
 }

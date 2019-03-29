@@ -11,6 +11,31 @@ var GroupRoomRemote = function (app) {
 	this.channelService = app.get('channelService')
 }
 
+
+//---------------------------------------------------------------------------------------------------------------
+// 加入群房间
+//---------------------------------------------------------------------------------------------------------------
+GroupRoomRemote.prototype.createGroupRoom = function (sid, groupname, username, config, cb) {
+	var channel = this.channelService.getChannel(groupname, false)
+	if (!!channel) {
+		cb({ code: 402, data: '创建群房间失败，群房间已经存在' })
+	} else {
+		// 当前群不存在 开始创建群
+		channel = this.channelService.getChannel(groupname, true)
+		channel.room = new Room(channel, config)
+
+		const groupChannel = this.channelService.getChannel(groupname, false)
+		if (groupChannel) {
+			groupChannel.pushMessage({ route: 'onGroupRoom', name: Notifications.onJoinRoom, data: { groupname, username } })  // 通知其他用户
+		}
+
+		channel.room.addUser(username)
+		channel.add(username, sid)
+		console.log(groupname, '当前前用户', channel.getMembers())
+		cb({ code: 0, data: '创建群房间成功' })
+	}
+}
+
 //---------------------------------------------------------------------------------------------------------------
 // 加入群房间
 //---------------------------------------------------------------------------------------------------------------
@@ -37,22 +62,12 @@ GroupRoomRemote.prototype.joinGroupRoom = function (sid, groupname, username, co
 			cb({ code: 0, data: '加入群房间成功' })
 		}
 		else {
+			console.log(groupname, '加入失败，群房间人数已满', channel.getMembers())
 			cb({ code: 402, data: '加入失败，群房间人数已满' })
 		}
 	} else {
-		// 当前群不存在 开始创建群
-		channel = this.channelService.getChannel(groupname, true)
-		channel.room = new Room(channel, config)
-
-		const groupChannel = this.channelService.getChannel(groupname, false)
-		if (groupChannel) {
-			groupChannel.pushMessage({ route: 'onGroupRoom', name: Notifications.onJoinRoom, data: { groupname, username } })  // 通知其他用户
-		}
-
-		channel.room.addUser(username)
-		channel.add(username, sid)
-		console.log(groupname, '当前前用户', channel.getMembers())
-		cb({ code: 0, data: '创建群房间成功' })
+		console.log(groupname, '加入失败，群房间不存在')
+		cb({ code: 402, data: '加入失败，群房间不存在' })
 	}
 }
 
@@ -65,7 +80,7 @@ GroupRoomRemote.prototype.resumeGroupRoom = function (sid, groupname, username, 
 			cb({ code: 0, data: '恢复群房间成功' })
 			return
 		}
-	} 
+	}
 
 	cb({ code: 601, data: '恢复群房间失败' })
 }
