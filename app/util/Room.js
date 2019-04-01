@@ -6,11 +6,12 @@ const Actions = require('./Actions')
 const Feadback = require('./Feadback')
 const logger = require('pomelo-logger').getLogger('pomelo', __filename);
 
-function Room(channel, config) {
+function Room(channel, rule) {
     this.channel = channel
-    this.count = config.count
+    this.rule = rule
+    this.count = rule.cc
     this.users = []
-    this.huxi = config.huxi
+    this.huxi = rule.hx
     this.isZhuangFirstOutCard = false
     this.feadback = new Feadback(channel)
     this.timeout = 0

@@ -21,7 +21,8 @@ const Notifications = {
     checkHu: 20,       // 检查胡
     onRoundEnd: 21,  // 一轮游戏结束
     onBi: 22,         // 玩家吃牌
-    onResume: 23      // 数据恢复
+    onResume: 23,      // 数据恢复
+    onRoomStatus: 24      // 房间数据发生变化
 }
 
 module.exports = Notifications

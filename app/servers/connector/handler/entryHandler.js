@@ -6,6 +6,7 @@ var Handler = function (app) {
 	this.app = app;
 	this.sessionService = this.app.get('sessionService')
 	this.channelService = this.app.get('channelService')
+	this.rooms = {}
 };
 
 var handler = Handler.prototype;
@@ -61,19 +62,31 @@ handler.leaveGroup = function (msg, session, next) {
 handler.joinRoom = function (msg, session, next) {
 	const sid = this.app.get('serverId')
 	const groupname = session.get('groupname')
-	const roomname = 'room' + msg.id
 	const username = session.get('username')
-
-	session.set('roomname', roomname)
-	session.push('roomname', function (err) {
-		if (err) {
-			console.error('set roomname for session service failed! error is : %j', err.stack)
-		}
-	});
-
-	this.app.rpc.chat.roomRemote.joinRoom(session, sid, groupname, roomname, username, msg, function (result) {
-		next(null, result)
-	})
+	if (msg.roomname) {
+		const roomname = msg.roomname
+		session.set('roomname', roomname)
+		session.push('roomname', function (err) {
+			if (err) {
+				console.error('set roomname for session service failed! error is : %j', err.stack)
+			}
+		});
+		this.app.rpc.chat.roomRemote.joinRoom(session, sid, groupname, roomname, username, msg, function (result) {
+			next(null, result)
+		})
+	} else {
+		this.app.rpc.chat.roomRemote.getRadom(session, groupname, 6, (roomname) => {
+			session.set('roomname', roomname)
+			session.push('roomname', function (err) {
+				if (err) {
+					console.error('set roomname for session service failed! error is : %j', err.stack)
+				}
+			});
+			this.app.rpc.chat.roomRemote.joinRoom(session, sid, groupname, roomname, username, msg, function (result) {
+				next(null, result)
+			})
+		})
+	}
 }
 
 /**

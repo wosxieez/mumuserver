@@ -13,7 +13,10 @@ GroupRemote.prototype.joinGroup = function (sid, groupname, username, cb) {
     console.log('---------------------------服务器', this.app.get('serverId'), '---------------------------')
     console.log('joinGroup')
     console.log(groupname)
-    var channel = this.channelService.getChannel(groupname, true) // 创建群渠道
+    var channel = this.channelService.getChannel(groupname, false)
+    if (!channel) {
+        channel = this.channelService.getChannel(groupname, true)
+    }
     
     const oldMember = channel.getMember(username)
 		if (!!oldMember) {
