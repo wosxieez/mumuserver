@@ -10,9 +10,7 @@ var GroupRemote = function (app) {
 }
 
 GroupRemote.prototype.joinGroup = function (sid, groupname, username, cb) {
-    console.log('---------------------------服务器', this.app.get('serverId'), '---------------------------')
-    console.log('joinGroup')
-    console.log(groupname)
+    console.log(this.app.get('serverId'), username, '正在加入群', groupname)
     var channel = this.channelService.getChannel(groupname, false)
     if (!channel) {
         channel = this.channelService.getChannel(groupname, true)
@@ -24,41 +22,32 @@ GroupRemote.prototype.joinGroup = function (sid, groupname, username, cb) {
         return
     }
     channel.add(username, sid)
-    console.log(sid, username, '加入群', groupname)
-    console.log(groupname, '群前用户', channel.getMembers())
+    console.log(this.app.get('serverId'), username, '加入群成功')
     this.notificationStatus(groupname)
-    cb({ code: 0, data: this.getStatus(groupname) })
-    console.log('---------------------------------------------------------------------------')
+    cb({ code: 0, data: this.getGroupStatus(groupname) })
 }
 
 GroupRemote.prototype.leaveGroup = function (sid, groupname, username, cb) {
-    console.log('---------------------------服务器', this.app.get('serverId'), '---------------------------')
-    console.log('leaveGroup')
-    console.log(groupname)
+    console.log(this.app.get('serverId'), username, '正在离开群', groupname)
     var channel = this.channelService.getChannel(groupname, false) // 创建群渠道
     if (!!channel) {
         channel.leave(username, sid)
-        console.log(sid, username, '离开群', groupname)
-        console.log(groupname, '群前用户', channel.getMembers())
         if (channel.getMembers().length === 0) {
             console.log('删除群' + groupname)
             channel.destroy()
         } else {
             this.notificationStatus(groupname) // 通知状态
         }
+        console.log(this.app.get('serverId'), username, '离开群成功')
         cb({ code: 0, data: '离开群成功' })
     } else {
+        console.log(this.app.get('serverId'), username, '离开群失败, 该群不存在')
         cb({ code: 0, data: '该群不存在' })
     }
-    console.log('---------------------------------------------------------------------------')
 }
 
-GroupRemote.prototype.queryStatus = function (groupname, username, cb) {
-    console.log('---------------------------服务器', this.app.get('serverId'), '---------------------------')
-    console.log('queryStatus')
-    console.log(groupname)
-    cb({ code: 0, data: this.getStatus(groupname) })
-    console.log('---------------------------------------------------------------------------')
+GroupRemote.prototype.queryGroupStatus = function (groupname, username, cb) {
+    cb({ code: 0, data: this.getGroupStatus(groupname) })
 }
 
 //---------------------------------------------------------------------------------------------------------------
@@ -68,12 +57,11 @@ GroupRemote.prototype.queryStatus = function (groupname, username, cb) {
 GroupRemote.prototype.notificationStatus = function (groupname) {
     const groupChannel = this.channelService.getChannel(groupname, false)
     if (groupChannel) {
-        groupChannel.pushMessage({ route: 'onGroup', name: Notifications.onRoomStatus, data: this.getStatus(groupname) })
+        groupChannel.pushMessage({ route: 'onGroup', name: Notifications.onGroupStatus, data: this.getGroupStatus(groupname) })
     }
-    console.log('通知状态...')
 }
 
-GroupRemote.prototype.getStatus = function (groupname) {
+GroupRemote.prototype.getGroupStatus = function (groupname) {
     var status = []
     var channel
     var room
@@ -87,6 +75,8 @@ GroupRemote.prototype.getStatus = function (groupname) {
             status.push(room)
         }
     }
-    console.log('获取状态', status)
+
+    console.log(this.app.get('serverId'), groupname, '群当前状态', status)
+
     return status
 }

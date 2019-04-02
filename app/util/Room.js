@@ -5,6 +5,7 @@ const HuActions = require('./HuActions')
 const Actions = require('./Actions')
 const Feadback = require('./Feadback')
 const logger = require('pomelo-logger').getLogger('pomelo', __filename);
+const axios = require('axios')
 
 function Room(channel, rule) {
     this.channel = channel
@@ -13,7 +14,12 @@ function Room(channel, rule) {
     this.isZhuangFirstOutCard = false
     this.feadback = new Feadback(channel)
     this.timeout = 0
+    this.cards = []
     this.isGaming = false // 是否正在游戏中
+
+
+    var params = { winner: 'wosxieez', loser: 'wosxieez2', score: 100, gid: 2, rid: this.rule.id }
+    axios.post('http://127.0.0.1:3008/update_score', params).catch(error => {})
 }
 
 Room.prototype.release = function () {
@@ -29,7 +35,7 @@ Room.prototype.addUser = function (username) {
     if (this.isGaming) {
         return
     }
-    this.users.push({ username })
+    this.users.push({ username, hx: 0 })
 }
 
 //---------------------------------------------------------------------------------------------------------------
@@ -103,7 +109,7 @@ Room.prototype.gameStart = function () {
 
     // 新的一轮开始了 通知每个玩家
     this.channel.pushMessage({
-        route: 'onNotification',
+        route: 'onRoom',
         name: Notifications.onNewRound,
         data: { users: this.users, zc: this.zhuang_card, zn: this.zhuang.username, cc: this.cards.length }
     })
@@ -205,7 +211,7 @@ Room.prototype.loopAllUserCanHuWithZhuangCard = function () {
         if (canHuData) {
             this.feadback.send(user.username,
                 {
-                    route: 'onNotification',
+                    route: 'onRoom',
                     name: Notifications.checkHu,
                     data: { username: user.username, data: canHuData }
                 })
@@ -235,7 +241,7 @@ Room.prototype.zhuangStart = function () {
 
     // 游戏正式开始 通知每个玩家
     this.channel.pushMessage({
-        route: 'onNotification',
+        route: 'onRoom',
         name: Notifications.onGameStart,
         data: { users: this.users, zc: this.zhuang_card, zn: this.zhuang.username }
     })
@@ -298,7 +304,7 @@ Room.prototype.checkXianCanTi = function () {
     if (hasTi) {
         // 通知有人提了
         this.channel.pushMessage({
-            route: 'onNotification',
+            route: 'onRoom',
             name: Notifications.onTi,
             data: { users: this.users, zc: this.zhuang_card, zn: this.zhuang.username }
         })
@@ -313,7 +319,7 @@ Room.prototype.zhuangPlayCard = function () {
     logger.info('庄家出牌')
     this.feadback.send(this.zhuang.username,
         {
-            route: 'onNotification',
+            route: 'onRoom',
             name: Notifications.checkNewCard,
             data: { username: this.zhuang.username, data: 'oc' }
         })
@@ -370,7 +376,7 @@ Room.prototype.checkXianCanTi2 = function () {
     if (hasTi) {
         // 通知有人提了
         this.channel.pushMessage({
-            route: 'onNotification',
+            route: 'onRoom',
             name: Notifications.onTi,
             data: { users: this.users, zc: this.zhuang_card, zn: this.zhuang.username }
         })
@@ -406,7 +412,7 @@ Room.prototype.loopOtherUserCanHuWithPlayerCard = function () {
             if (huXi.hx >= this.rule.hx) {
                 this.feadback.send(user.username,
                     {
-                        route: 'onNotification',
+                        route: 'onRoom',
                         name: Notifications.checkHu,
                         data: { username: user.username, data: canHuData }
                     })
@@ -460,7 +466,7 @@ Room.prototype.loopOtherUserCanPaoWithPlayerCard = function () {
 
             // 有玩家跑操作
             this.channel.pushMessage({
-                route: 'onNotification',
+                route: 'onRoom',
                 name: Notifications.onPao,
                 data: { users: this.users, zc: this.zhuang_card, zn: this.zhuang.username }
             })
@@ -481,7 +487,7 @@ Room.prototype.loopOtherUserCanPaoWithPlayerCard = function () {
 
                 // 有玩家跑操作
                 this.channel.pushMessage({
-                    route: 'onNotification',
+                    route: 'onRoom',
                     name: Notifications.onPao,
                     data: { users: this.users, zc: this.zhuang_card, zn: this.zhuang.username }
                 })
@@ -532,7 +538,7 @@ Room.prototype.loopOtherUserCanPengWithPlayerCard = function () {
                 // 通知玩家是否要碰
                 logger.info(user.username, '可以碰这张牌 通知玩家要不要碰')
                 this.feadback.send(user.username, {
-                    route: 'onNotification',
+                    route: 'onRoom',
                     name: Notifications.checkPeng,
                     data: { username: user.username, data: canPengData }
                 }).thenOk((data) => {
@@ -581,7 +587,7 @@ Room.prototype.checkPlayerUserCanChiWithPlayerCard = function () {
             // 通知出牌玩家是否要吃
             logger.info(this.player.username, '可以吃牌 通知玩家要不要吃牌')
             this.feadback.send(this.player.username, {
-                route: 'onNotification',
+                route: 'onRoom',
                 name: Notifications.checkEat,
                 data: { username: this.player.username, data: canChiData }
             }).thenOk((data) => {
@@ -651,7 +657,7 @@ Room.prototype.checkNextUserCanChiWithPlayerCard = function () {
                     canChiItem.cards.push(this.player_card)
                 })
                 this.feadback.send(nextUser.username, {
-                    route: 'onNotification',
+                    route: 'onRoom',
                     name: Notifications.checkEat,
                     data: { username: nextUser.username, data: canChiData }
                 }).thenOk((data) => {
@@ -814,7 +820,7 @@ Room.prototype.checkPlayerUserCanHuWithPlayerCard = function () {
         logger.info('计算胡息', huXi.hx, '胡牌胡息', this.rule.hx)
         if (huXi.hx >= this.rule.hx) {
             this.feadback.send(this.player.username, {
-                route: 'onNotification',
+                route: 'onRoom',
                 name: Notifications.checkHu,
                 data: { username: this.player.username, data: canHuData }
             }).thenOk((data) => {
@@ -847,7 +853,7 @@ Room.prototype.checkPlayerUserCanHuWithPlayerCard2 = function () {
         const huXi = HuXiUtil.getHuXi(canHuData, HuActions.IsMeFlopCard)
         if (huXi.hx >= this.rule.hx) {
             this.feadback.send(this.player.username, {
-                route: 'onNotification',
+                route: 'onRoom',
                 name: Notifications.checkHu,
                 data: { username: this.player.username, data: canHuData }
             }).thenOk((data) => {
@@ -880,7 +886,7 @@ Room.prototype.checkPlayerUserCanHuWithPlayerCard3 = function () {
         const huXi = HuXiUtil.getHuXi(canHuData, HuActions.IsMeFlopCard)
         if (huXi.hx >= this.rule.hx) {
             this.feadback.send(this.player.username, {
-                route: 'onNotification',
+                route: 'onRoom',
                 name: Notifications.checkHu,
                 data: { username: this.player.username, data: canHuData }
             }).thenOk((data) => {
@@ -923,7 +929,7 @@ Room.prototype.playerPlayCard = function (user) {
     if (CardUtil.hasValidaOutCards(user.handCards)) {
         this.feadback.send(user.username,
             {
-                route: 'onNotification',
+                route: 'onRoom',
                 name: Notifications.checkNewCard,
                 data: { username: user.username, data: 'oc' }
             })
@@ -994,7 +1000,7 @@ Room.prototype.loopOtherUserCanHuWithPlayerCard2 = function () {
             if (huXi.hx >= this.rule.hx) {
                 this.feadback.send(user.username,
                     {
-                        route: 'onNotification',
+                        route: 'onRoom',
                         name: Notifications.checkHu,
                         data: { username: user.username, data: canHuData }
                     })
@@ -1110,7 +1116,7 @@ Room.prototype.loopOtherUserCanPengWithPlayerCard2 = function () {
                 logger.info(user.username, '可以碰这张牌 通知玩家要不要碰')
                 // 通知玩家是否要碰
                 this.feadback.send(user.username, {
-                    route: 'onNotification',
+                    route: 'onRoom',
                     name: Notifications.checkPeng,
                     data: { username: user.username, data: canPengData }
                 }).thenOk((data) => {
@@ -1178,7 +1184,7 @@ Room.prototype.checkNextUserCanChiWithPlayerCard2 = function () {
                 })
                 // 通知出牌玩家是否要吃
                 this.feadback.send(nextUser.username, {
-                    route: 'onNotification',
+                    route: 'onRoom',
                     name: Notifications.checkEat,
                     data: { username: nextUser.username, data: canChiData }
                 }).thenOk((data) => {
@@ -1223,7 +1229,7 @@ Room.prototype.checkNextUserCanChiWithPlayerCard2 = function () {
  */
 Room.prototype.noticeAllUserOnReady = function () {
     this.channel.pushMessage({
-        route: 'onNotification',
+        route: 'onRoom',
         name: Notifications.onReady,
         data: { users: this.users }
     })
@@ -1233,7 +1239,7 @@ Room.prototype.noticeAllUserOnReady = function () {
  */
 Room.prototype.noticeAllUserOnPao = function () {
     this.channel.pushMessage({
-        route: 'onNotification',
+        route: 'onRoom',
         name: Notifications.onPao,
         data: { users: this.users }
     })
@@ -1243,7 +1249,7 @@ Room.prototype.noticeAllUserOnPao = function () {
  */
 Room.prototype.noticeAllUserOnTi = function () {
     this.channel.pushMessage({
-        route: 'onNotification',
+        route: 'onRoom',
         name: Notifications.onTi,
         data: { users: this.users }
     })
@@ -1253,7 +1259,7 @@ Room.prototype.noticeAllUserOnTi = function () {
  */
 Room.prototype.noticeAllUserOnPeng = function () {
     this.channel.pushMessage({
-        route: 'onNotification',
+        route: 'onRoom',
         name: Notifications.onPeng,
         data: { users: this.users }
     })
@@ -1263,7 +1269,7 @@ Room.prototype.noticeAllUserOnPeng = function () {
  */
 Room.prototype.noticeAllUserOnChi = function () {
     this.channel.pushMessage({
-        route: 'onNotification',
+        route: 'onRoom',
         name: Notifications.onEat,
         data: { users: this.users }
     })
@@ -1273,7 +1279,7 @@ Room.prototype.noticeAllUserOnChi = function () {
  */
 Room.prototype.noticeAllUserOnBi = function () {
     this.channel.pushMessage({
-        route: 'onNotification',
+        route: 'onRoom',
         name: Notifications.onBi,
         data: { users: this.users }
     })
@@ -1283,14 +1289,14 @@ Room.prototype.noticeAllUserOnBi = function () {
  */
 Room.prototype.noticeAllUserOnWei = function () {
     this.channel.pushMessage({
-        route: 'onNotification',
+        route: 'onRoom',
         name: Notifications.onWei,
         data: { users: this.users, zc: this.zhuang_card, zn: this.zhuang.username }
     })
 }
 Room.prototype.noticeAllUserOnNewCard = function (isOut) {
     this.channel.pushMessage({
-        route: 'onNotification',
+        route: 'onRoom',
         name: Notifications.onNewCard,
         data: {
             users: this.users,
@@ -1306,14 +1312,54 @@ Room.prototype.noticeAllUserOnWin = function (winData) {
         user.isReady = false
     })
 
-    this.channel.pushMessage({
-        route: 'onNotification',
-        name: Notifications.onWin,
-        data: { users: this.users, ...winData }
+    // 看没有人放炮
+    var countedTypes = _.countBy(winData.hts, function (c) { return c })
+    var hasFangPao = false
+    var gameOver = false
+
+    // 看有没有人放炮
+    if (countedTypes[3]) {
+        hasFangPao = true
+    }
+
+    // 计算玩家胡息 TODO
+    var winner, loser
+    this.users.forEach(user => {
+        if (user.username === winData.wn) {
+            winner = user
+            winner.hx += winData.thx
+            if (winner.hx >= 100) {
+                gameOver = true
+            }
+        } else {
+            loser = user
+            if (hasFangPao) {
+                loser.hx -= winData.thx
+            }
+        }
     })
 
-    this.isGaming = false
-    this.checkRelease()
+    if (gameOver) {
+        // 一局游戏结束了 开始统计分数了
+        // user1 {hx: 100}
+        // user2 {hx: 63}
+        var winnerHx = Math.round(winner.hx / 10) * 10
+        var loserHx = Math.round(loser.hx / 10) * 10
+        var winHx = winnerHx - loserHx
+        var winScore = winHx * this.rule.xf
+        var params = { winner: winner.username, loser: loser.username, score: winScore, rid: this.rule.id}
+        axios.post('http://127.0.0.1:3008/update_score', params).catch(error => {})
+
+        this.isGaming = false
+        this.checkRelease()
+    } else {
+        // 一盘结束 游戏继续
+        this.channel.pushMessage({
+            route: 'onRoom',
+            name: Notifications.onWin,
+            data: { users: this.users, ...winData }
+        })
+    }
 }
 Room.prototype.noticeAllUserOnRoundEnd = function () {
     this.users.forEach(user => {
@@ -1321,7 +1367,7 @@ Room.prototype.noticeAllUserOnRoundEnd = function () {
     })
 
     this.channel.pushMessage({
-        route: 'onNotification',
+        route: 'onRoom',
         name: Notifications.onRoundEnd,
         data: {
             users: this.users,
@@ -1336,13 +1382,10 @@ Room.prototype.noticeAllUserOnRoundEnd = function () {
     this.checkRelease()
 }
 
-Room.prototype.resume = function () {
-    if (this.isGaming) {
-        this.channel.pushMessage({
-            route: 'onNotification',
-            name: Notifications.onResume,
-            data: { users: this.users, zc: this.zhuang_card, zn: this.zhuang.username, cc: this.cards.length }
-        })
+Room.prototype.getStatus = function () {
+    return {
+        gaming: this.isGaming,
+        users: this.users
     }
 }
 

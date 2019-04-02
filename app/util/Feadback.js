@@ -5,9 +5,13 @@ module.exports = function Feadback(channel) {
         this.cancelFunction = null
         clearTimeout(this.timeout)
 
-        channel.pushMessage(message)
-
-        this.timeout = setTimeout(this.doCancel.bind(this, username), 30000)
+        if (channel.getMember(username)) {
+            channel.pushMessage(message)
+            this.timeout = setTimeout(this.doCancel.bind(this, username), 30000)
+        } else {
+            // 玩家掉线 pass处理
+            this.timeout = setTimeout(this.doCancel.bind(this, username), 500)
+        }
         return this
     }
     this.thenOk = function (cb) {

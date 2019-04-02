@@ -47,13 +47,13 @@ handler.joinGroup = function (msg, session, next) {
 }
 
 /**
- * 查询房间状态
+ * 查询群状态
  */
-handler.queryStatus = function (msg, session, next) {
+handler.queryGroupStatus = function (msg, session, next) {
 	const groupname = session.get('groupname')
 	const username = session.get('username')
 	const sid = this.app.get('serverId')
-	this.app.rpc.chat.groupRemote.queryStatus(session, groupname, username, function (result) {
+	this.app.rpc.chat.groupRemote.queryGroupStatus(session, groupname, username, function (result) {
 		next(null, result)
 	})
 }
@@ -112,19 +112,6 @@ handler.joinRoom = function (msg, session, next) {
 }
 
 /**
- *	恢复房间
- */
-handler.resumeRoom = function (msg, session, next) {
-	const sid = this.app.get('serverId')
-	const groupname = session.get('groupname')
-	const roomname = session.get('roomname')
-	const username = session.get('username')
-	this.app.rpc.chat.roomRemote.resumeRoom(session, sid, groupname, roomname, username, function (result) {
-		next(null, result)
-	})
-}
-
-/**
  *	离开房间
  */
 handler.leaveRoom = function (msg, session, next) {
@@ -145,97 +132,17 @@ handler.leaveRoom = function (msg, session, next) {
 	})
 }
 
-
 /**
- *	创建群房间
+ * 查询群状态
  */
-handler.createGroupRoom = function (msg, session, next) {
-	// 设置session
-	const username = msg.username   // 用户名
-	const sid = this.app.get('serverId')
-	const groupid = (Math.floor(Math.random() * 9000) + 1000)
-	const groupname = 'group' + groupid
-
-	session.bind(username)
-	session.on('closed', onSessionClosed2.bind(null, this.app))
-	session.set('username', username)
-	session.push('username', function (err) {
-		if (err) {
-			console.error('set username for session service failed! error is : %j', err.stack)
-		}
-	})
-	session.set('groupname', groupname)
-	session.push('groupname', function (err) {
-		if (err) {
-			console.error('set groupname for session service failed! error is : %j', err.stack)
-		}
-	})
-
-	this.app.rpc.chat.groupRoomRemote.createGroupRoom(session, sid, groupname, username, { count: 2, huxi: 15 }, function (result) {
-		if (result.code === 0) {
-			next(null, { code: 0, data: groupid })
-		} else {
-			next(null, result)
-		}
-	})
-}
-
-
-/**
- *	加入群房间
- */
-handler.joinGroupRoom = function (msg, session, next) {
-	// 设置session
-	const username = msg.username   // 用户名
-	const groupname = 'group' + msg.groupid // 群名
-	const sid = this.app.get('serverId')
-
-	session.bind(username)
-	session.on('closed', onSessionClosed2.bind(null, this.app))
-	session.set('username', username)
-	session.push('username', function (err) {
-		if (err) {
-			console.error('set username for session service failed! error is : %j', err.stack)
-		}
-	})
-	session.set('groupname', groupname)
-	session.push('groupname', function (err) {
-		if (err) {
-			console.error('set groupname for session service failed! error is : %j', err.stack)
-		}
-	})
-
-	this.app.rpc.chat.groupRoomRemote.joinGroupRoom(session, sid, groupname, username, { count: 1, huxi: 15 }, function (result) {
-		next(null, result)
-	})
-}
-
-/**
- *	恢复群房间
- */
-handler.resumeGroupRoom = function (msg, session, next) {
-	const sid = this.app.get('serverId')
+handler.queryRoomStatus = function (msg, session, next) {
 	const groupname = session.get('groupname')
 	const username = session.get('username')
-	this.app.rpc.chat.groupRoomRemote.resumeGroupRoom(session, sid, groupname, username, function (result) {
-		next(null, result)
-	})
-}
-
-/**
- *	离开群房间
- */
-handler.leaveGroupRoom = function (msg, session, next) {
+	const roomname = session.get('roomname')
 	const sid = this.app.get('serverId')
-	const groupname = session.get('groupname')
-	const username = session.get('username')
-	this.app.rpc.chat.groupRoomRemote.leaveGroupRoom(session, sid, groupname, username, function (result) {
+	this.app.rpc.chat.roomRemote.queryRoomStatus(session, groupname, roomname, username, function (result) {
 		next(null, result)
 	})
-	next(null, { code: 0, data: '离开群房间成功' })
-	setTimeout(() => {
-		this.sessionService.kick(session.uid, '主动断开')
-	}, 200)
 }
 
 function onSessionClosed(app, session) {
@@ -256,20 +163,4 @@ function onSessionClosed(app, session) {
 	}
 
 	console.log(username, '已断开连接')
-}
-
-function onSessionClosed2(app, session) {
-	if (!session || !session.uid) {
-		return;
-	}
-
-	const sid = app.get('serverId')
-	const groupname = session.get('groupname')
-	const username = session.get('username')
-
-	if (groupname) {
-		app.rpc.chat.groupRoomRemote.leaveGroupRoom(session, sid, groupname, username, function (result) { })
-	}
-
-	console.log(username, '已断开群房间连接')
 }

@@ -37,7 +37,8 @@ handler.pushMessage = function (message, session, next) {
 	const roomname = session.get('roomname')
 	channel = this.app.get('channelService').getChannel(roomname, false)
 	if (!!channel) {
-		channel.pushMessage({ route: 'onRoom', data: message })
+		channel.pushMessage({ route: 'onRoom', name: 26, data: message })
+		
 		next(null, { code: 0, data: '发送成功' })
 	} else {
 		next(null, { code: 500, data: '发送失败, 该房间不存在' })

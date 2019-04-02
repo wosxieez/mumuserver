@@ -18,7 +18,7 @@ HuXiUtil.getHuXi = function (cardsOnGroup, huAcation, isLatestCard = false) {
       huXi.hts.push(HuTypes.DiHu)
       break
     case HuActions.IsMeFlopCard: // 自摸
-      huXi.hx = HuXiUtil.getAllGroupHuXi(cardsOnGroup) 
+      huXi.hx = HuXiUtil.getAllGroupHuXi(cardsOnGroup)
       huXi.hts.push(HuTypes.ZiMo)
       HuXiUtil.checkWuHu(cardsOnGroup, huXi, isLatestCard)
       break
@@ -35,6 +35,7 @@ HuXiUtil.getHuXi = function (cardsOnGroup, huAcation, isLatestCard = false) {
       break;
   }
   console.log('胡息', JSON.stringify(cardsOnGroup), JSON.stringify(huXi))
+  huXi.thx = HuXiUtil.getTotalHuXi(huXi)
   return huXi
 }
 
@@ -100,7 +101,7 @@ HuXiUtil.getGroupHuXi = function (group) {
             huxi = 1;
           }
           break;
-          case Actions.Kan:
+        case Actions.Kan:
           if (cards[0] > 10 && cards[0] < 21) {
             huxi = 6;
           } else if (cards[0] > 0) {
@@ -190,12 +191,12 @@ HuXiUtil.checkYiDianHong = function (groupCards, huXi, isLatestCard) {
     huXi.hts.push(HuTypes.YiDianHong)
     HuXiUtil.checkKaHu(groupCards, huXi, isLatestCard)
   } else if (hongGroupCount === 1 && hongCount >= 3) {
-        // 一块匾
-        huXi.hts.push(HuTypes.YiKuaiBian)
-        HuXiUtil.checkKaHu(groupCards, huXi, isLatestCard)
-  } else if (hongCount >= 10 && hongCount <13) {
-        huXi.hts.push(HuTypes.Hong10)
-        HuXiUtil.checkKaHu(groupCards, huXi, isLatestCard)
+    // 一块匾
+    huXi.hts.push(HuTypes.YiKuaiBian)
+    HuXiUtil.checkKaHu(groupCards, huXi, isLatestCard)
+  } else if (hongCount >= 10 && hongCount < 13) {
+    huXi.hts.push(HuTypes.Hong10)
+    HuXiUtil.checkKaHu(groupCards, huXi, isLatestCard)
   } else if (hongCount >= 13) {
     huXi.hts.push(HuTypes.Hong13)
     HuXiUtil.checkKaHu(groupCards, huXi, isLatestCard)
@@ -204,9 +205,9 @@ HuXiUtil.checkYiDianHong = function (groupCards, huXi, isLatestCard) {
 
 HuXiUtil.checkKaHu = function (groupCards, huXi, isLatestCard) {
   if (huXi.hx === 30) {
-    huXi.hts.push(HuTypes.KaHu)
+    huXi.hts.push(HuTypes.DaKaHu)
   } else if (huXi === 20) {
-    huXi.hts.push(HuTypes.KaHu)
+    huXi.hts.push(HuTypes.XiaoKaHu)
   }
 
   HuXiUtil.checkHaiDiHu(groupCards, huXi, isLatestCard)
@@ -217,5 +218,33 @@ HuXiUtil.checkHaiDiHu = function (groupCards, huXi, isLatestCard) {
     huXi.hts.push(HuTypes.HaiDiHu)
   }
 }
+
+HuXiUtil.getTotalHuXi = function (huXi) {
+  var thx = 0
+  var countedTypes = _.countBy(huXi.hts, function (c) { return c })
+  console.log(countedTypes)
+  var a = (countedTypes[0] || 0) + (countedTypes[1] || 0)
+  var b = (countedTypes[4] || 0) + (countedTypes[10] || 0) + (countedTypes[11] || 0)
+  var c = (countedTypes[2] || 0) + (countedTypes[3] || 0) + (countedTypes[5] || 0) + (countedTypes[6] || 0) + (countedTypes[7] || 0) + (countedTypes[8] || 0) + (countedTypes[9] || 0)
+
+  if (a >= 1) {
+    thx = 100
+  } else {
+    if (b > 1) {
+      thx = 200
+    } else if (b = 1) {
+      if (c >= 1) {
+        thx = 200
+      } else {
+        thx = 100
+      }
+    } else {
+        thx = Math.pow(2, c) * huXi.hx
+    }
+  }
+
+  return Math.min(thx, 200)
+}
+
 
 module.exports = HuXiUtil

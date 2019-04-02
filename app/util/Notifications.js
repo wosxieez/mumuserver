@@ -1,8 +1,5 @@
 const Notifications = {
-    onJoinRoom: 1,    // 新玩家加入房间
-    onJoinGroup: 2, // 新玩家加入群
     onLeaveRoom: 3, // 玩家离开房间
-    onLeaveGroup: 4,// 玩家离开群
     onReady: 5,     // 有玩家准备
     onNewRound: 6,    // 开局通知
     onGameStart: 7, // 游戏正式开始
@@ -22,7 +19,9 @@ const Notifications = {
     onRoundEnd: 21,  // 一轮游戏结束
     onBi: 22,         // 玩家吃牌
     onResume: 23,      // 数据恢复
-    onRoomStatus: 24      // 房间数据发生变化
+    onGroupStatus: 24,      // 群数据发生变化
+    onRoomStatus: 25,    // 群数据发生变化
+    onRoomMessage: 26
 }
 
 module.exports = Notifications

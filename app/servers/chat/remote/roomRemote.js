@@ -36,10 +36,11 @@ RoomRemote.prototype.getRadom = function (groupname, num, cb) {
 // 创建房间
 //---------------------------------------------------------------------------------------------------------------
 RoomRemote.prototype.createRoom = function (sid, groupname, roomname, username, rule, cb) {
+	console.log(this.app.get('serverId'), groupname, username, '正在创建房间', roomname)
 	var channel = this.channelService.getChannel(roomname, false)
 	if (!!channel) {
 		// 创建已经存在了 创建房间失败
-		console.log(username, roomname, '创建房间失败 房间已经存在')
+		console.log(this.app.get('serverId'), groupname, '创建房间失败 房间已经存在')
 		cb({ code: 402, data: '创建房间失败 房间已经存在' })
 	} else {
 		// 房间不存在 开始创建房间
@@ -48,9 +49,10 @@ RoomRemote.prototype.createRoom = function (sid, groupname, roomname, username, 
 		channel.groupname = groupname
 		channel.room.addUser(username)
 		channel.add(username, sid)
-		this.notificationStatus(groupname)
-		console.log(username, roomname, '创建房间成功')
-		cb({ code: 0, data: '创建房间成功' })
+		console.log(this.app.get('serverId'), groupname, username, '创建房间成功')
+		this.notificationGroupStatus(groupname)
+		this.notificationRoomStatus(roomname)
+		cb({ code: 0, data: rule })
 	}
 }
 
@@ -58,61 +60,54 @@ RoomRemote.prototype.createRoom = function (sid, groupname, roomname, username, 
 // 加入房间
 //---------------------------------------------------------------------------------------------------------------
 RoomRemote.prototype.joinRoom = function (sid, groupname, roomname, username, cb) {
+	console.log(this.app.get('serverId'), groupname, username, '正在加入房间', roomname)
 	var channel = this.channelService.getChannel(roomname, false)
 	if (!!channel) {
 		// 用户已经在房间里了
 		if (channel.room.hasUser(username)) {
 			channel.add(username, sid)
-			console.log(username, roomname, '加入房间成功, 用户已经在房间里了')
-			cb({ code: 0, data: '加入房间成功' })
+			console.log(this.app.get('serverId'), groupname, username, '加入房间成功, 用户已经在房间里了', roomname)
+			cb({ code: 0, data: channel.room.rule })
 			return
 		}
 
 		// 看人数有没有满
-		if (channel.room.users.length < channel.room.count) {
+		if (channel.room.users.length < channel.room.rule.cc) {
 			channel.room.addUser(username)
 			channel.add(username, sid)
-			this.notificationStatus(groupname)
-			console.log(username, roomname, '加入房间成功')
-			cb({ code: 0, data: '加入房间成功' })
+			console.log(this.app.get('serverId'), groupname, username, '加入房间成功')
+			this.notificationGroupStatus(groupname)
+			this.notificationRoomStatus(roomname)
+			cb({ code: 0, data: channel.room.rule })
 		}
 		else {
-			console.log(username, roomname, '加入失败，房间人数已满')
+			console.log(this.app.get('serverId'), groupname, username, '加入失败，房间人数已满')
 			cb({ code: 402, data: '加入失败，房间人数已满' })
 		}
 	} else {
 		// 房间不存在 加入房间失败
-		console.log(username, roomname, '加入房间失败，房间不存在')
+		console.log(this.app.get('serverId'), groupname, username, '加入房间失败，房间不存在')
 		cb({ code: 403, data: '加入房间失败，房间不存在' })
 	}
 }
 
 //---------------------------------------------------------------------------------------------------------------
-// 恢复房间
+// 查询房间状态
 //---------------------------------------------------------------------------------------------------------------
-RoomRemote.prototype.resumeRoom = function (sid, groupname, roomname, username, cb) {
-	var channel = this.channelService.getChannel(roomname, false)
-	if (!!channel) {
-		// 用户已经在房间里了
-		if (channel.room.hasUser(username)) {
-			channel.room.resume()
-			cb({ code: 0, data: '恢复房间成功' })
-			return
-		}
-	}
-
-	cb({ code: 601, data: '恢复房间失败' })
+RoomRemote.prototype.queryRoomStatus = function (groupname, roomname, username, cb) {
+	console.log(groupname, roomname, username)
+	cb({ code: 0, data: this.getRoomStatus(roomname) })
 }
 
 //---------------------------------------------------------------------------------------------------------------
 // 离开房间
 //---------------------------------------------------------------------------------------------------------------
 RoomRemote.prototype.leaveRoom = function (sid, groupname, roomname, username, cb) {
+	console.log(this.app.get('serverId'), groupname, username, '正在离开房间', roomname)
 	var channel = this.channelService.getChannel(roomname, false)
 	if (!!channel) {
 		channel.room.deleteUser(username)
 		channel.leave(username, sid)
-		console.log(username, roomname, '离开房间成功')
 		if (channel.room.users.length === 0) {
 			channel.room.feadback.release()
 			channel.room.release()
@@ -120,8 +115,10 @@ RoomRemote.prototype.leaveRoom = function (sid, groupname, roomname, username, c
 			channel.destroy()
 			console.log('删除房间' + roomname)
 		}
-		this.notificationStatus(groupname)
+		this.notificationGroupStatus(groupname)
+		this.notificationRoomStatus(roomname)
 	}
+	console.log(this.app.get('serverId'), groupname, username, '离开房间成功')
 	cb({ code: 0, data: '离开房间成功' })
 }
 
@@ -130,7 +127,6 @@ RoomRemote.prototype.leaveRoom = function (sid, groupname, roomname, username, c
 //---------------------------------------------------------------------------------------------------------------
 RoomRemote.prototype.onAction = function (sid, groupname, roomname, username, action, cb) {
 	var channel = this.channelService.getChannel(roomname, false)
-	console.log('收到指令', username, action)
 	if (!!channel) {
 		switch (action.name) {
 			case Actions.Ready:
@@ -150,23 +146,21 @@ RoomRemote.prototype.onAction = function (sid, groupname, roomname, username, ac
 				break
 		}
 	}
-	// console.log('---------------------------------------------------------------------------')
 	cb({ code: 0, data: 'ok' })
 }
 
 //---------------------------------------------------------------------------------------------------------------
-//  通知状态
+//  通知群状态
 //---------------------------------------------------------------------------------------------------------------
 
-RoomRemote.prototype.notificationStatus = function (groupname) {
+RoomRemote.prototype.notificationGroupStatus = function (groupname) {
 	const groupChannel = this.channelService.getChannel(groupname, false)
 	if (groupChannel) {
-		groupChannel.pushMessage({ route: 'onGroup', name: Notifications.onRoomStatus, data: this.getStatus(groupname) })
+		groupChannel.pushMessage({ route: 'onGroup', name: Notifications.onGroupStatus, data: this.getGroupStatus(groupname) })
 	}
-	console.log('通知状态...')
 }
 
-RoomRemote.prototype.getStatus = function (groupname) {
+RoomRemote.prototype.getGroupStatus = function (groupname) {
 	var status = []
 	var channel
 	var room
@@ -180,6 +174,33 @@ RoomRemote.prototype.getStatus = function (groupname) {
 			status.push(room)
 		}
 	}
-	console.log('获取状态', status)
+
+	console.log(this.app.get('serverId'), groupname, '群当前状态', status)
+
+	return status
+}
+
+//---------------------------------------------------------------------------------------------------------------
+//  通知房间状态
+//---------------------------------------------------------------------------------------------------------------
+
+RoomRemote.prototype.notificationRoomStatus = function (roomname) {
+	const roomChannel = this.channelService.getChannel(roomname, false)
+	if (roomChannel) {
+		roomChannel.pushMessage({ route: 'onRoom', 
+		name: Notifications.onRoomStatus, 
+		data: this.getRoomStatus(roomname) })
+	}
+}
+
+RoomRemote.prototype.getRoomStatus = function (roomname) {
+	var status = {}
+	const roomChannel = this.channelService.getChannel(roomname, false)
+	if (roomChannel) {
+		status = roomChannel.room.getStatus()
+	}
+
+	console.log(this.app.get('serverId'), roomname, '房间当前状态', status)
+
 	return status
 }
