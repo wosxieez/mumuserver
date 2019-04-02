@@ -47,6 +47,18 @@ handler.joinGroup = function (msg, session, next) {
 }
 
 /**
+ * 查询房间状态
+ */
+handler.queryStatus = function (msg, session, next) {
+	const groupname = session.get('groupname')
+	const username = session.get('username')
+	const sid = this.app.get('serverId')
+	this.app.rpc.chat.groupRemote.queryStatus(session, groupname, username, function (result) {
+		next(null, result)
+	})
+}
+
+/**
  * 离开群
  */
 handler.leaveGroup = function (msg, session, next) {
@@ -57,36 +69,46 @@ handler.leaveGroup = function (msg, session, next) {
 }
 
 /**
- *	加入房间
+ *	创建房间
  */
-handler.joinRoom = function (msg, session, next) {
+handler.createRoom = function (rule, session, next) {
 	const sid = this.app.get('serverId')
 	const groupname = session.get('groupname')
 	const username = session.get('username')
-	if (msg.roomname) {
-		const roomname = msg.roomname
+
+	// 创建房间 房间号需要先生成
+	this.app.rpc.chat.roomRemote.getRadom(session, groupname, 6, (roomname) => {
 		session.set('roomname', roomname)
 		session.push('roomname', function (err) {
 			if (err) {
 				console.error('set roomname for session service failed! error is : %j', err.stack)
 			}
 		});
-		this.app.rpc.chat.roomRemote.joinRoom(session, sid, groupname, roomname, username, msg, function (result) {
+		this.app.rpc.chat.roomRemote.createRoom(session, sid, groupname, roomname, username, rule, function (result) {
 			next(null, result)
 		})
-	} else {
-		this.app.rpc.chat.roomRemote.getRadom(session, groupname, 6, (roomname) => {
-			session.set('roomname', roomname)
-			session.push('roomname', function (err) {
-				if (err) {
-					console.error('set roomname for session service failed! error is : %j', err.stack)
-				}
-			});
-			this.app.rpc.chat.roomRemote.joinRoom(session, sid, groupname, roomname, username, msg, function (result) {
-				next(null, result)
-			})
-		})
-	}
+	})
+}
+
+/**
+ *	加入房间
+ */
+handler.joinRoom = function (msg, session, next) {
+	const sid = this.app.get('serverId')
+	const groupname = session.get('groupname')
+	const username = session.get('username')
+	const roomname = msg.roomname
+
+	session.set('roomname', roomname)
+		session.push('roomname', function (err) {
+			if (err) {
+				console.error('set roomname for session service failed! error is : %j', err.stack)
+			}
+		});
+
+	this.app.rpc.chat.roomRemote.joinRoom(session, sid, groupname, roomname, username, function (result) {
+		next(null, result)
+	})
 }
 
 /**

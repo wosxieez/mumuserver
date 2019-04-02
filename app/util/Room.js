@@ -9,9 +9,7 @@ const logger = require('pomelo-logger').getLogger('pomelo', __filename);
 function Room(channel, rule) {
     this.channel = channel
     this.rule = rule
-    this.count = rule.cc
     this.users = []
-    this.huxi = rule.hx
     this.isZhuangFirstOutCard = false
     this.feadback = new Feadback(channel)
     this.timeout = 0
@@ -78,7 +76,7 @@ Room.prototype.setReady = function (username, isReady) {
 // 检查游戏是否能开始
 //---------------------------------------------------------------------------------------------------------------
 Room.prototype.checkGameStart = function () {
-    if (this.users.length < this.count) {
+    if (this.users.length < this.rule.cc) {
         return
     }
 
@@ -137,7 +135,7 @@ Room.prototype.xiPai = function () {
 
 Room.prototype.selectZhuang = function () {
     logger.info('选中庄家')
-    const random = Math.floor(Math.random() * this.count)
+    const random = Math.floor(Math.random() * this.rule.cc)
     this.zhuang = this.users[random]
 
     for (var i = 0; i < this.users.length; i++) {
@@ -405,7 +403,7 @@ Room.prototype.loopOtherUserCanHuWithPlayerCard = function () {
         const canHuData = CardUtil.canHu(user.handCards, user.groupCards, this.player_card)
         if (canHuData) {
             const huXi = HuXiUtil.getHuXi(canHuData, HuActions.IsOtherFlopCard, this.cards.length === 0)
-            if (huXi.hx >= this.huxi) {
+            if (huXi.hx >= this.rule.hx) {
                 this.feadback.send(user.username,
                     {
                         route: 'onNotification',
@@ -813,8 +811,8 @@ Room.prototype.checkPlayerUserCanHuWithPlayerCard = function () {
     if (canHuData) {
         // 通知翻牌玩家是否要胡
         const huXi = HuXiUtil.getHuXi(canHuData, HuActions.IsMeFlopCard, this.cards.length === 0)
-        logger.info('计算胡息', huXi.hx, '胡牌胡息', this.huxi)
-        if (huXi.hx >= this.huxi) {
+        logger.info('计算胡息', huXi.hx, '胡牌胡息', this.rule.hx)
+        if (huXi.hx >= this.rule.hx) {
             this.feadback.send(this.player.username, {
                 route: 'onNotification',
                 name: Notifications.checkHu,
@@ -847,7 +845,7 @@ Room.prototype.checkPlayerUserCanHuWithPlayerCard2 = function () {
     if (canHuData) {
         // 通知翻牌玩家是否要胡
         const huXi = HuXiUtil.getHuXi(canHuData, HuActions.IsMeFlopCard)
-        if (huXi.hx >= this.huxi) {
+        if (huXi.hx >= this.rule.hx) {
             this.feadback.send(this.player.username, {
                 route: 'onNotification',
                 name: Notifications.checkHu,
@@ -880,7 +878,7 @@ Room.prototype.checkPlayerUserCanHuWithPlayerCard3 = function () {
     if (canHuData) {
         // 通知翻牌玩家是否要胡
         const huXi = HuXiUtil.getHuXi(canHuData, HuActions.IsMeFlopCard)
-        if (huXi.hx >= this.huxi) {
+        if (huXi.hx >= this.rule.hx) {
             this.feadback.send(this.player.username, {
                 route: 'onNotification',
                 name: Notifications.checkHu,
@@ -993,7 +991,7 @@ Room.prototype.loopOtherUserCanHuWithPlayerCard2 = function () {
             }
             // {hx: 10, hts: []}
             const huXi = HuXiUtil.getHuXi(canHuData, huAction)
-            if (huXi.hx >= this.huxi) {
+            if (huXi.hx >= this.rule.hx) {
                 this.feadback.send(user.username,
                     {
                         route: 'onNotification',

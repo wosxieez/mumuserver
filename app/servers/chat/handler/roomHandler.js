@@ -22,28 +22,6 @@ handler.sendAction = function (action, session, next) {
 	// console.log('---------------------------------------------------------------------------')
 }
 
-handler.getRoomsUsers = function (msg, session, next) {
-	// console.log('---------------------------服务器', this.app.get('serverId'), '---------------------------')
-	// console.log('getRoomsUsers')
-
-	var data = {}
-	const roomnames = msg.roomnames
-	roomnames.forEach(roomname => {
-		data[roomname] = []
-		var channel = channel = this.app.get('channelService').getChannel(roomname, false)
-		if (!!channel) {
-			channel.room.users.forEach(user => {
-				data[roomname].push(user.username)
-			})
-		} else {
-		}
-	})
-	next(null, { code: 0, data })
-
-	// console.log('---------------------------------------------------------------------------')
-}
-
-
 /**
  * push message to group users
  *
