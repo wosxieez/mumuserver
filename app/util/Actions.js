@@ -10,7 +10,8 @@ const Actions = {
     Hu: "hu",         // 胡牌
     Cancel: "cancel", // 取消 
     Idle: "idle",      // 无操作
-    Ready: 'ready'    // 准备操纵
+    Ready: 'ready',    // 准备操纵
+    Dn: 'dn'
 }
 
 module.exports = Actions

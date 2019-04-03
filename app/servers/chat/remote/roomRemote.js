@@ -133,6 +133,9 @@ RoomRemote.prototype.onAction = function (sid, groupname, roomname, username, ac
 				channel.room.setReady(username, action.data)
 				channel.room.checkGameStart()
 				break
+				case Actions.Dn:
+				channel.room.setDaNiao(username, action.data)
+				break
 			case Actions.Hu:
 			case Actions.NewCard:
 			case Actions.Peng:

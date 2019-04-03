@@ -79,12 +79,27 @@ Room.prototype.hasUser = function (username) {
 }
 
 //---------------------------------------------------------------------------------------------------------------
-// 检查游戏是否能开始
+// 设置玩家准备
 //---------------------------------------------------------------------------------------------------------------
 Room.prototype.setReady = function (username, isReady) {
     for (var i = 0; i < this.users.length; i++) {
         if (this.users[i].username === username) {
             this.users[i].isReady = isReady
+        }
+    }
+
+    this.noticeAllUserOnReady()
+}
+
+//---------------------------------------------------------------------------------------------------------------
+// 设置打鸟信息
+//---------------------------------------------------------------------------------------------------------------
+Room.prototype.setDaNiao = function (username, dn) {
+    if (this.onGaming || this.isGaming) return
+    
+    for (var i = 0; i < this.users.length; i++) {
+        if (this.users[i].username === username) {
+            this.users[i].dn = dn
         }
     }
 
@@ -1529,7 +1544,7 @@ Room.prototype.noticeAllUserOnRoundEnd = function () {
 }
 
 Room.prototype.getStatus = function () {
-    return {
+    var status = {
         og: this.onGaming,
         ig: this.isGaming,
         zn: this.zhuang ? this.zhuang.username : null,
@@ -1543,6 +1558,8 @@ Room.prototype.getStatus = function () {
         cc: this.cards.length,
         io: this.isOut
     }
+    console.log('房间状态', status)
+    return status
 }
 
 Room.prototype.forceRelease = function () {

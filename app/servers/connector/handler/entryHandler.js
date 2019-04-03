@@ -91,7 +91,7 @@ handler.createRoom = function (rule, session, next) {
 }
 
 /**
- *	加入房间
+ *	加入房间 
  */
 handler.joinRoom = function (msg, session, next) {
 	const sid = this.app.get('serverId')
