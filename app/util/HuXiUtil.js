@@ -34,8 +34,8 @@ HuXiUtil.getHuXi = function (cardsOnGroup, huAcation, isLatestCard = false) {
     default:
       break;
   }
-  console.log('胡息', JSON.stringify(cardsOnGroup), JSON.stringify(huXi))
   huXi.thx = HuXiUtil.getTotalHuXi(huXi)
+  console.log('胡息', JSON.stringify(cardsOnGroup), JSON.stringify(huXi))
   return huXi
 }
 
