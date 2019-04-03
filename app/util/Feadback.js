@@ -7,10 +7,10 @@ module.exports = function Feadback(channel) {
 
         if (channel.getMember(username)) {
             channel.pushMessage(message)
-            this.timeout = setTimeout(this.doCancel.bind(this, username), 30000)
+            this.timeout = setTimeout(this.doCancel.bind(this, username), 60000)
         } else {
             // 玩家掉线 pass处理
-            this.timeout = setTimeout(this.doCancel.bind(this, username), 500)
+            this.timeout = setTimeout(this.doCancel.bind(this, username), 1000)
         }
         return this
     }

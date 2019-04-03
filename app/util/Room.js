@@ -96,7 +96,7 @@ Room.prototype.setReady = function (username, isReady) {
 //---------------------------------------------------------------------------------------------------------------
 Room.prototype.setDaNiao = function (username, dn) {
     if (this.onGaming || this.isGaming) return
-    
+
     for (var i = 0; i < this.users.length; i++) {
         if (this.users[i].username === username) {
             this.users[i].dn = dn
@@ -143,7 +143,7 @@ Room.prototype.gameStart = function () {
         data: this.getStatus()
     })
 
-    this.timeout = setTimeout(this.checkAllUserCanHuWith3Ti5Kan.bind(this), 2000)
+    this.timeout = setTimeout(this.checkAllUserCanHuWith3Ti5Kan.bind(this), 1500)
 }
 
 Room.prototype.initRoom = function () {
@@ -352,7 +352,7 @@ Room.prototype.checkXianCanTi = function () {
             data: this.getStatus()
         })
 
-        this.timeout = setTimeout(() => { this.nextPlayCard(this.zhuang) }, 2000)
+        this.timeout = setTimeout(() => { this.nextPlayCard(this.zhuang) }, 1000)
     } else {
         this.nextPlayCard(this.zhuang)
     }
@@ -383,7 +383,7 @@ Room.prototype.zhuangPlayCard = function () {
             CardUtil.deleteCard(this.player.handCards, this.player_card)
             this.isOut = true
             this.noticeAllUserOnNewCard()
-            this.timeout = setTimeout(() => { this.checkXianCanTi2() }, 2000)
+            this.timeout = setTimeout(() => { this.checkXianCanTi2() }, 1000)
         })
         .thenCancel(() => {
             this.action_user = null
@@ -400,7 +400,7 @@ Room.prototype.zhuangPlayCard = function () {
             CardUtil.deleteCard(this.player.handCards, this.player_card)
             this.isOut = true
             this.noticeAllUserOnNewCard()
-            this.timeout = setTimeout(() => { this.checkXianCanTi2() }, 2000)
+            this.timeout = setTimeout(() => { this.checkXianCanTi2() }, 1000)
         })
 }
 
@@ -435,7 +435,7 @@ Room.prototype.checkXianCanTi2 = function () {
             data: this.getStatus()
         })
 
-        this.timeout = setTimeout(() => { this.checkOtherUserCanHuWithPlayerCard2() }, 2000)
+        this.timeout = setTimeout(() => { this.checkOtherUserCanHuWithPlayerCard2() }, 1000)
     } else {
         this.checkOtherUserCanHuWithPlayerCard2()
     }
@@ -543,7 +543,7 @@ Room.prototype.loopOtherUserCanPaoWithPlayerCard = function () {
                 } else {
                     this.playerPlayCard(user)
                 }
-            }, 2000)
+            }, 1000)
         } else {
             const canPaoData2 = CardUtil.canTi2(user.groupCards, this.player_card)
             if (canPaoData2) {
@@ -565,7 +565,7 @@ Room.prototype.loopOtherUserCanPaoWithPlayerCard = function () {
                     } else {
                         this.playerPlayCard(user)
                     }
-                }, 2000)
+                }, 1000)
             } else {
                 // 这个玩家不能跑操作，循环检查下个玩家
                 this.loopOtherUserCanPaoWithPlayerCard()
@@ -625,7 +625,7 @@ Room.prototype.loopOtherUserCanPengWithPlayerCard = function () {
                         this.noticeAllUserOnPeng()
                         this.timeout = setTimeout(() => {
                             this.playerPlayCard(user)
-                        }, 2000)
+                        }, 1000)
                     }).thenCancel(() => {
                         logger.info(user.username, '选择了不碰 或者 超时了')
                         this.action_user = null
@@ -688,7 +688,7 @@ Room.prototype.checkPlayerUserCanChiWithPlayerCard = function () {
                 } else {
                     this.noticeAllUserOnChi()
                 }
-                this.timeout = setTimeout(() => { this.playerPlayCard(this.player) }, 2000)
+                this.timeout = setTimeout(() => { this.playerPlayCard(this.player) }, 1000)
             }).thenCancel(() => {
                 // 出牌玩家不想吃 或者 超时了
                 logger.info(this.player.username, '选择了不吃牌 或者 超时了')
@@ -768,7 +768,7 @@ Room.prototype.checkNextUserCanChiWithPlayerCard = function () {
                     } else {
                         this.noticeAllUserOnChi()
                     }
-                    this.timeout = setTimeout(() => { this.playerPlayCard(nextUser) }, 2000)
+                    this.timeout = setTimeout(() => { this.playerPlayCard(nextUser) }, 1000)
                 }).thenCancel(() => {
                     // 下家不想吃 或者 超时了
                     logger.info(nextUser.username, '选择了不吃牌 或者 超时了')
@@ -839,7 +839,7 @@ Room.prototype.nextPlayCard = function (user) {
     this.noticeAllUserOnNewCard()
     this.timeout = setTimeout(() => {
         this.checkPlayerUserCanTiWithPlayerCard()
-    }, 2000)
+    }, 1000)
 }
 
 
@@ -862,7 +862,7 @@ Room.prototype.checkPlayerUserCanTiWithPlayerCard = function () {
 
         this.timeout = setTimeout(() => {
             this.checkPlayerUserCanHuWithPlayerCard3()
-        }, 2000)
+        }, 1000)
     } else {
         const canTiData2 = CardUtil.canTi2(this.player.groupCards, this.player_card)
         if (canTiData2) {
@@ -873,7 +873,7 @@ Room.prototype.checkPlayerUserCanTiWithPlayerCard = function () {
 
             this.timeout = setTimeout(() => {
                 this.checkPlayerUserCanHuWithPlayerCard3()
-            }, 2000)
+            }, 1000)
         } else {
             this.checkPlayerUserCanWeiWithPlayerCard()
         }
@@ -899,7 +899,7 @@ Room.prototype.checkPlayerUserCanWeiWithPlayerCard = function () {
 
         this.timeout = setTimeout(() => {
             this.checkPlayerUserCanHuWithPlayerCard2()
-        }, 2000)
+        }, 1000)
     } else {
         this.checkPlayerUserCanHuWithPlayerCard()
     }
@@ -1075,7 +1075,7 @@ Room.prototype.playerPlayCard = function (user) {
                 CardUtil.deleteCard(this.player.handCards, this.player_card)
                 this.isOut = true
                 this.noticeAllUserOnNewCard()
-                this.timeout = setTimeout(() => { this.checkOtherUserCanHuWithPlayerCard2() }, 2000);
+                this.timeout = setTimeout(() => { this.checkOtherUserCanHuWithPlayerCard2() }, 1000);
             })
             .thenCancel(() => {
                 logger.info('取消或无反应')
@@ -1093,9 +1093,7 @@ Room.prototype.playerPlayCard = function (user) {
                 CardUtil.deleteCard(this.player.handCards, this.player_card)
                 this.isOut = true
                 this.noticeAllUserOnNewCard()
-                this.timeout = setTimeout(() => {
-                    this.checkOtherUserCanHuWithPlayerCard2()
-                }, 2000);
+                this.timeout = setTimeout(() => { this.checkOtherUserCanHuWithPlayerCard2() }, 1000);
             })
     } else {
         // 玩家无法出牌了 直接下家出牌
@@ -1208,7 +1206,7 @@ Room.prototype.loopOtherUserCanPaoWithPlayerCard2 = function () {
                 } else {
                     this.playerPlayCard(user)
                 }
-            }, 2000)
+            }, 1000)
         } else {
             const canPaoData2 = CardUtil.canTi3(user.groupCards, this.player_card)
             if (canPaoData2) {
@@ -1224,7 +1222,7 @@ Room.prototype.loopOtherUserCanPaoWithPlayerCard2 = function () {
                     } else {
                         this.playerPlayCard(user)
                     }
-                }, 2000)
+                }, 1000)
             } else {
                 // 这个玩家不能跑操作，循环检查下个玩家
                 this.loopOtherUserCanPaoWithPlayerCard2()
@@ -1284,7 +1282,7 @@ Room.prototype.loopOtherUserCanPengWithPlayerCard2 = function () {
                     this.noticeAllUserOnPeng()
                     this.timeout = setTimeout(() => {
                         this.playerPlayCard(user)
-                    }, 2000)
+                    }, 1000)
                 }).thenCancel(() => {
                     logger.info(user.username, '选择了不碰 或者 超时了')
                     this.action_user = null
@@ -1366,7 +1364,7 @@ Room.prototype.checkNextUserCanChiWithPlayerCard2 = function () {
                     } else {
                         this.noticeAllUserOnChi()
                     }
-                    this.timeout = setTimeout(() => { this.playerPlayCard(nextUser) }, 2000)
+                    this.timeout = setTimeout(() => { this.playerPlayCard(nextUser) }, 1000)
                 }).thenCancel(() => {
                     // 下家不想吃 或者 超时了
                     logger.info(nextUser.username, '选择了不吃 或者 超时了')
@@ -1558,7 +1556,6 @@ Room.prototype.getStatus = function () {
         cc: this.cards.length,
         io: this.isOut
     }
-    console.log('房间状态', status)
     return status
 }
 
