@@ -18,7 +18,7 @@ GroupRemote.prototype.joinGroup = function (sid, groupname, username, cb) {
 
     const oldMember = channel.getMember(username)
     if (!!oldMember) {
-        cb({ code: 0, data: channel.getMembers() })
+        cb({ code: 0, data: this.getGroupStatus(groupname) })
         return
     }
     channel.add(username, sid)
