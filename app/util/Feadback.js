@@ -21,6 +21,7 @@ module.exports = function Feadback(channel) {
     }
     this.doOk = function (un, newuser) {
         console.log('收到反馈', un, newuser)
+        if (!this.users) return 
         this.users = this.users.map(user => {
             if (user.un === un) {
                 console.log('反馈的玩家在反馈的数据中')
