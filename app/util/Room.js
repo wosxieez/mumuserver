@@ -766,6 +766,9 @@ Room.prototype.checkChiAction = function (aus) {
         }
     }
 
+    this.actionUsers = []
+    this.feadback.manualCancel()
+
     // 没人选择吃碰
     this.passCard()
 }
@@ -1325,6 +1328,7 @@ Room.prototype.checkNextUserCanChiWithPlayerCard2 = function () {
                             logger.info(nextUser.username, '选择了吃牌')
                             nextUser.handCards.push(this.player_card)
                             this.player_card = 0
+                            var data = aus[0].cd.dt
                             data.forEach(group => {
                                 group.cards.forEach(card => {
                                     CardUtil.deleteCard(nextUser.handCards, card)
