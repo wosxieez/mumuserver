@@ -22,7 +22,8 @@ const Notifications = {
     onGroupStatus: 24,      // 群数据发生变化
     onRoomStatus: 25,    // 群数据发生变化
     onRoomMessage: 26,
-    onGameOver: 27
+    onGameOver: 27,
+    onAction: 28
 }
 
 module.exports = Notifications

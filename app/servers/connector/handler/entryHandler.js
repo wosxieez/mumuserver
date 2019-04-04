@@ -72,6 +72,7 @@ handler.leaveGroup = function (msg, session, next) {
  *	创建房间
  */
 handler.createRoom = function (rule, session, next) {
+	console.log('fuck fuck')
 	const sid = this.app.get('serverId')
 	const groupname = session.get('groupname')
 	const username = session.get('username')
