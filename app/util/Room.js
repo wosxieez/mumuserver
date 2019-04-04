@@ -78,7 +78,7 @@ Room.prototype.hasUser = function (username) {
 Room.prototype.getUser = function (username) {
     for (var i = 0; i < this.users.length; i++) {
         if (this.users[i].username === username) {
-            return users[i]
+            return this.users[i]
         }
     }
     return null
@@ -661,28 +661,38 @@ Room.prototype.checkNextUserCanChiWithPlayerCard = function () {
         }
     }
 
-    console.log('this.actionUsers', this.actionUsers)
-    this.noticeAllUserOnAction()
-    this.feadback.send(this.actionUsers)
-        .thenOk(aus => {
-            this.checkPengAction(aus)
-        })
-        .thenCancel(aus => {
-            // 超时了 默认所有玩家的 不吃碰
-            for (var i = 0; i < aus.length; i++) {
-                if (aus[i].pd && aus[i].pd === -1) {
-                    aus[i].pd = 0
+    for (var i = this.actionUsers.length - 1; i >= 0; i--) {
+        if (!this.actionUsers[i].pd && !this.actionUsers[i].cd) {
+            this.actionUsers.splice(i, 1)
+        }
+    }
+
+    if (this.actionUsers.length > 0) {
+        this.noticeAllUserOnAction()
+        this.feadback.send(this.actionUsers)
+            .thenOk(aus => {
+                this.checkPengAction(aus)
+            })
+            .thenCancel(aus => {
+                // 超时了 默认所有玩家的 不吃碰
+                for (var i = 0; i < aus.length; i++) {
+                    if (aus[i].pd && aus[i].pd === -1) {
+                        aus[i].pd = 0
+                    }
+                    if (aus[i].cd && aus[i].cd === -1) {
+                        aus[i].cd = 0
+                    }
                 }
-                if (aus[i].cd && aus[i].cd === -1) {
-                    aus[i].cd = 0
-                }
-            }
-            this.checkPengAction(aus)
-        })
+                this.checkPengAction(aus)
+            })
+    } else {
+        this.passCard()
+    }
 }
 
 Room.prototype.checkPengAction = function (aus) {
     // 检查碰响应的玩家
+    console.log('检查碰响应的玩家', aus)
     for (var i = 0; i < aus.length; i++) {
         if (aus[i].pd) {
             if (aus[i].pd.ac === 1) {
@@ -703,11 +713,15 @@ Room.prototype.checkPengAction = function (aus) {
                 return
             } else if (aus[i].pd.ac === 0) {
                 // 玩家不碰操作 继续判断下家
+                var user = this.getUser(aus[i].un)
+                user.upCards.push(this.player_card)
                 continue
             } else {
                 // 玩家没有响应 继续等待
                 return
             }
+        } else {
+
         }
     }
 
@@ -716,6 +730,7 @@ Room.prototype.checkPengAction = function (aus) {
 
 Room.prototype.checkChiAction = function (aus) {
     // 检查吃响应的玩家
+    console.log('检查吃响应的玩家', aus)
     for (var i = 0; i < aus.length; i++) {
         if (aus[i].cd) {
             if (aus[i].cd.ac === 1) {
@@ -741,6 +756,8 @@ Room.prototype.checkChiAction = function (aus) {
                 return
             } else if (aus[i].cd.ac === 0) {
                 // 玩家不吃操作
+                var user = this.getUser(aus[i].un)
+                user.ucCards.push(this.player_card)
                 continue
             } else {
                 // 玩家没有响应 继续等待
@@ -1525,7 +1542,7 @@ Room.prototype.getStatus = function () {
         cc: this.cards.length,
         io: this.isOut
     }
-    console.log(status)
+    // console.log(status)
     return status
 }
 

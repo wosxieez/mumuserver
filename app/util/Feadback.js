@@ -8,7 +8,7 @@ module.exports = function Feadback(channel) {
         this.cancelFunction = null
         clearTimeout(this.timeout)
         this.timeout = setTimeout(this.timeoutCancel.bind(this), 60000) // 60s后所有玩家默认为取消
-        console.log('反馈启动')
+        console.log('反馈启动', this.users)
         return this
     }
     this.thenOk = function (cb) {
@@ -21,39 +21,38 @@ module.exports = function Feadback(channel) {
     }
     this.doOk = function (un, newuser) {
         console.log('收到反馈', un, newuser)
-        this.users.forEach(user => {
-            if (user.un == un) {
-                // 反馈的玩家在反馈的数据中
+        this.users = this.users.map(user => {
+            if (user.un === un) {
                 console.log('反馈的玩家在反馈的数据中')
                 user = newuser
-                const doFunction = this.okFunction
-                if (doFunction) {
-                    doFunction(this.users)
-                }
             }
+            return user
         })
-    }
-    this.timeoutCancel = function () {
-        // 超时了 执行取消
-        const doFunction = this.cancelFunction
-        this.users = null
-        this.okFunction = null
-        this.cancelFunction = null
-        clearTimeout(this.timeout)
-
+        console.log(this.users)
+        const doFunction = this.okFunction
         if (doFunction) {
             doFunction(this.users)
         }
-
-        console.log('超时反馈结束')
+    }
+    this.timeoutCancel = function () {
+        // 超时了 执行取消
+        console.log('超时反馈结束', this.users)
+        const doFunction = this.cancelFunction
+        this.okFunction = null
+        this.cancelFunction = null
+        clearTimeout(this.timeout)
+        if (doFunction) {
+            doFunction(this.users)
+        }
+        this.users = null
     }
     this.manualCancel = function () {
         // 手动取消了
+        console.log('手动反馈结束', this.users)
         this.users = null
         this.okFunction = null
         this.cancelFunction = null
         clearTimeout(this.timeout)
-        console.log('手动反馈结束')
     }
     this.release = function () {
         console.log('反馈释放')
