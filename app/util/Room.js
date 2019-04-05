@@ -1132,16 +1132,14 @@ Room.prototype.loopOtherUserCanPaoWithPlayerCard2 = function () {
         const canPaoData1 = CardUtil.canTi(user.handCards, this.player_card)
         if (canPaoData1) {
             // 跑起操作
-            canPaoData1.forEach(card => {
-                CardUtil.deleteCard(user.handCards, card)
-            })
-            canPaoData1.push(this.player_card)
-            this.player_card = 0
-            user.groupCards.push({ name: Actions.Pao, cards: canPaoData1 })
-
-            this.noticeAllUserOnPao()
-
             this.timeout = setTimeout(() => {
+                canPaoData1.forEach(card => {
+                    CardUtil.deleteCard(user.handCards, card)
+                })
+                canPaoData1.push(this.player_card)
+                this.player_card = 0
+                user.groupCards.push({ name: Actions.Pao, cards: canPaoData1 })
+                this.noticeAllUserOnPao()
                 if (CardUtil.tiPaoCount(user.groupCards) >= 2) {
                     this.timeout = setTimeout(() => {
                         this.nextPlayCard(user) // 让user用户的下家出牌
@@ -1149,7 +1147,7 @@ Room.prototype.loopOtherUserCanPaoWithPlayerCard2 = function () {
                 } else {
                     this.playerPlayCard(user)
                 }
-            }, 1500)
+            }, 1500);
         } else {
             const canPaoData2 = CardUtil.canTi3(user.groupCards, this.player_card)
             if (canPaoData2) {

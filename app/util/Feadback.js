@@ -5,12 +5,12 @@ module.exports = function Feadback(channel) {
     this.channel = channel
 
     this.send = function () {
-        this.isOk = true
         // [ { un: wosxieez1 nd: {dt: '', ac: -1}, hd: {dt: [], ac: -1}, pd: {dt: []}, ac: -1}, cd: {dt: [], ac: -1} },
         //   { un: wosxieez2 nd: {dt: '', ac: -1}, hd: {dt: [], ac: -1}, pd: {dt: []}, ac: -1}, cd: {dt: [], ac: -1} } ]
         this.okFunction = null
         clearTimeout(this.timeout)
         console.log('反馈启动', this.channel.room.actionUsers)
+        this.isOk = true
         this.timeout = setTimeout(this.timeoutCancel.bind(this), 60000) // 60s后所有玩家默认为取消
         return this
     }
@@ -38,7 +38,7 @@ module.exports = function Feadback(channel) {
     }
 
     this.timeoutCancel = function () {
-        if (this.isOk) return
+        if (!this.isOk) return
         this.isOk = false
         if (!this.channel.room.actionUsers) return 
         this.channel.room.actionUsers.forEach(oldUser => {
