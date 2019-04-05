@@ -358,36 +358,40 @@ Room.prototype.zhuangPlayCard = function () {
     this.actionUsers = [{ un: this.zhuang.username, nd: { dt: 'oc', ac: -1 } }]
     this.noticeAllUserOnAction()
     this.feadback.send(this.actionUsers)
-        .thenOk(aus => {
+        .thenOk(() => {
             // 庄家出牌
-            this.player_card = aus[0].nd.dt
-            this.player = this.zhuang
-            this.actionUsers = []
-            this.feadback.manualCancel()  // 手动取消反馈
+            if (this.actionUsers[0].nd.ac === 1) {
+                this.player_card = this.actionUsers[0].nd.dt
+                this.player = this.zhuang
+                this.actionUsers = []
+                this.feadback.manualCancel()  // 手动取消反馈
 
-            logger.info('庄家出牌', this.player_card)
-            this.player.ucCards.push(this.player_card)
-            this.player.upCards.push(this.player_card)
-            this.isZhuangFirstOutCard = true
-            CardUtil.deleteCard(this.player.handCards, this.player_card)
-            this.isOut = true
-            this.noticeAllUserOnNewCard()
-            this.checkXianCanTi2()
-        })
-        .thenCancel(() => {
-            // 超时取消
-            const riffleCards = CardUtil.riffle(this.zhuang.handCards)
-            const lastGroup = riffleCards.pop()
-            this.player_card = lastGroup.pop()
-            this.player = this.zhuang
-            logger.info('庄家出牌', this.player_card)
-            this.player.ucCards.push(this.player_card)
-            this.player.upCards.push(this.player_card)
-            this.isZhuangFirstOutCard = true
-            CardUtil.deleteCard(this.player.handCards, this.player_card)
-            this.isOut = true
-            this.noticeAllUserOnNewCard()
-            this.timeout = setTimeout(() => { this.checkXianCanTi2() }, 1500)
+                logger.info('庄家出牌', this.player_card)
+                this.player.ucCards.push(this.player_card)
+                this.player.upCards.push(this.player_card)
+                this.isZhuangFirstOutCard = true
+                CardUtil.deleteCard(this.player.handCards, this.player_card)
+                this.isOut = true
+                this.noticeAllUserOnNewCard()
+                this.checkXianCanTi2()
+            } else {
+                // 超时取消
+                const riffleCards = CardUtil.riffle(this.zhuang.handCards)
+                const lastGroup = riffleCards.pop()
+                this.player_card = lastGroup.pop()
+                this.player = this.zhuang
+                this.actionUsers = []
+                this.feadback.manualCancel()  // 手动取消反馈
+
+                logger.info('庄家出牌', this.player_card)
+                this.player.ucCards.push(this.player_card)
+                this.player.upCards.push(this.player_card)
+                this.isZhuangFirstOutCard = true
+                CardUtil.deleteCard(this.player.handCards, this.player_card)
+                this.isOut = true
+                this.noticeAllUserOnNewCard()
+                this.checkXianCanTi2()
+            }
         })
 }
 
@@ -417,12 +421,12 @@ Room.prototype.checkXianCanTi2 = function () {
     if (hasTi) {
         this.timeout = setTimeout(() => {
             // 通知有人提了
-        this.channel.pushMessage({
-            route: 'onRoom',
-            name: Notifications.onTi,
-            data: this.getStatus()
-        })
-        this.checkOtherUserCanHuWithPlayerCard2()
+            this.channel.pushMessage({
+                route: 'onRoom',
+                name: Notifications.onTi,
+                data: this.getStatus()
+            })
+            this.checkOtherUserCanHuWithPlayerCard2()
         }, 1500);
     } else {
         this.checkOtherUserCanHuWithPlayerCard2()
@@ -460,17 +464,8 @@ Room.prototype.loopOtherUserCanHuWithPlayerCard = function () {
         if (this.actionUsers.length > 0) {
             this.noticeAllUserOnAction()
             this.feadback.send(this.actionUsers)
-                .thenOk(aus => {
-                    this.checkHuAction(aus)
-                })
-                .thenCancel(aus => {
-                    // 超时了 默认所有玩家的 不胡
-                    for (var i = 0; i < aus.length; i++) {
-                        if (aus[i].hd && aus[i].hd.ac === -1) {
-                            aus[i].hd.ac = 0
-                        }
-                    }
-                    this.checkHuAction(aus)
+                .thenOk(() => {
+                    this.checkHuAction(this.actionUsers)
                 })
         } else {
             this.checkOtherUserCanPaoWithPlayerCard()
@@ -668,20 +663,8 @@ Room.prototype.checkNextUserCanChiWithPlayerCard = function () {
     if (this.actionUsers.length > 0) {
         this.noticeAllUserOnAction()
         this.feadback.send(this.actionUsers)
-            .thenOk(aus => {
-                this.checkPengAction(aus)
-            })
-            .thenCancel(aus => {
-                // 超时了 默认所有玩家的 不吃碰
-                for (var i = 0; i < aus.length; i++) {
-                    if (aus[i].pd && aus[i].pd.ac === -1) {
-                        aus[i].pd.ac = 0
-                    }
-                    if (aus[i].cd && aus[i].cd.ac === -1) {
-                        aus[i].cd.ac = 0
-                    }
-                }
-                this.checkPengAction(aus)
+            .thenOk(() => {
+                this.checkPengAction(this.actionUsers)
             })
     } else {
         this.timeout = setTimeout(() => {
@@ -813,12 +796,7 @@ Room.prototype.passCard = function () {
 
     // 参见流程 check12
     logger.info('check12')
-    if (this.cards.length > 0) {
-        this.nextPlayCard(this.player)
-    } else {
-        // todo game over 荒庄
-        this.noticeAllUserOnRoundEnd()
-    }
+    this.nextPlayCard(this.player)
 }
 
 
@@ -828,6 +806,11 @@ Room.prototype.passCard = function () {
  */
 Room.prototype.nextPlayCard = function (user) {
     logger.info('check23 下家翻牌')
+
+    if (this.cards.length === 0) {
+        this.noticeAllUserOnRoundEnd()
+        return
+    }
 
     for (var i = 0; i < this.users.length; i++) {
         if (this.users[i].username == user.username) {
@@ -943,10 +926,10 @@ Room.prototype.checkPlayerUserCanHuWithPlayerCard2 = function () {
             this.actionUsers = [{ un: this.player.username, hd: { dt: canHuData, ac: -1 } }]
             this.noticeAllUserOnAction()
             this.feadback.send(this.actionUsers)
-                .thenOk(aus => {
-                    if (aus[0].hd.ac === 1) {
+                .thenOk(() => {
+                    if (this.actionUsers[0].hd.ac === 1) {
                         // 翻牌玩家胡
-                        this.player.groupCards = aus[0].hd.td
+                        this.player.groupCards = this.actionUsers[0].hd.td
                         this.player.handCards = []
                         this.actionUsers = []
                         this.feadback.manualCancel()
@@ -957,11 +940,6 @@ Room.prototype.checkPlayerUserCanHuWithPlayerCard2 = function () {
                         this.feadback.manualCancel()
                         this.playerPlayCard(this.player)
                     }
-                })
-                .thenCancel(aus => {
-                    // 不胡
-                    this.actionUsers = []
-                    this.playerPlayCard(this.player)
                 })
         } else {
             // 胡息不够 不能胡牌
@@ -986,10 +964,10 @@ Room.prototype.checkPlayerUserCanHuWithPlayerCard3 = function () {
             this.actionUsers = [{ un: this.player.username, hd: { dt: canHuData, ac: -1 } }]
             this.noticeAllUserOnAction()
             this.feadback.send(this.actionUsers)
-                .thenOk(aus => {
-                    if (aus[0].hd.ac === 1) {
+                .thenOk(() => {
+                    if (this.actionUsers[0].hd.ac === 1) {
                         // 翻牌玩家胡
-                        this.player.groupCards = aus[0].hd.td
+                        this.player.groupCards = this.actionUsers[0].hd.td
                         this.player.handCards = []
                         this.actionUsers = []
                         this.feadback.manualCancel()
@@ -1000,11 +978,6 @@ Room.prototype.checkPlayerUserCanHuWithPlayerCard3 = function () {
                         this.feadback.manualCancel()
                         this.checkTiPaoCount()
                     }
-                })
-                .thenCancel(aus => {
-                    // 不胡
-                    this.actionUsers = []
-                    this.checkTiPaoCount()
                 })
         } else {
             // 胡息不够 不能胡牌
@@ -1038,11 +1011,11 @@ Room.prototype.playerPlayCard = function (user) {
         this.actionUsers = [{ un: user.username, nd: { dt: '', ac: -1 } }]
         this.noticeAllUserOnAction()
         this.feadback.send(this.actionUsers)
-            .thenOk(aus => {
-                if (aus[0].nd.ac === 1) {
-                    logger.info('收到出牌', aus[0].nd.dt)
+            .thenOk(() => {
+                if (this.actionUsers[0].nd.ac === 1) {
+                    logger.info('收到出牌', this.actionUsers[0].nd.dt)
                     this.player = user
-                    this.player_card = aus[0].nd.dt
+                    this.player_card = this.actionUsers[0].nd.dt
                     this.isZhuangFirstOutCard = false
                     this.player.ucCards.push(this.player_card)
                     this.player.upCards.push(this.player_card)
@@ -1054,24 +1027,22 @@ Room.prototype.playerPlayCard = function (user) {
                     this.checkOtherUserCanHuWithPlayerCard2()
                 } else {
                     // 不出牌 不可能的
+                    // 超时了
+                    logger.info('取消或无反应')
+                    const riffleCards = CardUtil.riffle(user.handCards)
+                    const lastGroup = riffleCards.pop()
+                    this.player = user
+                    this.player_card = lastGroup.pop()
+                    this.isZhuangFirstOutCard = false
+                    logger.info('默认出的牌为', this.player_card)
+                    this.player.ucCards.push(this.player_card)
+                    this.player.upCards.push(this.player_card)
+                    CardUtil.deleteCard(this.player.handCards, this.player_card)
+                    this.isOut = true
+                    this.actionUsers = []
+                    this.noticeAllUserOnNewCard()
+                    this.checkOtherUserCanHuWithPlayerCard2()
                 }
-            })
-            .thenCancel(aus => {
-                // 超时了
-                logger.info('取消或无反应')
-                const riffleCards = CardUtil.riffle(user.handCards)
-                const lastGroup = riffleCards.pop()
-                this.player = user
-                this.player_card = lastGroup.pop()
-                this.isZhuangFirstOutCard = false
-                logger.info('默认出的牌为', this.player_card)
-                this.player.ucCards.push(this.player_card)
-                this.player.upCards.push(this.player_card)
-                CardUtil.deleteCard(this.player.handCards, this.player_card)
-                this.isOut = true
-                this.actionUsers = []
-                this.noticeAllUserOnNewCard()
-                this.checkOtherUserCanHuWithPlayerCard2()
             })
     } else {
         // 玩家无法出牌了 直接下家出牌
@@ -1113,8 +1084,8 @@ Room.prototype.loopOtherUserCanHuWithPlayerCard2 = function () {
                 this.actionUsers = [{ un: user.username, hd: { dt: canHuData, ac: -1 } }]
                 this.noticeAllUserOnAction()
                 this.feadback.send(this.actionUsers)
-                    .thenOk(aus => {
-                        if (aus[0].hd.ac === 1) {
+                    .thenOk(() => {
+                        if (this.actionUsers[0].hd.ac === 1) {
                             user.groupCards = canHuData
                             user.handCards = []
                             this.actionUsers = []
@@ -1125,11 +1096,6 @@ Room.prototype.loopOtherUserCanHuWithPlayerCard2 = function () {
                             this.feadback.manualCancel()
                             this.loopOtherUserCanHuWithPlayerCard2()
                         }
-                    })
-                    .thenCancel(aus => {
-                        this.actionUsers = []
-                        this.feadback.manualCancel()
-                        this.loopOtherUserCanHuWithPlayerCard2()
                     })
             } else {
                 // 胡息小于15 不能胡
@@ -1309,20 +1275,8 @@ Room.prototype.checkNextUserCanChiWithPlayerCard2 = function () {
     if (this.actionUsers.length > 0) {
         this.noticeAllUserOnAction()
         this.feadback.send(this.actionUsers)
-            .thenOk(aus => {
-                this.checkPengAction2(aus)
-            })
-            .thenCancel(aus => {
-                // 超时了 默认所有玩家的 不吃碰
-                for (var i = 0; i < aus.length; i++) {
-                    if (aus[i].pd && aus[i].pd.ac === -1) {
-                        aus[i].pd.ac = 0
-                    }
-                    if (aus[i].cd && aus[i].cd.ac === -1) {
-                        aus[i].cd.ac = 0
-                    }
-                }
-                this.checkPengAction2(aus)
+            .thenOk(() => {
+                this.checkPengAction2(this.actionUsers)
             })
     } else {
         this.timeout = setTimeout(() => {

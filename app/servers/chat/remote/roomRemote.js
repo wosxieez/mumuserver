@@ -141,7 +141,7 @@ RoomRemote.prototype.onAction = function (sid, groupname, roomname, username, ac
 			case Actions.Peng:
 			case Actions.Chi:
 			case Actions.Cancel:
-				channel.room.feadback.doOk(username, action.data)
+				channel.room.feadback.doOk(action.data)
 			default:
 				break
 		}
