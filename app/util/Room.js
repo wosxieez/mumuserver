@@ -347,7 +347,7 @@ Room.prototype.checkXianCanTi = function () {
         })
 
         // 提是服务器自动提的 所以需要有个延时
-        this.timeout = setTimeout(() => { this.nextPlayCard(this.zhuang) }, 1000)
+        this.timeout = setTimeout(() => { this.nextPlayCard(this.zhuang) }, 1500)
     } else {
         this.nextPlayCard(this.zhuang)
     }
@@ -372,7 +372,7 @@ Room.prototype.zhuangPlayCard = function () {
             CardUtil.deleteCard(this.player.handCards, this.player_card)
             this.isOut = true
             this.noticeAllUserOnNewCard()
-            this.timeout = setTimeout(() => { this.checkXianCanTi2() }, 1000)
+            this.checkXianCanTi2()
         })
         .thenCancel(() => {
             // 超时取消
@@ -387,7 +387,7 @@ Room.prototype.zhuangPlayCard = function () {
             CardUtil.deleteCard(this.player.handCards, this.player_card)
             this.isOut = true
             this.noticeAllUserOnNewCard()
-            this.timeout = setTimeout(() => { this.checkXianCanTi2() }, 1000)
+            this.timeout = setTimeout(() => { this.checkXianCanTi2() }, 1500)
         })
 }
 
@@ -415,14 +415,15 @@ Room.prototype.checkXianCanTi2 = function () {
     })
 
     if (hasTi) {
-        // 通知有人提了
+        this.timeout = setTimeout(() => {
+            // 通知有人提了
         this.channel.pushMessage({
             route: 'onRoom',
             name: Notifications.onTi,
             data: this.getStatus()
         })
-
-        this.timeout = setTimeout(() => { this.checkOtherUserCanHuWithPlayerCard2() }, 1000)
+        this.checkOtherUserCanHuWithPlayerCard2()
+        }, 1500);
     } else {
         this.checkOtherUserCanHuWithPlayerCard2()
     }
@@ -517,11 +518,11 @@ Room.prototype.loopOtherUserCanPaoWithPlayerCard = function () {
                 if (CardUtil.tiPaoCount(user.groupCards) >= 2) {
                     this.timeout = setTimeout(() => {
                         this.nextPlayCard(user) // 让user用户的下家出牌
-                    }, 1000);
+                    }, 1500);
                 } else {
                     this.playerPlayCard(user)
                 }
-            }, 1000);
+            }, 1500);
         } else {
             const canPaoData2 = CardUtil.canTi2(user.groupCards, this.player_card)
             if (canPaoData2) {
@@ -541,11 +542,11 @@ Room.prototype.loopOtherUserCanPaoWithPlayerCard = function () {
                     if (CardUtil.tiPaoCount(user.groupCards) >= 2) {
                         this.timeout = setTimeout(() => {
                             this.nextPlayCard(user) // 让user用户的下家出牌
-                        }, 1000);
+                        }, 1500);
                     } else {
                         this.playerPlayCard(user)
                     }
-                }, 1000);
+                }, 1500);
             } else {
                 // 这个玩家不能跑操作，循环检查下个玩家
                 this.loopOtherUserCanPaoWithPlayerCard()
@@ -685,7 +686,7 @@ Room.prototype.checkNextUserCanChiWithPlayerCard = function () {
     } else {
         this.timeout = setTimeout(() => {
             this.passCard()
-        }, 1000);
+        }, 1500);
     }
 }
 
@@ -869,7 +870,7 @@ Room.prototype.checkPlayerUserCanTiWithPlayerCard = function () {
             this.player.groupCards.push({ name: Actions.Ti, cards: canTiData1 })
             this.noticeAllUserOnTi()
             this.checkPlayerUserCanHuWithPlayerCard3()
-        }, 1000);
+        }, 1500);
     } else {
         const canTiData2 = CardUtil.canTi2(this.player.groupCards, this.player_card)
         if (canTiData2) {
@@ -879,7 +880,7 @@ Room.prototype.checkPlayerUserCanTiWithPlayerCard = function () {
                 this.player_card = 0 // 翻的牌被提起来了
                 this.noticeAllUserOnTi()
                 this.checkPlayerUserCanHuWithPlayerCard3()
-            }, 1000);
+            }, 1500);
         } else {
             this.checkPlayerUserCanWeiWithPlayerCard()
         }
@@ -903,7 +904,7 @@ Room.prototype.checkPlayerUserCanWeiWithPlayerCard = function () {
             this.player.groupCards.push({ name: Actions.Wei, cards: canWeiData })
             this.noticeAllUserOnWei()
             this.checkPlayerUserCanHuWithPlayerCard2()
-        }, 1000);
+        }, 1500);
     } else {
         this.checkPlayerUserCanHuWithPlayerCard()
     }
@@ -1034,7 +1035,6 @@ Room.prototype.checkTiPaoCount = function () {
 Room.prototype.playerPlayCard = function (user) {
     logger.info('check17 本人出牌')
     if (CardUtil.hasValidaOutCards(user.handCards)) {
-
         this.actionUsers = [{ un: user.username, nd: { dt: '', ac: -1 } }]
         this.noticeAllUserOnAction()
         this.feadback.send(this.actionUsers)
@@ -1179,11 +1179,11 @@ Room.prototype.loopOtherUserCanPaoWithPlayerCard2 = function () {
                 if (CardUtil.tiPaoCount(user.groupCards) >= 2) {
                     this.timeout = setTimeout(() => {
                         this.nextPlayCard(user) // 让user用户的下家出牌
-                    }, 1000);
+                    }, 1500);
                 } else {
                     this.playerPlayCard(user)
                 }
-            }, 1000)
+            }, 1500)
         } else {
             const canPaoData2 = CardUtil.canTi3(user.groupCards, this.player_card)
             if (canPaoData2) {
@@ -1197,11 +1197,11 @@ Room.prototype.loopOtherUserCanPaoWithPlayerCard2 = function () {
                     if (CardUtil.tiPaoCount(user.groupCards) >= 2) {
                         this.timeout = setTimeout(() => {
                             this.nextPlayCard(user) // 让user用户的下家出牌
-                        }, 1000);
+                        }, 1500);
                     } else {
                         this.playerPlayCard(user)
                     }
-                }, 1000)
+                }, 1500)
             } else {
                 // 这个玩家不能跑操作，循环检查下个玩家
                 this.loopOtherUserCanPaoWithPlayerCard2()
@@ -1327,7 +1327,7 @@ Room.prototype.checkNextUserCanChiWithPlayerCard2 = function () {
     } else {
         this.timeout = setTimeout(() => {
             this.passCard()
-        }, 1000);
+        }, 1500);
     }
 }
 
