@@ -5,12 +5,13 @@ module.exports = function Feadback(channel) {
     this.channel = channel
 
     this.send = function () {
+        this.isOk = true
         // [ { un: wosxieez1 nd: {dt: '', ac: -1}, hd: {dt: [], ac: -1}, pd: {dt: []}, ac: -1}, cd: {dt: [], ac: -1} },
         //   { un: wosxieez2 nd: {dt: '', ac: -1}, hd: {dt: [], ac: -1}, pd: {dt: []}, ac: -1}, cd: {dt: [], ac: -1} } ]
         this.okFunction = null
         clearTimeout(this.timeout)
         console.log('反馈启动', this.channel.room.actionUsers)
-        this.timeout = setTimeout(this.timeoutCancel.bind(this), 2000) // 60s后所有玩家默认为取消
+        this.timeout = setTimeout(this.timeoutCancel.bind(this), 60000) // 60s后所有玩家默认为取消
         return this
     }
 
@@ -20,6 +21,7 @@ module.exports = function Feadback(channel) {
     }
 
     this.doOk = function (newUser) {
+        if (!this.isOk) return
         if (!this.channel.room.actionUsers) return 
         this.channel.room.actionUsers.forEach(oldUser => {
             if (newUser.un === oldUser.un) {
@@ -30,14 +32,14 @@ module.exports = function Feadback(channel) {
             }
         })
         console.log('收到反馈后结果', this.channel.room.actionUsers)
-        const doFunction = this.okFunction
-        this.okFunction = null
-        if (doFunction) {
-            doFunction()
+        if (this.okFunction) {
+            this.okFunction()
         }
     }
 
     this.timeoutCancel = function () {
+        if (this.isOk) return
+        this.isOk = false
         if (!this.channel.room.actionUsers) return 
         this.channel.room.actionUsers.forEach(oldUser => {
                 if (oldUser.nd) { oldUser.nd.ac = 0 }
@@ -46,24 +48,22 @@ module.exports = function Feadback(channel) {
                 if (oldUser.cd) { oldUser.cd.ac = 0 }
         })
         console.log('超时反馈结束', this.channel.room.actionUsers)
-        const doFunction = this.okFunction
-        this.okFunction = null
         clearTimeout(this.timeout)
-        if (doFunction) {
-            doFunction()
+        if (this.okFunction) {
+            this.okFunction()
         }
     }
 
     this.manualCancel = function () {
-        // 手动取消了
+        // 手动取消了;
+        this.isOk = false
         console.log('手动反馈结束', this.channel.room.actionUsers)
-        this.okFunction = null
         clearTimeout(this.timeout)
     }
 
     this.release = function () {
+        this.isOk = false
         console.log('反馈释放')
-        this.okFunction = null
         clearTimeout(this.timeout)
     }
 
