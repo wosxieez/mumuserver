@@ -68,7 +68,12 @@ GroupRemote.prototype.getGroupStatus = function (groupname) {
     for (key in this.channelService.channels) {
         channel = this.channelService.channels[key]
         if (channel && channel.groupname === groupname) {
-            room = { name: channel.name, rid: channel.room.rule.id, users: [] }
+            room = {
+                name: channel.name,
+                rid: channel.room.rule.id,
+                pub: channel.room.rule.hasOwnProperty('pub') ? channel.room.rule.pub : true,
+                users: []
+            }
             channel.room.users.forEach(user => {
                 room.users.push(user.username)
             })

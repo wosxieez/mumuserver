@@ -52,7 +52,7 @@ RoomRemote.prototype.createRoom = function (sid, groupname, roomname, username, 
 		console.log(this.app.get('serverId'), groupname, username, '创建房间成功')
 		this.notificationGroupStatus(groupname)
 		this.notificationRoomStatus(roomname)
-		cb({ code: 0, data: rule })
+		cb({ code: 0, data: {rn: roomname, ru: rule} })
 	}
 }
 
@@ -67,7 +67,7 @@ RoomRemote.prototype.joinRoom = function (sid, groupname, roomname, username, cb
 		if (channel.room.hasUser(username)) {
 			channel.add(username, sid)
 			console.log(this.app.get('serverId'), groupname, username, '加入房间成功, 用户已经在房间里了', roomname)
-			cb({ code: 0, data: channel.room.rule })
+			cb({ code: 0, data: {rn: roomname, ru: channel.room.rule } })
 			return
 		}
 
@@ -78,7 +78,7 @@ RoomRemote.prototype.joinRoom = function (sid, groupname, roomname, username, cb
 			console.log(this.app.get('serverId'), groupname, username, '加入房间成功')
 			this.notificationGroupStatus(groupname)
 			this.notificationRoomStatus(roomname)
-			cb({ code: 0, data: channel.room.rule })
+			cb({ code: 0, data: {rn: roomname, ru: channel.room.rule } })
 		}
 		else {
 			console.log(this.app.get('serverId'), groupname, username, '加入失败，房间人数已满')
@@ -133,7 +133,7 @@ RoomRemote.prototype.onAction = function (sid, groupname, roomname, username, ac
 				channel.room.setReady(username, action.data)
 				channel.room.checkGameStart()
 				break
-				case Actions.Dn:
+			case Actions.Dn:
 				channel.room.setDaNiao(username, action.data)
 				break
 			case Actions.Hu:
@@ -167,7 +167,12 @@ RoomRemote.prototype.getGroupStatus = function (groupname) {
 	for (key in this.channelService.channels) {
 		channel = this.channelService.channels[key]
 		if (channel && channel.groupname === groupname) {
-			room = { name: channel.name, rid: channel.room.rule.id, users: [] }
+			room = {
+				name: channel.name,
+				rid: channel.room.rule.id,
+				pub: channel.room.rule.hasOwnProperty('pub') ? channel.room.rule.pub : true,
+				users: []
+			}
 			channel.room.users.forEach(user => {
 				room.users.push(user.username)
 			})
@@ -187,9 +192,11 @@ RoomRemote.prototype.getGroupStatus = function (groupname) {
 RoomRemote.prototype.notificationRoomStatus = function (roomname) {
 	const roomChannel = this.channelService.getChannel(roomname, false)
 	if (roomChannel) {
-		roomChannel.pushMessage({ route: 'onRoom', 
-		name: Notifications.onRoomStatus, 
-		data: this.getRoomStatus(roomname) })
+		roomChannel.pushMessage({
+			route: 'onRoom',
+			name: Notifications.onRoomStatus,
+			data: this.getRoomStatus(roomname)
+		})
 	}
 }
 

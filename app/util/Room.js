@@ -101,6 +101,8 @@ Room.prototype.getActionUser = function (username) {
 // 设置玩家准备
 //---------------------------------------------------------------------------------------------------------------
 Room.prototype.setReady = function (username, isReady) {
+    if (this.isGaming) return
+
     for (var i = 0; i < this.users.length; i++) {
         if (this.users[i].username === username) {
             this.users[i].isReady = isReady
@@ -129,6 +131,8 @@ Room.prototype.setDaNiao = function (username, dn) {
 // 检查游戏是否能开始
 //---------------------------------------------------------------------------------------------------------------
 Room.prototype.checkGameStart = function () {
+    if (this.isGaming) return
+
     if (this.users.length < this.rule.cc) {
         return
     }
@@ -167,11 +171,14 @@ Room.prototype.gameStart = function () {
 
 Room.prototype.initRoom = function () {
     logger.info('初始化房间信息')
+    clearTimeout(this.timeout)
+    this.actionUsers = []
     this.zhuang = null
     this.zhuang_card = 0
     this.isZhuangFirstOutCard = false
     this.player = null
     this.player_card = 0
+    this.isOut = false
 
     this.users.forEach(user => {
         user.handCards = []

@@ -11,7 +11,6 @@ var Handler = function (app) {
 
 var handler = Handler.prototype;
 
-
 /**
  * 加入群
  */
@@ -78,7 +77,7 @@ handler.createRoom = function (rule, session, next) {
 	const username = session.get('username')
 
 	// 创建房间 房间号需要先生成
-	this.app.rpc.chat.roomRemote.getRadom(session, groupname, 6, (roomname) => {
+	this.app.rpc.chat.roomRemote.getRadom(session, groupname, 4, (roomname) => {
 		session.set('roomname', roomname)
 		session.push('roomname', function (err) {
 			if (err) {
