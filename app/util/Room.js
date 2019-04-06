@@ -677,7 +677,7 @@ Room.prototype.checkNextUserCanChiWithPlayerCard = function () {
     } else {
         this.timeout = setTimeout(() => {
             this.passCard()
-        }, 1000);
+        }, 1300);
     }
 }
 
@@ -1294,7 +1294,7 @@ Room.prototype.checkNextUserCanChiWithPlayerCard2 = function () {
     } else {
         this.timeout = setTimeout(() => {
             this.passCard()
-        }, 1000);
+        }, 1300);
     }
 }
 
@@ -1526,7 +1526,7 @@ Room.prototype.noticeAllUserOnWin = function (wd) {
             score: winScore, rid: this.rule.id,
             gid: this.channel.groupname.substr(5)
         }
-        axios.post('http://127.0.0.1:3008/update_score', params).catch(error => { })
+        axios.post('http://hefeixiaomu.com:3008/update_score', params).catch(error => { })
 
         // 发送一局结束的通知
         this.channel.pushMessage({
