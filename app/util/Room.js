@@ -1516,7 +1516,7 @@ Room.prototype.noticeAllUserOnWin = function (wd) {
         var winTHX = winnerTHX - loserTHX
         var winScore = winTHX * this.rule.xf
         var params = { winner: winner.username, loser: loser ? loser.username : '**@@**', score: winScore, rid: this.rule.id }
-        axios.post('http://127.0.0.1:3008/update_score', params).catch(error => { })
+        axios.post('http://hefeixiaomu.com:3008/update_score', params).catch(error => { })
 
         // 发送一局结束的通知
         this.channel.pushMessage({
@@ -1532,6 +1532,16 @@ Room.prototype.noticeAllUserOnRoundEnd = function () {
     this.isGaming = false
     this.users.forEach(user => {
         user.isReady = false
+    })
+
+    // 荒局
+    this.users.forEach(user => {
+        if (user.username === this.zhuang.username) {
+            user.hx = -10
+            user.thx += user.hx
+        } else {
+            user.hx = 0
+        }
     })
 
     this.channel.pushMessage({
