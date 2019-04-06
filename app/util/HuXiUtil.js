@@ -5,6 +5,12 @@ const _ = require('underscore')
 
 const HuXiUtil = {}
 
+/**
+ * @param {*} cardsOnGroup
+ * @param {*} huAcation
+ * @param {boolean} [isLatestCard=false]
+ * @returns {*} {hx: 20, hts: [], thx: 100}
+ */
 HuXiUtil.getHuXi = function (cardsOnGroup, huAcation, isLatestCard = false) {
   var huXi = { hx: 0, hts: [] }
   switch (huAcation) {
@@ -35,7 +41,7 @@ HuXiUtil.getHuXi = function (cardsOnGroup, huAcation, isLatestCard = false) {
       break;
   }
   huXi.thx = HuXiUtil.getTotalHuXi(huXi)
-  console.log('胡息', JSON.stringify(cardsOnGroup), JSON.stringify(huXi))
+  console.log('HuXi...', JSON.stringify(cardsOnGroup), JSON.stringify(huXi))
   return huXi
 }
 
@@ -226,13 +232,13 @@ HuXiUtil.getTotalHuXi = function (huXi) {
   var a = (countedTypes[0] || 0) + (countedTypes[1] || 0)
   var b = (countedTypes[4] || 0) + (countedTypes[10] || 0) + (countedTypes[11] || 0)
   var c = (countedTypes[2] || 0) + (countedTypes[3] || 0) + (countedTypes[5] || 0) + (countedTypes[6] || 0) + (countedTypes[7] || 0) + (countedTypes[8] || 0) + (countedTypes[9] || 0)
-
+  console.log(a, b, c)
   if (a >= 1) {
     thx = 100
   } else {
     if (b > 1) {
       thx = 200
-    } else if (b = 1) {
+    } else if (b == 1) {
       if (c >= 1) {
         thx = 200
       } else {

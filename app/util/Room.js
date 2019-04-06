@@ -46,7 +46,7 @@ Room.prototype.addUser = function (username) {
     // username 玩家用户名
     // hx       玩家这局的总胡息
     // dn       玩家是否打鸟
-    this.users.push({ username, hx: 0, dn: false })
+    this.users.push({ username, hx: 0, dn: false, thx: 0 })
 }
 
 //---------------------------------------------------------------------------------------------------------------
@@ -143,14 +143,14 @@ Room.prototype.checkGameStart = function () {
         }
     }
 
-    logger.info('游戏可以开始')
+    logger.info('game can start')
 
     this.gameStart()
 
 }
 
 Room.prototype.gameStart = function () {
-    logger.info('游戏开始')
+    logger.info('game start...')
     this.onGaming = true
     this.isGaming = true // 游戏开始
     this.initRoom()
@@ -264,8 +264,10 @@ Room.prototype.loopAllUserCanHuWithZhuangCard = function () {
     if (user) {
         const canHuData = CardUtil.canHu(user.handCards, user.groupCards, this.zhuang_card)
         if (canHuData) {
-            console.log('天胡必须胡')
-            this.noticeAllUserOnWin()
+            // 地胡
+            const huXi = HuXiUtil.getHuXi(canHuData, HuActions.isZhuangFirstOutCard)
+            console.log('DiHu...must Hu')
+            this.noticeAllUserOnWin({ wn: user.username, ...huXi })
         } else {
             this.loopAllUserCanHuWithZhuangCard()
         }
@@ -463,7 +465,7 @@ Room.prototype.loopOtherUserCanHuWithPlayerCard = function () {
         if (canHuData) {
             const huXi = HuXiUtil.getHuXi(canHuData, HuActions.IsOtherFlopCard, this.cards.length === 0)
             if (huXi.hx >= this.rule.hx) {
-                this.actionUsers.push({ un: user.username, hd: { dt: canHuData, ac: -1 } })
+                this.actionUsers.push({ un: user.username, hd: { dt: { hc: canHuData, hx: huXi }, ac: -1 } })
             }
         }
         this.loopOtherUserCanHuWithPlayerCard()
@@ -768,12 +770,13 @@ Room.prototype.checkHuAction = function (aus) {
         if (aus[i].hd) {
             if (aus[i].hd.ac === 1) {
                 // 玩家胡操作
+                // aus[i] {un: 'wosxieez', hd: {dt: {hc: hdCards, hx: {hx: 15, thx: 30, hts: [1, 2, 3]}, ac: 1}}
                 var user = this.getUser(aus[i].un)
-                user.groupCards = aus[i].hd.dt
+                user.groupCards = aus[i].hd.dt.hc
                 user.handCards = []
                 this.actionUsers = []
                 this.feadback.manualCancel()
-                this.noticeAllUserOnWin()
+                this.noticeAllUserOnWin({ wn: aus[i].un, ...aus[i].hd.dt.hx })
                 return
             } else if (aus[i].hd.ac === 0) {
                 // 玩家不胡操作 继续判断下家
@@ -913,7 +916,7 @@ Room.prototype.checkPlayerUserCanHuWithPlayerCard = function () {
         const huXi = HuXiUtil.getHuXi(canHuData, HuActions.IsMeFlopCard, this.cards.length === 0)
         logger.info('计算胡息', huXi.hx, '胡牌胡息', this.rule.hx)
         if (huXi.hx >= this.rule.hx) {
-            this.actionUsers.push({ un: this.player.username, hd: { dt: '', ac: -1 } })
+            this.actionUsers.push({ un: this.player.username, hd: { dt: { hc: canHuData, hx: huXi }, ac: -1 } })
         }
     }
     this.checkOtherUserCanHuWithPlayerCard()
@@ -930,13 +933,13 @@ Room.prototype.checkPlayerUserCanHuWithPlayerCard2 = function () {
         // 通知翻牌玩家是否要胡
         const huXi = HuXiUtil.getHuXi(canHuData, HuActions.IsMeFlopCard)
         if (huXi.hx >= this.rule.hx) {
-            this.actionUsers = [{ un: this.player.username, hd: { dt: canHuData, ac: -1 } }]
+            this.actionUsers = [{ un: this.player.username, hd: { dt: { hc: canHuData, hx: huXi }, ac: -1 } }]
             this.noticeAllUserOnAction()
             this.feadback.send(this.actionUsers)
                 .thenOk(() => {
                     if (this.actionUsers[0].hd.ac === 1) {
                         // 翻牌玩家胡
-                        this.player.groupCards = this.actionUsers[0].hd.td
+                        this.player.groupCards = this.actionUsers[0].hd.dt.hc
                         this.player.handCards = []
                         this.actionUsers = []
                         this.feadback.manualCancel()
@@ -968,13 +971,13 @@ Room.prototype.checkPlayerUserCanHuWithPlayerCard3 = function () {
         // 通知翻牌玩家是否要胡
         const huXi = HuXiUtil.getHuXi(canHuData, HuActions.IsMeFlopCard)
         if (huXi.hx >= this.rule.hx) {
-            this.actionUsers = [{ un: this.player.username, hd: { dt: canHuData, ac: -1 } }]
+            this.actionUsers = [{ un: this.player.username, hd: { dt: { hc: canHuData, hx: huXi }, ac: -1 } }]
             this.noticeAllUserOnAction()
             this.feadback.send(this.actionUsers)
                 .thenOk(() => {
                     if (this.actionUsers[0].hd.ac === 1) {
                         // 翻牌玩家胡
-                        this.player.groupCards = this.actionUsers[0].hd.td
+                        this.player.groupCards = this.actionUsers[0].hd.dt.hc
                         this.player.handCards = []
                         this.actionUsers = []
                         this.feadback.manualCancel()
@@ -1088,7 +1091,7 @@ Room.prototype.loopOtherUserCanHuWithPlayerCard2 = function () {
             // {hx: 10, hts: []}
             const huXi = HuXiUtil.getHuXi(canHuData, huAction)
             if (huXi.hx >= this.rule.hx) {
-                this.actionUsers = [{ un: user.username, hd: { dt: canHuData, ac: -1 } }]
+                this.actionUsers = [{ un: user.username, hd: { dt: { hc: canHuData, hx: huXi }, ac: -1 } }]
                 this.noticeAllUserOnAction()
                 this.feadback.send(this.actionUsers)
                     .thenOk(() => {
@@ -1456,78 +1459,86 @@ Room.prototype.noticeAllUserOnAction = function () {
         data: this.getStatus()
     })
 }
-Room.prototype.noticeAllUserOnWin = function (winData) {
+Room.prototype.noticeAllUserOnWin = function (wd) {
+    // wd = {wn: 'wosxieez', hx: 15, thx: 30, hts: [2, 3, 4]}
+    console.log('game win...', wd)
+
+    this.isGaming = false
     this.users.forEach(user => {
         user.isReady = false
     })
-    this.isGaming = false
-
-    // console.log(winData)
 
     // 看没有人放炮
-    // var countedTypes = _.countBy(winData.hts, function (c) { return c })
-    // var hasFangPao = false
-    // var gameOver = false
-
-    // // 看有没有人放炮
-    // if (countedTypes[3]) {
-    //     hasFangPao = true
-    // }
+    var countedTypes = _.countBy(wd.hts, function (c) { return c })
+    var hasFangPao = false
+    if (countedTypes[3]) {
+        hasFangPao = true
+    }
 
     // 计算玩家胡息 TODO
-    // var winner, loser
-    // this.users.forEach(user => {
-    //     if (user.username === winData.wn) {
-    //         winner = user
-    //         winner.hx += winData.thx
-    //         if (winner.hx >= 100) {
-    //             gameOver = true
-    //         }
-    //     } else {
-    //         loser = user
-    //         if (hasFangPao) {
-    //             loser.hx -= winData.thx
-    //         }
-    //     }
-    // })
-
-    // if (gameOver) {
-    //     // 一局游戏结束了 开始统计分数了
-    //     // user1 {hx: 100}
-    //     // user2 {hx: 63}
-    //     var winnerHx = Math.round(winner.hx / 10) * 10
-    //     var loserHx = loser ? Math.round(loser.hx / 10) * 10 : 0
-    //     var winHx = winnerHx - loserHx
-    //     var winScore = winHx * this.rule.xf
-
-    //     // var params = { winner: winner.username, loser: loser.username, score: winScore, rid: this.rule.id}
-    //     // axios.post('http://127.0.0.1:3008/update_score', params).catch(error => {})
-    // } 
-
-    // 一盘结束 游戏继续
-    this.onGaming = false
-    this.channel.pushMessage({
-        route: 'onRoom',
-        name: Notifications.onGameOver,
-        data: { ...this.getStatus(), ...winData }
+    var winner, loser
+    this.users.forEach(user => {
+        if (user.username === wd.wn) {
+            winner = user
+            if (hasFangPao) {
+                winner.hx = wd.thx / 2
+                winner.thx += winner.hx
+            } else {
+                winner.hx = wd.thx
+                winner.thx += winner.hx
+            }
+            if (winner.thx >= 100) {
+                this.onGaming = false
+            }
+        } else {
+            // TODO
+            loser = user
+            if (hasFangPao) {
+                loser.hx = -wd.thx / 2
+                loser.thx += loser.hx
+            }
+        }
     })
 
-    this.forceRelease()
+    if (this.onGaming) { // 一局还在进行中
+        // 发送一局结束的通知
+        this.channel.pushMessage({
+            route: 'onRoom',
+            name: Notifications.onWin,
+            data: { ...this.getStatus(), hn: wd.wn, hts: wd.hts }
+        })
+    } else {
+        // user1 {thx: 100}
+        // user2 {thx: 63}
+        // 一局结束了
+        var winnerTHX = Math.round(winner.thx / 10) * 10
+        var loserTHX = loser ? Math.round(loser.thx / 10) * 10 : 0
+        var winTHX = winnerTHX - loserTHX
+        var winScore = winTHX * this.rule.xf
+        var params = { winner: winner.username, loser: loser ? loser.username : '**@@**', score: winScore, rid: this.rule.id }
+        axios.post('http://127.0.0.1:3008/update_score', params).catch(error => { })
+
+        // 发送一局结束的通知
+        this.channel.pushMessage({
+            route: 'onRoom',
+            name: Notifications.onGameOver,
+            data: { ...this.getStatus(), hn: wd.wn, hts: wd.hts }
+        })
+        this.forceRelease()
+    }
 }
 
 Room.prototype.noticeAllUserOnRoundEnd = function () {
+    this.isGaming = false
     this.users.forEach(user => {
         user.isReady = false
     })
-    this.isGaming = false
-
 
     this.channel.pushMessage({
         route: 'onRoom',
         name: Notifications.onRoundEnd,
         data: this.getStatus()
     })
-
 }
 
 Room.prototype.getStatus = function () {
@@ -1553,7 +1564,7 @@ Room.prototype.forceRelease = function () {
     this.channel.destroy()
     this.channel = null
     clearTimeout(this.timeout)
-    console.log('删除房间')
+    console.log('room deleted')
 }
 
 module.exports = Room
