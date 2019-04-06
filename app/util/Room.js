@@ -166,7 +166,7 @@ Room.prototype.gameStart = function () {
         data: this.getStatus()
     })
 
-    this.timeout = setTimeout(this.checkAllUserCanHuWith3Ti5Kan.bind(this), 1500)
+    this.timeout = setTimeout(this.checkAllUserCanHuWith3Ti5Kan.bind(this), 2000)
 }
 
 Room.prototype.initRoom = function () {
@@ -281,7 +281,6 @@ Room.prototype.loopAllUserCanHuWithZhuangCard = function () {
  * 参考流程 Fun1
  */
 Room.prototype.zhuangStart = function () {
-    logger.info('Fun1')
     this.zhuang.handCards.push(this.zhuang_card)
     this.zhuang_card = 0
 
@@ -678,7 +677,7 @@ Room.prototype.checkNextUserCanChiWithPlayerCard = function () {
     } else {
         this.timeout = setTimeout(() => {
             this.passCard()
-        }, 1500);
+        }, 1000);
     }
 }
 
@@ -1004,7 +1003,9 @@ Room.prototype.checkPlayerUserCanHuWithPlayerCard3 = function () {
  */
 Room.prototype.checkTiPaoCount = function () {
     if (CardUtil.tiPaoCount(this.player.groupCards) >= 2) {
-        this.nextPlayCard(this.player)
+        this.timeout = setTimeout(() => {
+            this.nextPlayCard(this.player)
+        }, 1500);
     } else {
         this.playerPlayCard(this.player)
     }
@@ -1061,7 +1062,7 @@ Room.prototype.playerPlayCard = function (user) {
 }
 
 /**
- * 参见流程图 check18
+ * 参见流程图
  */
 Room.prototype.checkOtherUserCanHuWithPlayerCard2 = function () {
     logger.info('check18 检查其他玩家手里牌 + player_card 是否胡牌', this.player.username)
@@ -1080,7 +1081,7 @@ Room.prototype.checkOtherUserCanHuWithPlayerCard2 = function () {
 Room.prototype.loopOtherUserCanHuWithPlayerCard2 = function () {
     const user = this.loopUsers.shift()
     if (user) {
-        const canHuData = CardUtil.canHu(user.handCards, user.groupCards, this.player_card)
+        const canHuData = CardUtil.canHu2(user.handCards, user.groupCards, this.player_card)
         if (canHuData) {
             var huAction
             if (this.isZhuangFirstOutCard) {
@@ -1091,22 +1092,26 @@ Room.prototype.loopOtherUserCanHuWithPlayerCard2 = function () {
             // {hx: 10, hts: []}
             const huXi = HuXiUtil.getHuXi(canHuData, huAction)
             if (huXi.hx >= this.rule.hx) {
-                this.actionUsers = [{ un: user.username, hd: { dt: { hc: canHuData, hx: huXi }, ac: -1 } }]
-                this.noticeAllUserOnAction()
-                this.feadback.send(this.actionUsers)
-                    .thenOk(() => {
-                        if (this.actionUsers[0].hd.ac === 1) {
-                            user.groupCards = canHuData
-                            user.handCards = []
-                            this.actionUsers = []
-                            this.feadback.manualCancel()
-                            this.noticeAllUserOnWin({ wn: user.username, ...huXi })
-                        } else {
-                            this.actionUsers = []
-                            this.feadback.manualCancel()
-                            this.loopOtherUserCanHuWithPlayerCard2()
-                        }
-                    })
+                // 地胡 放炮胡 必须胡
+                user.groupCards = canHuData
+                user.handCards = []
+                this.noticeAllUserOnWin({ wn: user.username, ...huXi })
+                // this.actionUsers = [{ un: user.username, hd: { dt: { hc: canHuData, hx: huXi }, ac: -1 } }]
+                // this.noticeAllUserOnAction()
+                // this.feadback.send(this.actionUsers)
+                //     .thenOk(() => {
+                //         if (this.actionUsers[0].hd.ac === 1) {
+                //             user.groupCards = canHuData
+                //             user.handCards = []
+                //             this.actionUsers = []
+                //             this.feadback.manualCancel()
+                //             this.noticeAllUserOnWin({ wn: user.username, ...huXi })
+                //         } else {
+                //             this.actionUsers = []
+                //             this.feadback.manualCancel()
+                //             this.loopOtherUserCanHuWithPlayerCard2()
+                //         }
+                //     })
             } else {
                 // 胡息小于15 不能胡
                 this.loopOtherUserCanHuWithPlayerCard2()
@@ -1289,7 +1294,7 @@ Room.prototype.checkNextUserCanChiWithPlayerCard2 = function () {
     } else {
         this.timeout = setTimeout(() => {
             this.passCard()
-        }, 1500);
+        }, 1000);
     }
 }
 
@@ -1515,8 +1520,13 @@ Room.prototype.noticeAllUserOnWin = function (wd) {
         var loserTHX = loser ? Math.round(loser.thx / 10) * 10 : 0
         var winTHX = winnerTHX - loserTHX
         var winScore = winTHX * this.rule.xf
-        var params = { winner: winner.username, loser: loser ? loser.username : '**@@**', score: winScore, rid: this.rule.id }
-        axios.post('http://hefeixiaomu.com:3008/update_score', params).catch(error => { })
+        var params = {
+            winner: winner.username,
+            loser: loser ? loser.username : '**@@**',
+            score: winScore, rid: this.rule.id,
+            gid: this.channel.groupname.substr(5)
+        }
+        axios.post('http://127.0.0.1:3008/update_score', params).catch(error => { })
 
         // 发送一局结束的通知
         this.channel.pushMessage({

@@ -212,6 +212,7 @@ CardUtil.canTi2 = function (cardsOnGroup, currentCard) {
   var can = false
   for (var i = 0; i < cardsOnGroup.length; i++) {
     group = cardsOnGroup[i]
+    console.log('...', group)
     if (group.cards.length == 3) {
       can = true
       for (var j = 0; j < group.cards.length; j++) {
@@ -279,15 +280,47 @@ CardUtil.tiPaoCount = function (cardsOnGroup) {
 
 CardUtil.canHu = function (cardsOnHand, cardsOnGroup, currentCard) {
   console.log('检查能否胡', cardsOnHand, cardsOnGroup, currentCard)
-  var copyedCards = _.clone(cardsOnHand);
+  var copyedHandCards = _.clone(cardsOnHand)
+  var copyedGroupCards = _.clone(cardsOnGroup)
   if (currentCard !== 0) {
-    copyedCards.push(currentCard);
+    // 看组合牌中能不能跑起
+    var paoGroup = CardUtil.canTi2(copyedGroupCards, currentCard)
+    if (paoGroup) {
+      paoGroup.name = Actions.Pao
+      paoGroup.cards.push(currentCard)
+    } else {
+      copyedHandCards.push(currentCard)
+    }
   }
   // 看手里牌跟 打的牌或者翻的牌 能够组成顺子
-  var onHand = CardUtil.shouShun(copyedCards);
+  var onHand = CardUtil.shouShun(copyedHandCards);
   console.log('检查能否胡', onHand)
   if (onHand) {
-    return cardsOnGroup.concat(onHand)
+    return copyedGroupCards.concat(onHand)
+  } else {
+    return false
+  }
+}
+
+CardUtil.canHu2 = function (cardsOnHand, cardsOnGroup, currentCard) {
+  console.log('检查能否胡', cardsOnHand, cardsOnGroup, currentCard)
+  var copyedHandCards = _.clone(cardsOnHand)
+  var copyedGroupCards = _.clone(cardsOnGroup)
+  if (currentCard !== 0) {
+    // 看组合牌中能不能跑起, 玩家出的牌，所以碰组合不能跑, 使用canTi3
+    var paoGroup = CardUtil.canTi3(copyedGroupCards, currentCard)
+    if (paoGroup) {
+      paoGroup.name = Actions.Pao
+      paoGroup.cards.push(currentCard)
+    } else {
+      copyedHandCards.push(currentCard)
+    }
+  }
+  // 看手里牌跟 打的牌或者翻的牌 能够组成顺子
+  var onHand = CardUtil.shouShun(copyedHandCards);
+  console.log('检查能否胡', onHand)
+  if (onHand) {
+    return copyedGroupCards.concat(onHand)
   } else {
     return false
   }
