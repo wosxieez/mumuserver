@@ -244,38 +244,55 @@ Room.prototype.checkAllUserCanHuWith3Ti5Kan = function () {
         }
     }
 
-    this.checkAllUserCanHuWithZhuangCard()
+    this.checkZhuangCanHuWithZhuangCard()
 }
 
 /**
  * 参见流程图 check2
  */
-Room.prototype.checkAllUserCanHuWithZhuangCard = function () {
+Room.prototype.checkZhuangCanHuWithZhuangCard = function () {
     logger.info('check2')
-    this.loopUsers = []
-    this.users.forEach(user => {
-        this.loopUsers.push(user)
-    })
-    this.loopAllUserCanHuWithZhuangCard()
-}
-
-Room.prototype.loopAllUserCanHuWithZhuangCard = function () {
-    const user = this.loopUsers.shift()
-    if (user) {
-        const canHuData = CardUtil.canHu(user.handCards, user.groupCards, this.zhuang_card)
-        if (canHuData) {
-            // 地胡
-            const huXi = HuXiUtil.getHuXi(canHuData, HuActions.isZhuangFirstOutCard)
-            console.log('DiHu...must Hu')
-            this.noticeAllUserOnWin({ wn: user.username, ...huXi })
-        } else {
-            this.loopAllUserCanHuWithZhuangCard()
-        }
+    const canHuData = CardUtil.canHu(this.zhuang.handCards, this.zhuang.groupCards, this.zhuang_card)
+    if (canHuData) {
+        // 天胡
+        console.log('TianHu...must Hu')
+        const huXi = HuXiUtil.getHuXi(canHuData, HuActions.IsZhuangCard)
+        this.noticeAllUserOnWin({ wn: this.zhuang.username, ...huXi })
     } else {
-        // loop执行完了执行下步操作
         this.zhuangStart()
     }
 }
+}
+
+// /**
+//  * 参见流程图 check2
+//  */
+// Room.prototype.checkAllUserCanHuWithZhuangCard = function () {
+//     logger.info('check2')
+//     this.loopUsers = []
+//     this.users.forEach(user => {
+//         this.loopUsers.push(user)
+//     })
+//     this.loopAllUserCanHuWithZhuangCard()
+// }
+
+// Room.prototype.loopAllUserCanHuWithZhuangCard = function () {
+//     const user = this.loopUsers.shift()
+//     if (user) {
+//         const canHuData = CardUtil.canHu(user.handCards, user.groupCards, this.zhuang_card)
+//         if (canHuData) {
+//             // 天胡
+//             const huXi = HuXiUtil.getHuXi(canHuData, HuActions.IsZhuangCard)
+//             console.log('TianHu...must Hu')
+//             this.noticeAllUserOnWin({ wn: user.username, ...huXi })
+//         } else {
+//             this.loopAllUserCanHuWithZhuangCard()
+//         }
+//     } else {
+//         // loop执行完了执行下步操作
+//         this.zhuangStart()
+//     }
+// }
 
 /**
  * 参考流程 Fun1
@@ -1467,22 +1484,22 @@ Room.prototype.noticeAllUserOnAction = function () {
 Room.prototype.noticeAllUserOnWin = function (wd) {
     // wd = {wn: 'wosxieez', hx: 15, thx: 30, hts: [2, 3, 4]}
     console.log('game win...', wd)
-
     this.isGaming = false
-    this.users.forEach(user => {
-        user.isReady = false
-    })
-
     // 看没有人放炮
     var countedTypes = _.countBy(wd.hts, function (c) { return c })
     var hasFangPao = false
     if (countedTypes[3]) {
         hasFangPao = true
     }
-
     // 计算玩家胡息 TODO
     var winner, loser
     this.users.forEach(user => {
+        if (!!this.channel.getMember(user.username)) {
+            user.isReady = false
+        } else {
+            // 一盘结束了 如果玩家不在线了，默认玩家准备就绪
+            user.isReady = true
+        }
         if (user.username === wd.wn) {
             winner = user
             if (hasFangPao) {
@@ -1504,7 +1521,6 @@ Room.prototype.noticeAllUserOnWin = function (wd) {
             }
         }
     })
-
     if (this.onGaming) { // 一局还在进行中
         // 发送一局结束的通知
         this.channel.pushMessage({
@@ -1541,11 +1557,12 @@ Room.prototype.noticeAllUserOnWin = function (wd) {
 Room.prototype.noticeAllUserOnRoundEnd = function () {
     this.isGaming = false
     this.users.forEach(user => {
-        user.isReady = false
-    })
-
-    // 荒局
-    this.users.forEach(user => {
+        if (!!this.channel.getMember(user.username)) {
+            user.isReady = false
+        } else {
+            // 一盘结束了 如果玩家不在线了，默认玩家准备就绪
+            user.isReady = true
+        }
         if (user.username === this.zhuang.username) {
             user.hx = -10
             user.thx += user.hx

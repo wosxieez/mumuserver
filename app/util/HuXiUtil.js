@@ -18,10 +18,12 @@ HuXiUtil.getHuXi = function (cardsOnGroup, huAcation, isLatestCard = false) {
     case HuActions.IsZhuangCard: // 天胡
       huXi.hx = 100
       huXi.hts.push(HuTypes.TianHu)
+      huXi.hts.push(HuTypes.ZiMo)
       break;
     case HuActions.IsZhuangFirstOutCard: // 地胡
       huXi.hx = 100
       huXi.hts.push(HuTypes.DiHu)
+      huXi.hts.push(HuTypes.FangPao)
       break
     case HuActions.IsMeFlopCard: // 自摸
       huXi.hx = HuXiUtil.getAllGroupHuXi(cardsOnGroup)

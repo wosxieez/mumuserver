@@ -293,7 +293,7 @@ CardUtil.canHu = function (cardsOnHand, cardsOnGroup, currentCard) {
     }
   }
   // 看手里牌跟 打的牌或者翻的牌 能够组成顺子
-  var onHand = CardUtil.shouShun(copyedHandCards);
+  var onHand = CardUtil.shouShun(copyedHandCards, currentCard);
   console.log('检查能否胡', onHand)
   if (onHand) {
     return copyedGroupCards.concat(onHand)
@@ -317,7 +317,7 @@ CardUtil.canHu2 = function (cardsOnHand, cardsOnGroup, currentCard) {
     }
   }
   // 看手里牌跟 打的牌或者翻的牌 能够组成顺子
-  var onHand = CardUtil.shouShun(copyedHandCards);
+  var onHand = CardUtil.shouShun(copyedHandCards, currentCard);
   console.log('检查能否胡', onHand)
   if (onHand) {
     return copyedGroupCards.concat(onHand)
@@ -330,7 +330,7 @@ CardUtil.canHu2 = function (cardsOnHand, cardsOnGroup, currentCard) {
  * 玩家的牌是否无单牌。
  * @param cards: 手中的牌，或者手中的牌加新翻开的底牌。
  */
-CardUtil.shouShun = function (cards) {
+CardUtil.shouShun = function (cards, currentCard) {
   var countedCards = _.countBy(cards, function (c) { return c; });
   var results = [];
 
@@ -342,7 +342,11 @@ CardUtil.shouShun = function (cards) {
       results.push({ name: Actions.Pao, cards: [card, card, card, card] });
       delete countedCards[key];
     } else if (value === 3) {
-      results.push({ name: Actions.Kan, cards: [card, card, card] });
+      if (card === currentCard) {
+        results.push({ name: Actions.Peng, cards: [card, card, card] });
+      } else {
+        results.push({ name: Actions.Kan, cards: [card, card, card] });
+      }
       delete countedCards[key];
     }
   })

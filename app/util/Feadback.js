@@ -7,6 +7,20 @@ module.exports = function Feadback(channel) {
     this.send = function () {
         // [ { un: wosxieez1 nd: {dt: '', ac: -1}, hd: {dt: [], ac: -1}, pd: {dt: []}, ac: -1}, cd: {dt: [], ac: -1} },
         //   { un: wosxieez2 nd: {dt: '', ac: -1}, hd: {dt: [], ac: -1}, pd: {dt: []}, ac: -1}, cd: {dt: [], ac: -1} } ]
+        if (!this.channel.room.actionUsers) return 
+        this.channel.room.actionUsers.forEach(oldUser => {
+            if (!this.channel.getMember(oldUser.un)) {
+                // 如果发送反馈的时候 玩家不在线 默认玩家所有操作都取消
+                if (oldUser.nd && oldUser.nd.ac === -1 ) { oldUser.nd.ac = 0 }
+                if (oldUser.hd && oldUser.hd.ac === -1 ) { oldUser.hd.ac = 0 }
+                if (oldUser.pd && oldUser.pd.ac === -1 ) { oldUser.pd.ac = 0 }
+                if (oldUser.cd && oldUser.cd.ac === -1 ) { oldUser.cd.ac = 0 }
+                setTimeout(() => {
+                    this.doOk(oldUser)
+                }, 1000);
+            }
+        })
+
         this.okFunction = null
         clearTimeout(this.timeout)
         console.log('反馈启动', this.channel.room.actionUsers)
@@ -42,10 +56,10 @@ module.exports = function Feadback(channel) {
         this.isOk = false
         if (!this.channel.room.actionUsers) return 
         this.channel.room.actionUsers.forEach(oldUser => {
-                if (oldUser.nd) { oldUser.nd.ac = 0 }
-                if (oldUser.hd) { oldUser.hd.ac = 0 }
-                if (oldUser.pd) { oldUser.pd.ac = 0 }
-                if (oldUser.cd) { oldUser.cd.ac = 0 }
+                if (oldUser.nd && oldUser.nd.ac === -1 ) { oldUser.nd.ac = 0 }
+                if (oldUser.hd && oldUser.hd.ac === -1 ) { oldUser.hd.ac = 0 }
+                if (oldUser.pd && oldUser.pd.ac === -1 ) { oldUser.pd.ac = 0 }
+                if (oldUser.cd && oldUser.cd.ac === -1 ) { oldUser.cd.ac = 0 }
         })
         console.log('超时反馈结束', this.channel.room.actionUsers)
         clearTimeout(this.timeout)

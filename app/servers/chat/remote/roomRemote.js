@@ -114,6 +114,21 @@ RoomRemote.prototype.leaveRoom = function (sid, groupname, roomname, username, c
 			channel.room = null
 			channel.destroy()
 			console.log('删除房间' + roomname)
+		} else {
+			// 看是不是所有玩家都不在线
+			var isAllOffline = true
+			channel.room.users.forEach(user => {
+				if (!!channel.getMember(user.username)) {
+					isAllOffline = false
+				}
+			})
+			if (isAllOffline) { // 所有玩家都离线了 默认解散房间
+				channel.room.feadback.release()
+				channel.room.release()
+				channel.room = null
+				channel.destroy()
+				console.log('删除房间' + roomname)
+			}
 		}
 		this.notificationGroupStatus(groupname)
 		this.notificationRoomStatus(roomname)
