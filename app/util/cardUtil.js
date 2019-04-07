@@ -280,8 +280,8 @@ CardUtil.tiPaoCount = function (cardsOnGroup) {
 
 CardUtil.canHu = function (cardsOnHand, cardsOnGroup, currentCard) {
   console.log('检查能否胡', cardsOnHand, cardsOnGroup, currentCard)
-  var copyedHandCards = _.clone(cardsOnHand)
-  var copyedGroupCards = _.clone(cardsOnGroup)
+  var copyedHandCards = JSON.parse(JSON.stringify(cardsOnHand)) // 深度拷贝
+  var copyedGroupCards = JSON.parse(JSON.stringify(cardsOnGroup)) // 深度拷贝
   if (currentCard !== 0) {
     // 看组合牌中能不能跑起
     var paoGroup = CardUtil.canTi2(copyedGroupCards, currentCard)
@@ -304,8 +304,8 @@ CardUtil.canHu = function (cardsOnHand, cardsOnGroup, currentCard) {
 
 CardUtil.canHu2 = function (cardsOnHand, cardsOnGroup, currentCard) {
   console.log('检查能否胡', cardsOnHand, cardsOnGroup, currentCard)
-  var copyedHandCards = _.clone(cardsOnHand)
-  var copyedGroupCards = _.clone(cardsOnGroup)
+  var copyedHandCards = JSON.parse(JSON.stringify(cardsOnHand)) // 深度拷贝
+  var copyedGroupCards = JSON.parse(JSON.stringify(cardsOnGroup)) // 深度拷贝
   if (currentCard !== 0) {
     // 看组合牌中能不能跑起, 玩家出的牌，所以碰组合不能跑, 使用canTi3
     var paoGroup = CardUtil.canTi3(copyedGroupCards, currentCard)

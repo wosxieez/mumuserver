@@ -545,7 +545,7 @@ Room.prototype.loopOtherUserCanPaoWithPlayerCard = function () {
                     if (CardUtil.tiPaoCount(user.groupCards) >= 2) {
                         this.timeout = setTimeout(() => {
                             this.nextPlayCard(user) // 让user用户的下家出牌
-                        }, 1500);
+                        }, 1000);
                     } else {
                         this.playerPlayCard(user)
                     }
