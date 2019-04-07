@@ -1520,6 +1520,7 @@ Room.prototype.noticeAllUserOnWin = function (wd) {
             }
         }
     })
+
     if (this.onGaming) { // 一局还在进行中
         // 发送一局结束的通知
         this.channel.pushMessage({
@@ -1527,21 +1528,32 @@ Room.prototype.noticeAllUserOnWin = function (wd) {
             name: Notifications.onWin,
             data: { ...this.getStatus(), hn: wd.wn, hts: wd.hts }
         })
+
+        if (this.rule.id === 0) {
+            // 娱乐房一盘就结束游戏
+            this.onGaming = false
+            this.forceRelease()
+        }
     } else {
         // user1 {thx: 100}
         // user2 {thx: 63}
         // 一局结束了
-        var winnerTHX = Math.round(winner.thx / 10) * 10
-        var loserTHX = loser ? Math.round(loser.thx / 10) * 10 : 0
-        var winTHX = winnerTHX - loserTHX
-        var winScore = winTHX * this.rule.xf
-        var params = {
-            winner: winner.username,
-            loser: loser ? loser.username : '**@@**',
-            score: winScore, rid: this.rule.id,
-            gid: this.channel.groupname.substr(5)
+
+        if (this.rule.id === 0) {
+            // 娱乐局不统计分数
+        } else {
+            var winnerTHX = Math.round(winner.thx / 10) * 10
+            var loserTHX = loser ? Math.round(loser.thx / 10) * 10 : 0
+            var winTHX = winnerTHX - loserTHX
+            var winScore = winTHX * this.rule.xf
+            var params = {
+                winner: winner.username,
+                loser: loser ? loser.username : '**@@**',
+                score: winScore, rid: this.rule.id,
+                gid: this.channel.groupname.substr(5)
+            }
+            axios.post('http://hefeixiaomu.com:3008/update_score', params).catch(error => { })
         }
-        axios.post('http://hefeixiaomu.com:3008/update_score', params).catch(error => { })
 
         // 发送一局结束的通知
         this.channel.pushMessage({
@@ -1575,6 +1587,12 @@ Room.prototype.noticeAllUserOnRoundEnd = function () {
         name: Notifications.onRoundEnd,
         data: this.getStatus()
     })
+
+    if (this.rule.id === 0) {
+        // 娱乐房一盘就结束游戏
+        this.onGaming = false
+        this.forceRelease()
+    }
 }
 
 Room.prototype.getStatus = function () {
