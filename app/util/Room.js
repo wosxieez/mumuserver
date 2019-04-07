@@ -262,7 +262,6 @@ Room.prototype.checkZhuangCanHuWithZhuangCard = function () {
         this.zhuangStart()
     }
 }
-}
 
 // /**
 //  * 参见流程图 check2
