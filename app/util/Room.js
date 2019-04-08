@@ -21,6 +21,7 @@ function Room(channel, rule) {
     this.player = null
     this.player_card = 0
     this.cards = []
+    this.in = 0 // 记录这局中的第几把
 
     this.isZhuangFirstOutCard = false
     this.feadback = new Feadback(channel)
@@ -153,11 +154,12 @@ Room.prototype.checkGameStart = function () {
 
 Room.prototype.gameStart = function () {
     logger.info('game start...')
-    this.onGaming = true
-    this.isGaming = true // 游戏开始
+    this.in++
     this.initRoom()
     this.xiPai()
     this.selectZhuang()
+    this.onGaming = true
+    this.isGaming = true // 游戏开始
     this.faPai()
     this.faZhuangPai()
 
@@ -175,7 +177,9 @@ Room.prototype.initRoom = function () {
     logger.info('初始化房间信息')
     clearTimeout(this.timeout)
     this.actionUsers = []
-    this.zhuang = null
+    if (!this.onGaming) { // 一局没有开始的话  初始化下庄
+        this.zhuang = null
+    } 
     this.zhuang_card = 0
     this.isZhuangFirstOutCard = false
     this.player = null
@@ -197,6 +201,7 @@ Room.prototype.xiPai = function () {
 }
 
 Room.prototype.selectZhuang = function () {
+    if (this.onGaming) return  // 一局开始了就不选择庄了
     logger.info('选中庄家')
     const random = Math.floor(Math.random() * this.rule.cc)
     this.zhuang = this.users[random]
@@ -936,7 +941,7 @@ Room.prototype.checkPlayerUserCanHuWithPlayerCard2 = function () {
     const canHuDatas = CardUtil.canHu(this.player.handCards, this.player.groupCards, this.player_card) // 
     if (canHuDatas) {
         var maxHuXi = { hx: 0 }
-        var maxHuData 
+        var maxHuData
         canHuDatas.forEach(canHuData => {
             const huXi = HuXiUtil.getHuXi(canHuData, HuActions.IsMeFlopCard)
             if (huXi.hx > maxHuXi.hx) {
@@ -980,7 +985,7 @@ Room.prototype.checkPlayerUserCanHuWithPlayerCard3 = function () {
     logger.info('check24 翻牌玩家是否可以胡')
     const canHuDatas = CardUtil.canHu(this.player.handCards, this.player.groupCards, this.player_card)
     if (canHuDatas) {
-        var maxHuData 
+        var maxHuData
         var maxHuXi = { hx: 0 }
         canHuDatas.forEach(canHuData => {
             const huXi = HuXiUtil.getHuXi(canHuData, HuActions.IsMeFlopCard)
@@ -1479,6 +1484,7 @@ Room.prototype.noticeAllUserOnWin = function (wd) {
     // wd = {wn: 'wosxieez', hx: 15, thx: 30, hts: [2, 3, 4]}
     console.log('game win...', wd)
     this.isGaming = false
+    this.zhuang = this.getUser(wd.wn) // 赢的玩家为庄
     // 看没有人放炮
     var countedTypes = _.countBy(wd.hts, function (c) { return c })
     var hasFangPao = false
