@@ -454,15 +454,17 @@ Room.prototype.loopOtherUserCanHuWithPlayerCard = function () {
     if (user) {
         const canHuDatas = CardUtil.canHu(user.handCards, user.groupCards, this.player_card)
         if (canHuDatas) {
+            var maxHuData
             var maxHuXi = { hx: 0 }
             canHuDatas.forEach(canHuData => {
                 const huXi = HuXiUtil.getHuXi(canHuData, HuActions.IsOtherFlopCard, this.cards.length === 0)
                 if (huXi.hx > maxHuXi.hx) {
                     maxHuXi = huXi
+                    maxHuData = canHuData
                 }
             })
             if (maxHuXi.hx >= this.rule.hx) {
-                this.actionUsers.push({ un: user.username, hd: { dt: { hc: canHuData, hx: maxHuXi }, ac: -1 } })
+                this.actionUsers.push({ un: user.username, hd: { dt: { hc: maxHuData, hx: maxHuXi }, ac: -1 } })
             }
         }
         this.loopOtherUserCanHuWithPlayerCard()
@@ -910,14 +912,16 @@ Room.prototype.checkPlayerUserCanHuWithPlayerCard = function () {
     const canHuDatas = CardUtil.canHu(this.player.handCards, this.player.groupCards, this.player_card)
     if (canHuDatas) {
         var maxHuXi = { hx: 0 }
+        var maxHuData
         canHuDatas.forEach(canHuData => {
             const huXi = HuXiUtil.getHuXi(canHuData, HuActions.IsMeFlopCard, this.cards.length === 0)
             if (huXi.hx > maxHuXi.hx) {
                 maxHuXi = huXi
+                maxHuData = canHuData
             }
         })
         if (maxHuXi.hx >= this.rule.hx) {
-            this.actionUsers.push({ un: this.player.username, hd: { dt: { hc: canHuData, hx: maxHuXi }, ac: -1 } })
+            this.actionUsers.push({ un: this.player.username, hd: { dt: { hc: maxHuData, hx: maxHuXi }, ac: -1 } })
         }
     }
     this.checkOtherUserCanHuWithPlayerCard()
@@ -932,14 +936,16 @@ Room.prototype.checkPlayerUserCanHuWithPlayerCard2 = function () {
     const canHuDatas = CardUtil.canHu(this.player.handCards, this.player.groupCards, this.player_card) // 
     if (canHuDatas) {
         var maxHuXi = { hx: 0 }
+        var maxHuData 
         canHuDatas.forEach(canHuData => {
             const huXi = HuXiUtil.getHuXi(canHuData, HuActions.IsMeFlopCard)
             if (huXi.hx > maxHuXi.hx) {
                 maxHuXi = huXi
+                maxHuData = canHuData
             }
         })
         if (maxHuXi.hx >= this.rule.hx) {
-            this.actionUsers = [{ un: this.player.username, hd: { dt: { hc: canHuData, hx: maxHuXi }, ac: -1 } }]
+            this.actionUsers = [{ un: this.player.username, hd: { dt: { hc: maxHuData, hx: maxHuXi }, ac: -1 } }]
             this.noticeAllUserOnAction()
             this.feadback.send(this.actionUsers)
                 .thenOk(() => {
@@ -974,15 +980,17 @@ Room.prototype.checkPlayerUserCanHuWithPlayerCard3 = function () {
     logger.info('check24 翻牌玩家是否可以胡')
     const canHuDatas = CardUtil.canHu(this.player.handCards, this.player.groupCards, this.player_card)
     if (canHuDatas) {
+        var maxHuData 
         var maxHuXi = { hx: 0 }
         canHuDatas.forEach(canHuData => {
             const huXi = HuXiUtil.getHuXi(canHuData, HuActions.IsMeFlopCard)
             if (huXi.hx > maxHuXi.hx) {
                 maxHuXi = huXi
+                maxHuData = canHuData
             }
         })
         if (maxHuXi.hx >= this.rule.hx) {
-            this.actionUsers = [{ un: this.player.username, hd: { dt: { hc: canHuData, hx: maxHuXi }, ac: -1 } }]
+            this.actionUsers = [{ un: this.player.username, hd: { dt: { hc: maxHuData, hx: maxHuXi }, ac: -1 } }]
             this.noticeAllUserOnAction()
             this.feadback.send(this.actionUsers)
                 .thenOk(() => {
@@ -1101,11 +1109,13 @@ Room.prototype.loopOtherUserCanHuWithPlayerCard2 = function () {
             } else {
                 huAction = HuActions.IsOtherOutCard
             }
+            var maxHuData
             var maxHuXi = { hx: 0 }
             canHuDatas.forEach(canHuData => {
                 const huXi = HuXiUtil.getHuXi(canHuData, huAction)
                 if (huXi.hx > maxHuXi.hx) {
                     maxHuXi = huXi
+                    maxHuData = canHuData
                 }
             })
             if (maxHuXi.hx >= this.rule.hx) {

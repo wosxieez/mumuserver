@@ -328,7 +328,7 @@ CardUtil.canHu = function (cardsOnHand, cardsOnGroup, currentCard) {
   }
 
   if (!canChiPaoPeng) {
-    allHandCards.push(copyedGroupCards.concat(copyedHandCards.concat([currentCard])))
+    allHandCards.push(copyedHandCards.concat([currentCard]))
   }
 
   var allHuGroups = []
@@ -340,8 +340,8 @@ CardUtil.canHu = function (cardsOnHand, cardsOnGroup, currentCard) {
   })
   console.log('能胡的组合', JSON.stringify(allHuGroups))
 
-  if (allHuGroups.length > 1) {
-    return allHandCards
+  if (allHuGroups.length >= 1) {
+    return allHuGroups
   } else {
     return false
   }
@@ -400,7 +400,7 @@ CardUtil.canHu2 = function (cardsOnHand, cardsOnGroup, currentCard) {
   }
 
   if (!canChiPaoPeng) {
-    allHandCards.push(copyedGroupCards.concat(copyedHandCards.concat([currentCard])))
+    allHandCards.push(copyedHandCards.concat([currentCard]))
   }
 
   var allHuGroups = []
@@ -412,8 +412,8 @@ CardUtil.canHu2 = function (cardsOnHand, cardsOnGroup, currentCard) {
   })
   console.log('能胡的组合', JSON.stringify(allHuGroups))
 
-  if (allHuGroups.length > 1) {
-    return allHandCards
+  if (allHuGroups.length >= 1) {
+    return allHuGroups
   } else {
     return false
   }
