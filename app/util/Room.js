@@ -254,46 +254,20 @@ Room.prototype.checkAllUserCanHuWith3Ti5Kan = function () {
  */
 Room.prototype.checkZhuangCanHuWithZhuangCard = function () {
     logger.info('check2')
-    const canHuData = CardUtil.canHu(this.zhuang.handCards, this.zhuang.groupCards, this.zhuang_card)
-    if (canHuData) {
-        // 天胡
-        console.log('TianHu...must Hu')
-        const huXi = HuXiUtil.getHuXi(canHuData, HuActions.IsZhuangCard)
-        this.noticeAllUserOnWin({ wn: this.zhuang.username, ...huXi })
+    const canHuDatas = CardUtil.canHu(this.zhuang.handCards, this.zhuang.groupCards, this.zhuang_card)
+    if (canHuDatas) {
+        var maxHuXi = { hx: 0 }
+        canHuDatas.forEach(canHuData => {
+            const huXi = HuXiUtil.getHuXi(canHuData, HuActions.IsZhuangCard)
+            if (huXi.hx > maxHuXi.hx) {
+                maxHuXi = huXi
+            }
+        })
+        this.noticeAllUserOnWin({ wn: this.zhuang.username, ...maxHuXi })
     } else {
         this.zhuangStart()
     }
 }
-
-// /**
-//  * 参见流程图 check2
-//  */
-// Room.prototype.checkAllUserCanHuWithZhuangCard = function () {
-//     logger.info('check2')
-//     this.loopUsers = []
-//     this.users.forEach(user => {
-//         this.loopUsers.push(user)
-//     })
-//     this.loopAllUserCanHuWithZhuangCard()
-// }
-
-// Room.prototype.loopAllUserCanHuWithZhuangCard = function () {
-//     const user = this.loopUsers.shift()
-//     if (user) {
-//         const canHuData = CardUtil.canHu(user.handCards, user.groupCards, this.zhuang_card)
-//         if (canHuData) {
-//             // 天胡
-//             const huXi = HuXiUtil.getHuXi(canHuData, HuActions.IsZhuangCard)
-//             console.log('TianHu...must Hu')
-//             this.noticeAllUserOnWin({ wn: user.username, ...huXi })
-//         } else {
-//             this.loopAllUserCanHuWithZhuangCard()
-//         }
-//     } else {
-//         // loop执行完了执行下步操作
-//         this.zhuangStart()
-//     }
-// }
 
 /**
  * 参考流程 Fun1
@@ -478,11 +452,17 @@ Room.prototype.checkOtherUserCanHuWithPlayerCard = function () {
 Room.prototype.loopOtherUserCanHuWithPlayerCard = function () {
     const user = this.loopUsers.shift()
     if (user) {
-        const canHuData = CardUtil.canHu(user.handCards, user.groupCards, this.player_card)
-        if (canHuData) {
-            const huXi = HuXiUtil.getHuXi(canHuData, HuActions.IsOtherFlopCard, this.cards.length === 0)
-            if (huXi.hx >= this.rule.hx) {
-                this.actionUsers.push({ un: user.username, hd: { dt: { hc: canHuData, hx: huXi }, ac: -1 } })
+        const canHuDatas = CardUtil.canHu(user.handCards, user.groupCards, this.player_card)
+        if (canHuDatas) {
+            var maxHuXi = { hx: 0 }
+            canHuDatas.forEach(canHuData => {
+                const huXi = HuXiUtil.getHuXi(canHuData, HuActions.IsOtherFlopCard, this.cards.length === 0)
+                if (huXi.hx > maxHuXi.hx) {
+                    maxHuXi = huXi
+                }
+            })
+            if (maxHuXi.hx >= this.rule.hx) {
+                this.actionUsers.push({ un: user.username, hd: { dt: { hc: canHuData, hx: maxHuXi }, ac: -1 } })
             }
         }
         this.loopOtherUserCanHuWithPlayerCard()
@@ -927,13 +907,17 @@ Room.prototype.checkPlayerUserCanWeiWithPlayerCard = function () {
 Room.prototype.checkPlayerUserCanHuWithPlayerCard = function () {
     logger.info('check15 翻牌玩家是否可以胡')
     this.actionUsers = []
-    const canHuData = CardUtil.canHu(this.player.handCards, this.player.groupCards, this.player_card)
-    if (canHuData) {
-        // 通知翻牌玩家是否要胡
-        const huXi = HuXiUtil.getHuXi(canHuData, HuActions.IsMeFlopCard, this.cards.length === 0)
-        logger.info('计算胡息', huXi.hx, '胡牌胡息', this.rule.hx)
-        if (huXi.hx >= this.rule.hx) {
-            this.actionUsers.push({ un: this.player.username, hd: { dt: { hc: canHuData, hx: huXi }, ac: -1 } })
+    const canHuDatas = CardUtil.canHu(this.player.handCards, this.player.groupCards, this.player_card)
+    if (canHuDatas) {
+        var maxHuXi = { hx: 0 }
+        canHuDatas.forEach(canHuData => {
+            const huXi = HuXiUtil.getHuXi(canHuData, HuActions.IsMeFlopCard, this.cards.length === 0)
+            if (huXi.hx > maxHuXi.hx) {
+                maxHuXi = huXi
+            }
+        })
+        if (maxHuXi.hx >= this.rule.hx) {
+            this.actionUsers.push({ un: this.player.username, hd: { dt: { hc: canHuData, hx: maxHuXi }, ac: -1 } })
         }
     }
     this.checkOtherUserCanHuWithPlayerCard()
@@ -945,12 +929,17 @@ Room.prototype.checkPlayerUserCanHuWithPlayerCard = function () {
  */
 Room.prototype.checkPlayerUserCanHuWithPlayerCard2 = function () {
     logger.info('check16 翻牌玩家是否可以胡')
-    const canHuData = CardUtil.canHu(this.player.handCards, this.player.groupCards, this.player_card) // 
-    if (canHuData) {
-        // 通知翻牌玩家是否要胡
-        const huXi = HuXiUtil.getHuXi(canHuData, HuActions.IsMeFlopCard)
-        if (huXi.hx >= this.rule.hx) {
-            this.actionUsers = [{ un: this.player.username, hd: { dt: { hc: canHuData, hx: huXi }, ac: -1 } }]
+    const canHuDatas = CardUtil.canHu(this.player.handCards, this.player.groupCards, this.player_card) // 
+    if (canHuDatas) {
+        var maxHuXi = { hx: 0 }
+        canHuDatas.forEach(canHuData => {
+            const huXi = HuXiUtil.getHuXi(canHuData, HuActions.IsMeFlopCard)
+            if (huXi.hx > maxHuXi.hx) {
+                maxHuXi = huXi
+            }
+        })
+        if (maxHuXi.hx >= this.rule.hx) {
+            this.actionUsers = [{ un: this.player.username, hd: { dt: { hc: canHuData, hx: maxHuXi }, ac: -1 } }]
             this.noticeAllUserOnAction()
             this.feadback.send(this.actionUsers)
                 .thenOk(() => {
@@ -983,12 +972,17 @@ Room.prototype.checkPlayerUserCanHuWithPlayerCard2 = function () {
  */
 Room.prototype.checkPlayerUserCanHuWithPlayerCard3 = function () {
     logger.info('check24 翻牌玩家是否可以胡')
-    const canHuData = CardUtil.canHu(this.player.handCards, this.player.groupCards, this.player_card)
-    if (canHuData) {
-        // 通知翻牌玩家是否要胡
-        const huXi = HuXiUtil.getHuXi(canHuData, HuActions.IsMeFlopCard)
-        if (huXi.hx >= this.rule.hx) {
-            this.actionUsers = [{ un: this.player.username, hd: { dt: { hc: canHuData, hx: huXi }, ac: -1 } }]
+    const canHuDatas = CardUtil.canHu(this.player.handCards, this.player.groupCards, this.player_card)
+    if (canHuDatas) {
+        var maxHuXi = { hx: 0 }
+        canHuDatas.forEach(canHuData => {
+            const huXi = HuXiUtil.getHuXi(canHuData, HuActions.IsMeFlopCard)
+            if (huXi.hx > maxHuXi.hx) {
+                maxHuXi = huXi
+            }
+        })
+        if (maxHuXi.hx >= this.rule.hx) {
+            this.actionUsers = [{ un: this.player.username, hd: { dt: { hc: canHuData, hx: maxHuXi }, ac: -1 } }]
             this.noticeAllUserOnAction()
             this.feadback.send(this.actionUsers)
                 .thenOk(() => {
@@ -1099,37 +1093,26 @@ Room.prototype.checkOtherUserCanHuWithPlayerCard2 = function () {
 Room.prototype.loopOtherUserCanHuWithPlayerCard2 = function () {
     const user = this.loopUsers.shift()
     if (user) {
-        const canHuData = CardUtil.canHu2(user.handCards, user.groupCards, this.player_card)
-        if (canHuData) {
+        const canHuDatas = CardUtil.canHu2(user.handCards, user.groupCards, this.player_card)
+        if (canHuDatas) {
             var huAction
             if (this.isZhuangFirstOutCard) {
                 huAction = HuActions.IsZhuangFirstOutCard
             } else {
                 huAction = HuActions.IsOtherOutCard
             }
-            // {hx: 10, hts: []}
-            const huXi = HuXiUtil.getHuXi(canHuData, huAction)
-            if (huXi.hx >= this.rule.hx) {
+            var maxHuXi = { hx: 0 }
+            canHuDatas.forEach(canHuData => {
+                const huXi = HuXiUtil.getHuXi(canHuData, huAction)
+                if (huXi.hx > maxHuXi.hx) {
+                    maxHuXi = huXi
+                }
+            })
+            if (maxHuXi.hx >= this.rule.hx) {
                 // 地胡 放炮胡 必须胡
                 user.groupCards = canHuData
                 user.handCards = []
-                this.noticeAllUserOnWin({ wn: user.username, ...huXi })
-                // this.actionUsers = [{ un: user.username, hd: { dt: { hc: canHuData, hx: huXi }, ac: -1 } }]
-                // this.noticeAllUserOnAction()
-                // this.feadback.send(this.actionUsers)
-                //     .thenOk(() => {
-                //         if (this.actionUsers[0].hd.ac === 1) {
-                //             user.groupCards = canHuData
-                //             user.handCards = []
-                //             this.actionUsers = []
-                //             this.feadback.manualCancel()
-                //             this.noticeAllUserOnWin({ wn: user.username, ...huXi })
-                //         } else {
-                //             this.actionUsers = []
-                //             this.feadback.manualCancel()
-                //             this.loopOtherUserCanHuWithPlayerCard2()
-                //         }
-                //     })
+                this.noticeAllUserOnWin({ wn: user.username, ...maxHuXi })
             } else {
                 // 胡息小于15 不能胡
                 this.loopOtherUserCanHuWithPlayerCard2()

@@ -128,8 +128,6 @@ CardUtil.riffle = function (cards) {
     }
   });
 
-
-
   // 9. 散牌
   var countedCardsArray = [];
   _.each(countedCards, function (value, key) {
@@ -281,20 +279,69 @@ CardUtil.canHu = function (cardsOnHand, cardsOnGroup, currentCard) {
   console.log('检查能否胡', cardsOnHand, cardsOnGroup, currentCard)
   var copyedHandCards = JSON.parse(JSON.stringify(cardsOnHand)) // 深度拷贝
   var copyedGroupCards = JSON.parse(JSON.stringify(cardsOnGroup)) // 深度拷贝
+  var allHandCards = []
+  var canChiPaoPeng = false
   if (currentCard !== 0) {
     // 看组合牌中能不能跑起
     var paoGroup = CardUtil.canTi2(copyedGroupCards, currentCard)
     if (paoGroup) {
+      canChiPaoPeng = true
       paoGroup.name = Actions.Pao
       paoGroup.cards.push(currentCard)
+      allHandCards.push(copyedHandCards)
     } else {
-      copyedHandCards.push(currentCard)
+      // 看手里牌能不能跑
+      var canPaoCards = CardUtil.canTi(copyedHandCards, currentCard)
+      if (canPaoCards) {
+        canChiPaoPeng = true
+        var ccHandCards = JSON.parse(JSON.stringify(copyedHandCards))
+        canPaoCards.forEach(card => {
+          CardUtil.deleteCard(ccHandCards, card)
+        })
+        copyedGroupCards.push({ name: Actions.Pao, cards: [currentCard, currentCard, currentCard, currentCard] })
+        allHandCards.push(ccHandCards)
+      }
+      var canPengCards = CardUtil.canPeng(copyedHandCards, currentCard)
+      if (canPengCards) {
+        canChiPaoPeng = true
+        var cccHandCards = JSON.parse(JSON.stringify(copyedHandCards))
+        canPengCards.forEach(card => {
+          CardUtil.deleteCard(cccHandCards, card)
+        })
+        copyedGroupCards.push({ name: Actions.Peng, cards: [currentCard, currentCard, currentCard] })
+        allHandCards.push(cccHandCards)
+      }
+      var canChiGroups = CardUtil.canChi(copyedHandCards, currentCard)
+      if (canChiGroups) {
+        canChiPaoPeng = true
+        canChiGroups.forEach(chiGroup => {
+          var ccccHandCards = JSON.parse(JSON.stringify(copyedHandCards))
+          chiGroup.cards.forEach(card => {
+            CardUtil.deleteCard(ccccHandCards, card)
+          })
+          chiGroup.cards.push(currentCard)
+          copyedGroupCards.push({ name: Actions.Chi, cards: chiGroup.cards })
+          allHandCards.push(ccccHandCards)
+        })
+      }
     }
   }
-  // 看手里牌跟 打的牌或者翻的牌 能够组成顺子
-  var onHand = CardUtil.shouShun(copyedHandCards, currentCard);
-  if (onHand) {
-    return copyedGroupCards.concat(onHand)
+
+  if (!canChiPaoPeng) {
+    allHandCards.push(copyedGroupCards.concat(copyedHandCards.concat([currentCard])))
+  }
+
+  var allHuGroups = []
+  allHandCards.forEach(newHandCards => {
+    var shunGroups = CardUtil.shouShun(newHandCards)
+    if (shunGroups) {
+      allHuGroups.push(copyedGroupCards.concat(shunGroups))
+    }
+  })
+  console.log('能胡的组合', JSON.stringify(allHuGroups))
+
+  if (allHuGroups.length > 1) {
+    return allHandCards
   } else {
     return false
   }
@@ -304,20 +351,69 @@ CardUtil.canHu2 = function (cardsOnHand, cardsOnGroup, currentCard) {
   console.log('检查能否胡', cardsOnHand, cardsOnGroup, currentCard)
   var copyedHandCards = JSON.parse(JSON.stringify(cardsOnHand)) // 深度拷贝
   var copyedGroupCards = JSON.parse(JSON.stringify(cardsOnGroup)) // 深度拷贝
+  var allHandCards = []
+  var canChiPaoPeng = false
   if (currentCard !== 0) {
-    // 看组合牌中能不能跑起, 玩家出的牌，所以碰组合不能跑, 使用canTi3
+    // 看组合牌中能不能跑起
     var paoGroup = CardUtil.canTi3(copyedGroupCards, currentCard)
     if (paoGroup) {
+      canChiPaoPeng = true
       paoGroup.name = Actions.Pao
       paoGroup.cards.push(currentCard)
+      allHandCards.push(copyedHandCards)
     } else {
-      copyedHandCards.push(currentCard)
+      // 看手里牌能不能跑
+      var canPaoCards = CardUtil.canTi(copyedHandCards, currentCard)
+      if (canPaoCards) {
+        canChiPaoPeng = true
+        var ccHandCards = JSON.parse(JSON.stringify(copyedHandCards))
+        canPaoCards.forEach(card => {
+          CardUtil.deleteCard(ccHandCards, card)
+        })
+        copyedGroupCards.push({ name: Actions.Pao, cards: [currentCard, currentCard, currentCard, currentCard] })
+        allHandCards.push(ccHandCards)
+      }
+      var canPengCards = CardUtil.canPeng(copyedHandCards, currentCard)
+      if (canPengCards) {
+        canChiPaoPeng = true
+        var cccHandCards = JSON.parse(JSON.stringify(copyedHandCards))
+        canPengCards.forEach(card => {
+          CardUtil.deleteCard(cccHandCards, card)
+        })
+        copyedGroupCards.push({ name: Actions.Peng, cards: [currentCard, currentCard, currentCard] })
+        allHandCards.push(cccHandCards)
+      }
+      var canChiGroups = CardUtil.canChi(copyedHandCards, currentCard)
+      if (canChiGroups) {
+        canChiPaoPeng = true
+        canChiGroups.forEach(chiGroup => {
+          var ccccHandCards = JSON.parse(JSON.stringify(copyedHandCards))
+          chiGroup.cards.forEach(card => {
+            CardUtil.deleteCard(ccccHandCards, card)
+          })
+          chiGroup.cards.push(currentCard)
+          copyedGroupCards.push({ name: Actions.Chi, cards: chiGroup.cards })
+          allHandCards.push(ccccHandCards)
+        })
+      }
     }
   }
-  // 看手里牌跟 打的牌或者翻的牌 能够组成顺子
-  var onHand = CardUtil.shouShun(copyedHandCards, currentCard);
-  if (onHand) {
-    return copyedGroupCards.concat(onHand)
+
+  if (!canChiPaoPeng) {
+    allHandCards.push(copyedGroupCards.concat(copyedHandCards.concat([currentCard])))
+  }
+
+  var allHuGroups = []
+  allHandCards.forEach(newHandCards => {
+    var shunGroups = CardUtil.shouShun(newHandCards)
+    if (shunGroups) {
+      allHuGroups.push(copyedGroupCards.concat(shunGroups))
+    }
+  })
+  console.log('能胡的组合', JSON.stringify(allHuGroups))
+
+  if (allHuGroups.length > 1) {
+    return allHandCards
   } else {
     return false
   }
@@ -327,10 +423,9 @@ CardUtil.canHu2 = function (cardsOnHand, cardsOnGroup, currentCard) {
  * 玩家的牌是否无单牌。
  * @param cards: 手中的牌，或者手中的牌加新翻开的底牌。
  */
-CardUtil.shouShun = function (cards, currentCard) {
+CardUtil.shouShun = function (cards) {
   var countedCards = _.countBy(cards, function (c) { return c; });
   var results = [];
-
   // 四张 三张的剔出来
   _.each(countedCards, function (value, key) {
     const card = parseInt(key)
@@ -338,15 +433,10 @@ CardUtil.shouShun = function (cards, currentCard) {
       results.push({ name: Actions.Pao, cards: [card, card, card, card] });
       delete countedCards[key];
     } else if (value === 3) {
-      if (card === currentCard) {
-        results.push({ name: Actions.Peng, cards: [card, card, card] });
-      } else {
-        results.push({ name: Actions.Kan, cards: [card, card, card] });
-      }
+      results.push({ name: Actions.Kan, cards: [card, card, card] });
       delete countedCards[key];
     }
   })
-
   // 去掉2，7 10
   if (countedCards[2] >= 1 && countedCards[7] >= 1 && countedCards[10] >= 1) {
     results.push({ name: Actions.Chi, cards: [2, 7, 10] });
@@ -373,26 +463,7 @@ CardUtil.shouShun = function (cards, currentCard) {
     countedCards[17]--
     countedCards[20]--
   }
-
   var findShunzi = function (singleCard) {
-    // 贰柒拾
-    var diff = _.difference([12, 17, 20], [singleCard]);
-    if (diff.length !== 3 && countedCards[diff[0]] && countedCards[diff[1]]) {
-      countedCards[singleCard]--;
-      countedCards[diff[1]]--;
-      countedCards[diff[0]]--;
-      return [singleCard, diff[0], diff[1]];
-    }
-
-    // 二七十
-    diff = _.difference([2, 7, 10], [singleCard]);
-    if (diff.length !== 3 && countedCards[diff[0]] && countedCards[diff[1]]) {
-      countedCards[singleCard]--;
-      countedCards[diff[1]]--;
-      countedCards[diff[0]]--;
-      return [singleCard, diff[0], diff[1]];
-    }
-
     // 顺子
     if (countedCards[singleCard + 1] && countedCards[singleCard + 2] && singleCard !== 9 && singleCard !== 10) {
       countedCards[singleCard]--;
@@ -406,14 +477,12 @@ CardUtil.shouShun = function (cards, currentCard) {
       countedCards[singleCard - 1]--;
       return [singleCard - 1, singleCard, singleCard + 1];
     }
-
     if (countedCards[singleCard - 1] && countedCards[singleCard - 2] && singleCard !== 11 && singleCard !== 12) {
       countedCards[singleCard]--;
       countedCards[singleCard - 1]--;
       countedCards[singleCard - 2]--;
       return [singleCard - 2, singleCard - 1, singleCard];
     }
-
     // 大小混搭 6 16 16  
     // 6 6 16
     if (singleCard > 10 && (countedCards[singleCard - 10] > 1)) {
@@ -428,7 +497,6 @@ CardUtil.shouShun = function (cards, currentCard) {
     }
     return false;
   };
-
   // 处理单张
   _.each(countedCards, function (value, key) {
     if (value === 1) {
@@ -439,8 +507,7 @@ CardUtil.shouShun = function (cards, currentCard) {
       }
     }
   })
-
-  // 去掉所有组合掉的牌
+  // 去掉所有能组合的牌
   _.each(countedCards, function (value, key) {
     if (value === 0) {
       delete countedCards[key];

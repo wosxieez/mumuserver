@@ -9,7 +9,6 @@ const HuXiUtil = require('./app/util/HuXiUtil')
 var app = pomelo.createApp();
 app.set('name', 'chatofpomelo');
 
-// test 2
 // var canHuData = CardUtil.canHu([4, 4, 4, 2, 2, 7, 7, 10, 10, 6, 16], [
 // 	{ name: 'chi', cards: [11, 12, 13] },
 // 	{ name: 'chi', cards: [18, 19, 20] },
