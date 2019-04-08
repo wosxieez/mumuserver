@@ -21,7 +21,7 @@ function Room(channel, rule) {
     this.player = null
     this.player_card = 0
     this.cards = []
-    this.in = 0 // 记录这局中的第几把
+    this.ic = 0 // 记录这局中的第几把
 
     this.isZhuangFirstOutCard = false
     this.feadback = new Feadback(channel)
@@ -49,7 +49,7 @@ Room.prototype.addUser = function (username) {
     // username 玩家用户名
     // hx       玩家这局的总胡息
     // dn       玩家是否打鸟
-    this.users.push({ username, hx: 0, dn: false, thx: 0 })
+    this.users.push({ username, hx: 0, dn: false, thx: 0, tjs: 0, ae: -1 })
 }
 
 //---------------------------------------------------------------------------------------------------------------
@@ -131,6 +131,40 @@ Room.prototype.setDaNiao = function (username, dn) {
 }
 
 //---------------------------------------------------------------------------------------------------------------
+// 玩家请求退出
+//---------------------------------------------------------------------------------------------------------------
+Room.prototype.askExit = function (username) {
+    for (var i = 0; i < this.users.length; i++) {
+        if (this.users[i].username != username) {
+            this.users[i].ae = -1
+        }
+    }
+    this.setExit(username, 1)
+    if (this.channel) {
+        this.channel.pushMessage({
+            route: 'onRoom',
+            name: Notifications.onAskExit,
+            data: { ...this.users, an: username }
+        })
+    }
+}
+
+Room.prototype.setExit = function (username, ae) {
+    this.getUser(username).ae = ae
+
+    var agreeExit = true
+    for (var i = 0; i < this.users.length; i++) {
+        if (this.users[i].ae != 1) {
+            agreeExit = false
+        }
+    }
+    console.log(agreeExit)
+    if (agreeExit) {
+        this.noticeAllUserOnExit()
+    }
+}
+
+//---------------------------------------------------------------------------------------------------------------
 // 检查游戏是否能开始
 //---------------------------------------------------------------------------------------------------------------
 Room.prototype.checkGameStart = function () {
@@ -154,7 +188,7 @@ Room.prototype.checkGameStart = function () {
 
 Room.prototype.gameStart = function () {
     logger.info('game start...')
-    this.in++
+    this.ic++
     this.initRoom()
     this.xiPai()
     this.selectZhuang()
@@ -179,7 +213,7 @@ Room.prototype.initRoom = function () {
     this.actionUsers = []
     if (!this.onGaming) { // 一局没有开始的话  初始化下庄
         this.zhuang = null
-    } 
+    }
     this.zhuang_card = 0
     this.isZhuangFirstOutCard = false
     this.player = null
@@ -1125,7 +1159,7 @@ Room.prototype.loopOtherUserCanHuWithPlayerCard2 = function () {
             })
             if (maxHuXi.hx >= this.rule.hx) {
                 // 地胡 放炮胡 必须胡
-                user.groupCards = canHuData
+                user.groupCards = maxHuData
                 user.handCards = []
                 this.noticeAllUserOnWin({ wn: user.username, ...maxHuXi })
             } else {
@@ -1566,6 +1600,55 @@ Room.prototype.noticeAllUserOnWin = function (wd) {
     }
 }
 
+
+Room.prototype.noticeAllUserOnExit = function () {
+    console.log('玩家申请退出成功')
+    this.isGaming = false
+    this.onGaming = false
+
+    // 计算玩家胡息 TODO
+    var winner, loser
+    var maxThx = -1000
+    this.users.forEach(user => {
+        if (user.thx >= maxThx) {
+            winner = user
+            maxThx = Math.max(maxThx, user.thx)
+        }
+    })
+    this.users.forEach(user => {
+        if (user.username !== winner.username) {
+            loser = user
+        }
+    })
+    // user1 {thx: 100}
+    // user2 {thx: 63}
+    // 一局结束了
+
+    if (this.rule.id === 0) {
+        // 娱乐局不统计分数
+    } else {
+        var winnerTHX = Math.round(winner.thx / 10) * 10
+        var loserTHX = loser ? Math.round(loser.thx / 10) * 10 : 0
+        var winTHX = winnerTHX - loserTHX
+        var winScore = winTHX * this.rule.xf
+        var params = {
+            winner: winner.username,
+            loser: loser ? loser.username : '**@@**',
+            score: winScore, rid: this.rule.id,
+            gid: this.channel.groupname.substr(5)
+        }
+        axios.post('http://hefeixiaomu.com:3008/update_score', params).catch(error => { })
+    }
+
+    // 发送一局结束的通知
+    this.channel.pushMessage({
+        route: 'onRoom',
+        name: Notifications.onGameOver,
+        data: { ...this.getStatus(), hn: winner.username, hts: [] }
+    })
+    this.forceRelease()
+}
+
 Room.prototype.noticeAllUserOnRoundEnd = function () {
     this.isGaming = false
     this.users.forEach(user => {
@@ -1607,7 +1690,8 @@ Room.prototype.getStatus = function () {
         us: this.users,
         aus: this.actionUsers,
         cc: this.cards.length,
-        io: this.isOut
+        io: this.isOut,
+        ic: this.ic
     }
     // console.log(status)
     return status

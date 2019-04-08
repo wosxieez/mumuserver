@@ -352,9 +352,9 @@ CardUtil.canHu2 = function (cardsOnHand, cardsOnGroup, currentCard) {
   var copyedHandCards = JSON.parse(JSON.stringify(cardsOnHand)) // 深度拷贝
   var copyedGroupCards = JSON.parse(JSON.stringify(cardsOnGroup)) // 深度拷贝
   var allHandCards = []
-  var canChiPaoPeng = false
   if (currentCard !== 0) {
     // 看组合牌中能不能跑起
+    var canChiPaoPeng = false
     var paoGroup = CardUtil.canTi3(copyedGroupCards, currentCard)
     if (paoGroup) {
       canChiPaoPeng = true
@@ -397,10 +397,13 @@ CardUtil.canHu2 = function (cardsOnHand, cardsOnGroup, currentCard) {
         })
       }
     }
-  }
 
-  if (!canChiPaoPeng) {
-    allHandCards.push(copyedHandCards.concat([currentCard]))
+    if (!canChiPaoPeng) {
+      allHandCards.push(copyedHandCards.concat([currentCard]))
+    }
+  } else {
+    // currentCard === 0
+    allHandCards.push(copyedHandCards)
   }
 
   var allHuGroups = []

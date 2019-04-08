@@ -15,13 +15,8 @@ var RoomRemote = function (app) {
 // 获取唯一的房间号 room123456
 //---------------------------------------------------------------------------------------------------------------
 RoomRemote.prototype.getRadom = function (groupname, num, cb) {
-	var code = ''
-	for (var i = 0; i < num; i++) {
-		var radom = Math.floor(Math.random() * 10);
-		code += radom;
-	}
-
-	var roomname = 'room' + parseInt(code)
+	var code = Math.floor(Math.random()*9000) + 1000
+	var roomname = 'room' + code
 	for (key in this.channelService.channels) {
 		if (this.channelService.channels[key].name === roomname) {
 			this.getRadom(groupname, num, cb)
@@ -52,7 +47,7 @@ RoomRemote.prototype.createRoom = function (sid, groupname, roomname, username, 
 		console.log(this.app.get('serverId'), groupname, username, '创建房间成功')
 		this.notificationGroupStatus(groupname)
 		this.notificationRoomStatus(roomname)
-		cb({ code: 0, data: {rn: roomname, ru: rule} })
+		cb({ code: 0, data: { rn: roomname, ru: rule } })
 	}
 }
 
@@ -67,7 +62,7 @@ RoomRemote.prototype.joinRoom = function (sid, groupname, roomname, username, cb
 		if (channel.room.hasUser(username)) {
 			channel.add(username, sid)
 			console.log(this.app.get('serverId'), groupname, username, '加入房间成功, 用户已经在房间里了', roomname)
-			cb({ code: 0, data: {rn: roomname, ru: channel.room.rule } })
+			cb({ code: 0, data: { rn: roomname, ru: channel.room.rule } })
 			return
 		}
 
@@ -78,7 +73,7 @@ RoomRemote.prototype.joinRoom = function (sid, groupname, roomname, username, cb
 			console.log(this.app.get('serverId'), groupname, username, '加入房间成功')
 			this.notificationGroupStatus(groupname)
 			this.notificationRoomStatus(roomname)
-			cb({ code: 0, data: {rn: roomname, ru: channel.room.rule } })
+			cb({ code: 0, data: { rn: roomname, ru: channel.room.rule } })
 		}
 		else {
 			console.log(this.app.get('serverId'), groupname, username, '加入失败，房间人数已满')
@@ -157,6 +152,13 @@ RoomRemote.prototype.onAction = function (sid, groupname, roomname, username, ac
 			case Actions.Chi:
 			case Actions.Cancel:
 				channel.room.feadback.doOk(action.data)
+				break
+			case Actions.Ae: // 玩家请求退出
+				channel.room.askExit(username)
+				break
+			case Actions.Dae: // 玩家响应退出
+				channel.room.setExit(username, action.data)	
+				break
 			default:
 				break
 		}

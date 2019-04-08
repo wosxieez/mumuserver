@@ -11,7 +11,9 @@ const Actions = {
     Cancel: "cancel", // 取消 
     Idle: "idle",      // 无操作
     Ready: 'ready',    // 准备操纵
-    Dn: 'dn'
+    Dn: 'dn',  
+    Ae: 'ae',
+    Dae: 'dae'
 }
 
 module.exports = Actions
