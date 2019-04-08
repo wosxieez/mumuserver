@@ -277,71 +277,102 @@ CardUtil.tiPaoCount = function (cardsOnGroup) {
 
 CardUtil.canHu = function (cardsOnHand, cardsOnGroup, currentCard) {
   console.log('检查能否胡', cardsOnHand, cardsOnGroup, currentCard)
-  var copyedHandCards = JSON.parse(JSON.stringify(cardsOnHand)) // 深度拷贝
-  var copyedGroupCards = JSON.parse(JSON.stringify(cardsOnGroup)) // 深度拷贝
-  var allHandCards = []
-  var canChiPaoPeng = false
-  if (currentCard !== 0) {
+  var allGroups = []
+  if (currentCard != 0) {
+    var canChiPaoPeng = false
+
     // 看组合牌中能不能跑起
-    var paoGroup = CardUtil.canTi2(copyedGroupCards, currentCard)
+    var aHandCards = JSON.parse(JSON.stringify(cardsOnHand))
+    var aGroupCards = JSON.parse(JSON.stringify(cardsOnGroup))
+    var paoGroup = CardUtil.canTi2(aGroupCards, currentCard)
     if (paoGroup) {
+      console.log('能跑')
       canChiPaoPeng = true
       paoGroup.name = Actions.Pao
       paoGroup.cards.push(currentCard)
-      allHandCards.push(copyedHandCards)
-    } else {
-      // 看手里牌能不能跑
-      var canPaoCards = CardUtil.canTi(copyedHandCards, currentCard)
-      if (canPaoCards) {
-        canChiPaoPeng = true
-        var ccHandCards = JSON.parse(JSON.stringify(copyedHandCards))
-        canPaoCards.forEach(card => {
-          CardUtil.deleteCard(ccHandCards, card)
-        })
-        copyedGroupCards.push({ name: Actions.Pao, cards: [currentCard, currentCard, currentCard, currentCard] })
-        allHandCards.push(ccHandCards)
+      var shun = CardUtil.shouShun(aHandCards)
+      if (shun) {
+        allGroups.push(aGroupCards.concat(shun))
       }
-      var canPengCards = CardUtil.canPeng(copyedHandCards, currentCard)
-      if (canPengCards) {
-        canChiPaoPeng = true
-        var cccHandCards = JSON.parse(JSON.stringify(copyedHandCards))
-        canPengCards.forEach(card => {
-          CardUtil.deleteCard(cccHandCards, card)
-        })
-        copyedGroupCards.push({ name: Actions.Peng, cards: [currentCard, currentCard, currentCard] })
-        allHandCards.push(cccHandCards)
+    }
+
+    // 看手里牌能不能跑
+    var aHandCards = JSON.parse(JSON.stringify(cardsOnHand))
+    var aGroupCards = JSON.parse(JSON.stringify(cardsOnGroup))
+    var canPaoCards = CardUtil.canTi(aHandCards, currentCard)
+    if (canPaoCards) {
+      console.log('能跑')
+      canChiPaoPeng = true
+      canPaoCards.forEach(card => {
+        CardUtil.deleteCard(aHandCards, card)
+      })
+      aGroupCards.push({ name: Actions.Pao, cards: [currentCard, currentCard, currentCard, currentCard] })
+      var shun = CardUtil.shouShun(aHandCards)
+      if (shun) {
+        allGroups.push(aGroupCards.concat(shun))
       }
-      var canChiGroups = CardUtil.canChi(copyedHandCards, currentCard)
-      if (canChiGroups) {
-        canChiPaoPeng = true
-        canChiGroups.forEach(chiGroup => {
-          var ccccHandCards = JSON.parse(JSON.stringify(copyedHandCards))
-          chiGroup.cards.forEach(card => {
-            CardUtil.deleteCard(ccccHandCards, card)
-          })
-          chiGroup.cards.push(currentCard)
-          copyedGroupCards.push({ name: Actions.Chi, cards: chiGroup.cards })
-          allHandCards.push(ccccHandCards)
-        })
+    }
+
+    // 看手里牌能不能碰
+    var aHandCards = JSON.parse(JSON.stringify(cardsOnHand))
+    var aGroupCards = JSON.parse(JSON.stringify(cardsOnGroup))
+    var canPengCards = CardUtil.canPeng(aHandCards, currentCard)
+    if (canPengCards) {
+      console.log('能碰')
+      canChiPaoPeng = true
+      canPengCards.forEach(card => {
+        CardUtil.deleteCard(aHandCards, card)
+      })
+      aGroupCards.push({ name: Actions.Peng, cards: [currentCard, currentCard, currentCard] })
+      var shun = CardUtil.shouShun(aHandCards)
+      if (shun) {
+        allGroups.push(aGroupCards.concat(shun))
       }
+    }
+
+    // 看手里牌能不能吃
+    var canChiGroups = CardUtil.canChi(cardsOnHand, currentCard)
+    if (canChiGroups) {
+      console.log('能吃')
+      canChiPaoPeng = true
+      canChiGroups.forEach(chiGroup => {
+        var aHandCards = JSON.parse(JSON.stringify(cardsOnHand))
+        var aGroupCards = JSON.parse(JSON.stringify(cardsOnGroup))
+        chiGroup.cards.forEach(card => {
+          CardUtil.deleteCard(aHandCards, card)
+        })
+        chiGroup.cards.push(currentCard)
+        aGroupCards.push({ name: Actions.Chi, cards: chiGroup.cards })
+        var shun = CardUtil.shouShun(aHandCards)
+        if (shun) {
+          allGroups.push(aGroupCards.concat(shun))
+        }
+      })
+    }
+
+    if (!canChiPaoPeng) {
+      var aHandCards = JSON.parse(JSON.stringify(cardsOnHand))
+      var aGroupCards = JSON.parse(JSON.stringify(cardsOnGroup))
+      aHandCards.push(currentCard)
+      var shun = CardUtil.shouShun(aHandCards)
+      if (shun) {
+        allGroups.push(aGroupCards.concat(shun))
+      }
+    }
+  } else {
+    // currentCard === 0
+    var aHandCards = JSON.parse(JSON.stringify(cardsOnHand))
+    var aGroupCards = JSON.parse(JSON.stringify(cardsOnGroup))
+    var shun = CardUtil.shouShun(aHandCards)
+    if (shun) {
+      allGroups.push(aGroupCards.concat(shun))
     }
   }
 
-  if (!canChiPaoPeng) {
-    allHandCards.push(copyedHandCards.concat([currentCard]))
-  }
+  console.log('能胡的组合', JSON.stringify(allGroups))
 
-  var allHuGroups = []
-  allHandCards.forEach(newHandCards => {
-    var shunGroups = CardUtil.shouShun(newHandCards)
-    if (shunGroups) {
-      allHuGroups.push(copyedGroupCards.concat(shunGroups))
-    }
-  })
-  console.log('能胡的组合', JSON.stringify(allHuGroups))
-
-  if (allHuGroups.length >= 1) {
-    return allHuGroups
+  if (allGroups.length >= 1) {
+    return allGroups
   } else {
     return false
   }
@@ -349,74 +380,102 @@ CardUtil.canHu = function (cardsOnHand, cardsOnGroup, currentCard) {
 
 CardUtil.canHu2 = function (cardsOnHand, cardsOnGroup, currentCard) {
   console.log('检查能否胡', cardsOnHand, cardsOnGroup, currentCard)
-  var copyedHandCards = JSON.parse(JSON.stringify(cardsOnHand)) // 深度拷贝
-  var copyedGroupCards = JSON.parse(JSON.stringify(cardsOnGroup)) // 深度拷贝
-  var allHandCards = []
-  if (currentCard !== 0) {
-    // 看组合牌中能不能跑起
+  var allGroups = []
+  if (currentCard != 0) {
     var canChiPaoPeng = false
-    var paoGroup = CardUtil.canTi3(copyedGroupCards, currentCard)
+
+    // 看组合牌中能不能跑起
+    var aHandCards = JSON.parse(JSON.stringify(cardsOnHand))
+    var aGroupCards = JSON.parse(JSON.stringify(cardsOnGroup))
+    var paoGroup = CardUtil.canTi3(aGroupCards, currentCard)
     if (paoGroup) {
+      console.log('能跑')
       canChiPaoPeng = true
       paoGroup.name = Actions.Pao
       paoGroup.cards.push(currentCard)
-      allHandCards.push(copyedHandCards)
-    } else {
-      // 看手里牌能不能跑
-      var canPaoCards = CardUtil.canTi(copyedHandCards, currentCard)
-      if (canPaoCards) {
-        canChiPaoPeng = true
-        var ccHandCards = JSON.parse(JSON.stringify(copyedHandCards))
-        canPaoCards.forEach(card => {
-          CardUtil.deleteCard(ccHandCards, card)
-        })
-        copyedGroupCards.push({ name: Actions.Pao, cards: [currentCard, currentCard, currentCard, currentCard] })
-        allHandCards.push(ccHandCards)
+      var shun = CardUtil.shouShun(aHandCards)
+      if (shun) {
+        allGroups.push(aGroupCards.concat(shun))
       }
-      var canPengCards = CardUtil.canPeng(copyedHandCards, currentCard)
-      if (canPengCards) {
-        canChiPaoPeng = true
-        var cccHandCards = JSON.parse(JSON.stringify(copyedHandCards))
-        canPengCards.forEach(card => {
-          CardUtil.deleteCard(cccHandCards, card)
-        })
-        copyedGroupCards.push({ name: Actions.Peng, cards: [currentCard, currentCard, currentCard] })
-        allHandCards.push(cccHandCards)
+    }
+
+    // 看手里牌能不能跑
+    var aHandCards = JSON.parse(JSON.stringify(cardsOnHand))
+    var aGroupCards = JSON.parse(JSON.stringify(cardsOnGroup))
+    var canPaoCards = CardUtil.canTi(aHandCards, currentCard)
+    if (canPaoCards) {
+      console.log('能跑')
+      canChiPaoPeng = true
+      canPaoCards.forEach(card => {
+        CardUtil.deleteCard(aHandCards, card)
+      })
+      aGroupCards.push({ name: Actions.Pao, cards: [currentCard, currentCard, currentCard, currentCard] })
+      var shun = CardUtil.shouShun(aHandCards)
+      if (shun) {
+        allGroups.push(aGroupCards.concat(shun))
       }
-      var canChiGroups = CardUtil.canChi(copyedHandCards, currentCard)
-      if (canChiGroups) {
-        canChiPaoPeng = true
-        canChiGroups.forEach(chiGroup => {
-          var ccccHandCards = JSON.parse(JSON.stringify(copyedHandCards))
-          chiGroup.cards.forEach(card => {
-            CardUtil.deleteCard(ccccHandCards, card)
-          })
-          chiGroup.cards.push(currentCard)
-          copyedGroupCards.push({ name: Actions.Chi, cards: chiGroup.cards })
-          allHandCards.push(ccccHandCards)
-        })
+    }
+
+    // 看手里牌能不能碰
+    var aHandCards = JSON.parse(JSON.stringify(cardsOnHand))
+    var aGroupCards = JSON.parse(JSON.stringify(cardsOnGroup))
+    var canPengCards = CardUtil.canPeng(aHandCards, currentCard)
+    if (canPengCards) {
+      console.log('能碰')
+      canChiPaoPeng = true
+      canPengCards.forEach(card => {
+        CardUtil.deleteCard(aHandCards, card)
+      })
+      aGroupCards.push({ name: Actions.Peng, cards: [currentCard, currentCard, currentCard] })
+      var shun = CardUtil.shouShun(aHandCards)
+      if (shun) {
+        allGroups.push(aGroupCards.concat(shun))
       }
+    }
+
+    // 看手里牌能不能吃
+    var canChiGroups = CardUtil.canChi(cardsOnHand, currentCard)
+    if (canChiGroups) {
+      console.log('能吃')
+      canChiPaoPeng = true
+      canChiGroups.forEach(chiGroup => {
+        var aHandCards = JSON.parse(JSON.stringify(cardsOnHand))
+        var aGroupCards = JSON.parse(JSON.stringify(cardsOnGroup))
+        chiGroup.cards.forEach(card => {
+          CardUtil.deleteCard(aHandCards, card)
+        })
+        chiGroup.cards.push(currentCard)
+        aGroupCards.push({ name: Actions.Chi, cards: chiGroup.cards })
+        var shun = CardUtil.shouShun(aHandCards)
+        if (shun) {
+          allGroups.push(aGroupCards.concat(shun))
+        }
+      })
     }
 
     if (!canChiPaoPeng) {
-      allHandCards.push(copyedHandCards.concat([currentCard]))
+      var aHandCards = JSON.parse(JSON.stringify(cardsOnHand))
+      var aGroupCards = JSON.parse(JSON.stringify(cardsOnGroup))
+      aHandCards.push(currentCard)
+      var shun = CardUtil.shouShun(aHandCards)
+      if (shun) {
+        allGroups.push(aGroupCards.concat(shun))
+      }
     }
   } else {
     // currentCard === 0
-    allHandCards.push(copyedHandCards)
+    var aHandCards = JSON.parse(JSON.stringify(cardsOnHand))
+    var aGroupCards = JSON.parse(JSON.stringify(cardsOnGroup))
+    var shun = CardUtil.shouShun(aHandCards)
+    if (shun) {
+      allGroups.push(aGroupCards.concat(shun))
+    }
   }
 
-  var allHuGroups = []
-  allHandCards.forEach(newHandCards => {
-    var shunGroups = CardUtil.shouShun(newHandCards)
-    if (shunGroups) {
-      allHuGroups.push(copyedGroupCards.concat(shunGroups))
-    }
-  })
-  console.log('能胡的组合', JSON.stringify(allHuGroups))
+  console.log('能胡的组合', JSON.stringify(allGroups))
 
-  if (allHuGroups.length >= 1) {
-    return allHuGroups
+  if (allGroups.length >= 1) {
+    return allGroups
   } else {
     return false
   }
