@@ -25,6 +25,8 @@ function Room(channel, rule) {
     this.isZhuangFirstOutCard = false
     this.feadback = new Feadback(channel)
     this.timeout = 0
+
+    // test 1
     // var params = { winner: 'wosxieez', loser: 'wosxieez2', score: 100, gid: 2, rid: this.rule.id }
     // axios.post('http://127.0.0.1:3008/update_score', params).catch(error => {})
 }

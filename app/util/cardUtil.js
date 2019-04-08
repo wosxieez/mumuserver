@@ -212,7 +212,6 @@ CardUtil.canTi2 = function (cardsOnGroup, currentCard) {
   var can = false
   for (var i = 0; i < cardsOnGroup.length; i++) {
     group = cardsOnGroup[i]
-    console.log('...', group)
     if (group.cards.length == 3) {
       can = true
       for (var j = 0; j < group.cards.length; j++) {
@@ -294,7 +293,6 @@ CardUtil.canHu = function (cardsOnHand, cardsOnGroup, currentCard) {
   }
   // 看手里牌跟 打的牌或者翻的牌 能够组成顺子
   var onHand = CardUtil.shouShun(copyedHandCards, currentCard);
-  console.log('检查能否胡', onHand)
   if (onHand) {
     return copyedGroupCards.concat(onHand)
   } else {
@@ -318,7 +316,6 @@ CardUtil.canHu2 = function (cardsOnHand, cardsOnGroup, currentCard) {
   }
   // 看手里牌跟 打的牌或者翻的牌 能够组成顺子
   var onHand = CardUtil.shouShun(copyedHandCards, currentCard);
-  console.log('检查能否胡', onHand)
   if (onHand) {
     return copyedGroupCards.concat(onHand)
   } else {
@@ -334,10 +331,9 @@ CardUtil.shouShun = function (cards, currentCard) {
   var countedCards = _.countBy(cards, function (c) { return c; });
   var results = [];
 
-  // 1. 处理三张，并找出所有单张
+  // 四张 三张的剔出来
   _.each(countedCards, function (value, key) {
     const card = parseInt(key)
-    // 四张 三张的剔出来
     if (value === 4) {
       results.push({ name: Actions.Pao, cards: [card, card, card, card] });
       delete countedCards[key];
@@ -350,6 +346,33 @@ CardUtil.shouShun = function (cards, currentCard) {
       delete countedCards[key];
     }
   })
+
+  // 去掉2，7 10
+  if (countedCards[2] >= 1 && countedCards[7] >= 1 && countedCards[10] >= 1) {
+    results.push({ name: Actions.Chi, cards: [2, 7, 10] });
+    countedCards[2]--
+    countedCards[7]--
+    countedCards[10]--
+  }
+  if (countedCards[2] >= 1 && countedCards[7] >= 1 && countedCards[10] >= 1) {
+    results.push({ name: Actions.Chi, cards: [2, 7, 10] });
+    countedCards[2]--
+    countedCards[7]--
+    countedCards[10]--
+  }
+  // 去掉12，17 20
+  if (countedCards[12] >= 1 && countedCards[17] >= 1 && countedCards[20] >= 1) {
+    results.push({ name: Actions.Chi, cards: [12, 17, 20] });
+    countedCards[12]--
+    countedCards[17]--
+    countedCards[20]--
+  }
+  if (countedCards[12] >= 1 && countedCards[17] >= 1 && countedCards[20] >= 1) {
+    results.push({ name: Actions.Chi, cards: [12, 17, 20] });
+    countedCards[12]--
+    countedCards[17]--
+    countedCards[20]--
+  }
 
   var findShunzi = function (singleCard) {
     // 贰柒拾
@@ -391,7 +414,8 @@ CardUtil.shouShun = function (cards, currentCard) {
       return [singleCard - 2, singleCard - 1, singleCard];
     }
 
-    // 大小混搭
+    // 大小混搭 6 16 16  
+    // 6 6 16
     if (singleCard > 10 && (countedCards[singleCard - 10] > 1)) {
       countedCards[singleCard]--;
       countedCards[singleCard - 10] -= 2;
@@ -423,6 +447,7 @@ CardUtil.shouShun = function (cards, currentCard) {
     }
   })
 
+  console.log('顺子结果', countedCards, results)
   var keys = _.keys(countedCards)
   if (keys.length > 1) {
     return false
