@@ -1578,21 +1578,21 @@ Room.prototype.noticeAllUserOnWin = function (wd) {
             // 娱乐局不统计分数
         } else {
             var winnerTHX = Math.round(winner.thx / 10) * 10
-            logger.log('winner...thx...', winnerTHX)
+            logger.info('winner...thx...', winnerTHX)
             if (winner.dn) {
                 winnerTHX += this.rule.nf
-                logger.log('winner...thx...with dn', winner.dn, winnerTHX)
+                logger.info('winner...thx...with dn', winner.dn, winnerTHX)
             }
             var loserTHX = loser ? Math.round(loser.thx / 10) * 10 : 0
-            logger.log('loser...thx...', loserTHX)
+            logger.info('loser...thx...', loserTHX)
             if (loser && loser.dn) {
                 loserTHX -= this.rule.nf
-                logger.log('loser...thx...with dn', loserTHX)
+                logger.info('loser...thx...with dn', loserTHX)
             }
             var winTHX = winnerTHX - loserTHX
-            logger.log('total win thx...', winTHX)
+            logger.info('total win thx...', winTHX)
             var winScore = winTHX * this.rule.xf
-            logger.log('total win score...', winScore)
+            logger.info('total win score...', winScore)
             var params = {
                 winner: winner.username,
                 loser: loser ? loser.username : '**@@**',
@@ -1639,23 +1639,23 @@ Room.prototype.noticeAllUserOnExit = function () {
     if (this.rule.id === 0) {
         // 娱乐局不统计分数
     } else {
-        logger.log('player...allow...exit...success')
+        logger.info('player...allow...exit...success')
         var winnerTHX = Math.round(winner.thx / 10) * 10
-        logger.log('winner...thx...', winnerTHX)
+        logger.info('winner...thx...', winnerTHX)
         if (winner.dn) {
             winnerTHX += this.rule.nf
-            logger.log('winner...thx...with dn', winner.dn, winnerTHX)
+            logger.info('winner...thx...with dn', winner.dn, winnerTHX)
         }
         var loserTHX = loser ? Math.round(loser.thx / 10) * 10 : 0
-        logger.log('loser...thx...', loserTHX)
+        logger.info('loser...thx...', loserTHX)
         if (loser && loser.dn) {
             loserTHX -= this.rule.nf
-            logger.log('loser...thx...with dn', loserTHX)
+            logger.info('loser...thx...with dn', loserTHX)
         }
         var winTHX = winnerTHX - loserTHX
-        logger.log('total win thx...', winTHX)
+        logger.info('total win thx...', winTHX)
         var winScore = winTHX * this.rule.xf
-        logger.log('total win score...', winScore)
+        logger.info('total win score...', winScore)
         var params = {
             winner: winner.username,
             loser: loser ? loser.username : '**@@**',
