@@ -208,6 +208,8 @@ HuXiUtil.checkYiDianHong = function (groupCards, huXi, isLatestCard) {
   } else if (hongCount >= 13) {
     huXi.hts.push(HuTypes.Hong13)
     HuXiUtil.checkKaHu(groupCards, huXi, isLatestCard)
+  } else {
+    HuXiUtil.checkKaHu(groupCards, huXi, isLatestCard)
   }
 }
 
