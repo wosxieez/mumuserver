@@ -1,4 +1,5 @@
 const _ = require('underscore')
+const logger = require('pomelo-logger').getLogger('pomelo', __filename);
 
 
 module.exports = function Feadback(channel) {
@@ -29,7 +30,7 @@ module.exports = function Feadback(channel) {
                 this.timeouts.push(timeout)
             }
         })
-        console.log('反馈启动', this.channel.room.actionUsers)
+        logger.info('反馈启动', this.channel.room.actionUsers)
         this.isOk = true
         var timeout = setTimeout(this.timeoutCancel.bind(this), 60000) // 60s后所有玩家默认为取消
         this.timeouts.push(timeout)
@@ -52,7 +53,7 @@ module.exports = function Feadback(channel) {
                 if (newUser.cd) { oldUser.cd = newUser.cd }
             }
         })
-        console.log('收到反馈后结果', this.channel.room.actionUsers)
+        logger.info('收到反馈后结果', this.channel.room.actionUsers)
         if (this.okFunction) {
             this.okFunction()
         }
@@ -68,7 +69,7 @@ module.exports = function Feadback(channel) {
                 if (oldUser.pd && oldUser.pd.ac === -1 ) { oldUser.pd.ac = 0 }
                 if (oldUser.cd && oldUser.cd.ac === -1 ) { oldUser.cd.ac = 0 }
         })
-        console.log('超时反馈结束', this.channel.room.actionUsers)
+        logger.info('超时反馈结束', this.channel.room.actionUsers)
         this.timeouts.forEach(timeout => {
             clearTimeout(timeout)
         })  
@@ -81,7 +82,7 @@ module.exports = function Feadback(channel) {
     this.manualCancel = function () {
         // 手动取消了;
         this.isOk = false
-        console.log('手动反馈结束', this.channel.room.actionUsers)
+        logger.info('手动反馈结束', this.channel.room.actionUsers)
         this.timeouts.forEach(timeout => {
             clearTimeout(timeout)
         })  
@@ -90,7 +91,7 @@ module.exports = function Feadback(channel) {
 
     this.release = function () {
         this.isOk = false
-        console.log('反馈释放')
+        logger.info('反馈释放')
         this.timeouts.forEach(timeout => {
             clearTimeout(timeout)
         })  
