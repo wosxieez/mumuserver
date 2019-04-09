@@ -1581,12 +1581,14 @@ Room.prototype.noticeAllUserOnWin = function (wd) {
             logger.info('winner...thx...', winnerTHX)
             if (winner.dn) {
                 winnerTHX += this.rule.nf
+                winner.thx = winnerTHX
                 logger.info('winner...thx...with dn', winner.dn, winnerTHX)
             }
             var loserTHX = loser ? Math.round(loser.thx / 10) * 10 : 0
             logger.info('loser...thx...', loserTHX)
             if (loser && loser.dn) {
                 loserTHX -= this.rule.nf
+                loser.thx = loserTHX
                 logger.info('loser...thx...with dn', loserTHX)
             }
             var winTHX = winnerTHX - loserTHX
