@@ -13,6 +13,9 @@ app.set('name', 'chatofpomelo');
 // { name: 'chi', cards: [ 6, 7, 8 ] },
 // { name: 'ti', cards: [ 15, 15, 15, 15 ] },
 // { name: 'wei', cards: [ 2, 2, 2 ] } ], 0)
+
+// var huX= HuXiUtil.getHuXi(canHuData[0], 3, true)
+// console.log(huX)
 // return
 
 // app configure

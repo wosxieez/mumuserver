@@ -1095,10 +1095,9 @@ Room.prototype.playerPlayCard = function (user) {
                     this.feadback.manualCancel()
                     this.noticeAllUserOnNewCard()
                     this.checkOtherUserCanHuWithPlayerCard2()
-                } else {
-                    // 不出牌 不可能的
+                } else if (this.actionUsers[0].nd.ac === 0) {
                     // 超时了
-                    logger.info('取消或无反应')
+                    logger.info('不出牌或超时')
                     const riffleCards = CardUtil.riffle(user.handCards)
                     const lastGroup = riffleCards.pop()
                     this.player = user
@@ -1112,6 +1111,8 @@ Room.prototype.playerPlayCard = function (user) {
                     this.actionUsers = []
                     this.noticeAllUserOnNewCard()
                     this.checkOtherUserCanHuWithPlayerCard2()
+                } else {
+                    logger.info('无效的出牌响应')
                 }
             })
     } else {
