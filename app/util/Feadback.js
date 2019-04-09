@@ -3,11 +3,19 @@ const _ = require('underscore')
 
 module.exports = function Feadback(channel) {
     this.channel = channel
+    this.timeouts = []
 
     this.send = function () {
         // [ { un: wosxieez1 nd: {dt: '', ac: -1}, hd: {dt: [], ac: -1}, pd: {dt: []}, ac: -1}, cd: {dt: [], ac: -1} },
         //   { un: wosxieez2 nd: {dt: '', ac: -1}, hd: {dt: [], ac: -1}, pd: {dt: []}, ac: -1}, cd: {dt: [], ac: -1} } ]
         if (!this.channel.room.actionUsers) return 
+        this.okFunction = null
+
+        this.timeouts.forEach(timeout => {
+            clearTimeout(timeout)
+        })  
+        this.timeouts = []
+        
         this.channel.room.actionUsers.forEach(oldUser => {
             if (!this.channel.getMember(oldUser.un)) {
                 // 如果发送反馈的时候 玩家不在线 默认玩家所有操作都取消
@@ -15,17 +23,16 @@ module.exports = function Feadback(channel) {
                 if (oldUser.hd && oldUser.hd.ac === -1 ) { oldUser.hd.ac = 0 }
                 if (oldUser.pd && oldUser.pd.ac === -1 ) { oldUser.pd.ac = 0 }
                 if (oldUser.cd && oldUser.cd.ac === -1 ) { oldUser.cd.ac = 0 }
-                setTimeout(() => {
+                var timeout = setTimeout(() => {
                     this.doOk(oldUser)
                 }, 1000);
+                this.timeouts.push(timeout)
             }
         })
-
-        this.okFunction = null
-        clearTimeout(this.timeout)
         console.log('反馈启动', this.channel.room.actionUsers)
         this.isOk = true
-        this.timeout = setTimeout(this.timeoutCancel.bind(this), 60000) // 60s后所有玩家默认为取消
+        var timeout = setTimeout(this.timeoutCancel.bind(this), 60000) // 60s后所有玩家默认为取消
+        this.timeouts.push(timeout)
         return this
     }
 
@@ -62,7 +69,10 @@ module.exports = function Feadback(channel) {
                 if (oldUser.cd && oldUser.cd.ac === -1 ) { oldUser.cd.ac = 0 }
         })
         console.log('超时反馈结束', this.channel.room.actionUsers)
-        clearTimeout(this.timeout)
+        this.timeouts.forEach(timeout => {
+            clearTimeout(timeout)
+        })  
+        this.timeouts = []
         if (this.okFunction) {
             this.okFunction()
         }
@@ -72,13 +82,19 @@ module.exports = function Feadback(channel) {
         // 手动取消了;
         this.isOk = false
         console.log('手动反馈结束', this.channel.room.actionUsers)
-        clearTimeout(this.timeout)
+        this.timeouts.forEach(timeout => {
+            clearTimeout(timeout)
+        })  
+        this.timeouts = []
     }
 
     this.release = function () {
         this.isOk = false
         console.log('反馈释放')
-        clearTimeout(this.timeout)
+        this.timeouts.forEach(timeout => {
+            clearTimeout(timeout)
+        })  
+        this.timeouts = []
     }
 
 }
