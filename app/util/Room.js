@@ -1579,7 +1579,14 @@ Room.prototype.noticeAllUserOnWin = function (wd) {
             // 娱乐局不统计分数
         } else {
             var winnerScore = Math.round(winner.thx / 10) * 10 * this.rule.xf
-            var loserScore = loser ? Math.round(loser.thx / 10) * 10 : 0 * this.rule.xf
+            var loserScore = 0
+            if (loser) {
+                if (loser.thx >= 0) {
+                    loserScore = Math.round(loser.thx / 10) * 10 * this.rule.xf
+                } else {
+                    loserScore = -Math.round(-loser.thx / 10) * 10 * this.rule.xf
+                }
+            }
             var winnerNiaoScore = 0, loserNiaoScore = 0
             if (winner.dn) {
                 winner.nf = this.rule.nf // 鸟分
@@ -1589,7 +1596,7 @@ Room.prototype.noticeAllUserOnWin = function (wd) {
                 loser.nf = -this.rule.nf // 鸟分
                 loserNiaoScore = loser.nf
             }
-            var winScore = winnerScore + winnerNiaoScore - loserScore + loserNiaoScore
+            var winScore = winnerScore + winnerNiaoScore - loserScore - loserNiaoScore
             if (winner) {
                 winner.tjs = winScore
             }
@@ -1598,7 +1605,7 @@ Room.prototype.noticeAllUserOnWin = function (wd) {
             }
             var params = {
                 winner: winner.username,
-                loser: loser ? loser.username : '**@@**',
+                loser: loser ? loser.username : 'NULL USER',
                 score: winScore, rid: this.rule.id,
                 gid: this.channel.groupname.substr(5)
             }
@@ -1645,7 +1652,14 @@ Room.prototype.noticeAllUserOnExit = function () {
         // 娱乐局不统计分数
     } else {
         var winnerScore = Math.round(winner.thx / 10) * 10 * this.rule.xf
-        var loserScore = loser ? Math.round(loser.thx / 10) * 10 : 0 * this.rule.xf
+        var loserScore = 0
+            if (loser) {
+                if (loser.thx >= 0) {
+                    loserScore = Math.round(loser.thx / 10) * 10 * this.rule.xf
+                } else {
+                    loserScore = -Math.round(-loser.thx / 10) * 10 * this.rule.xf
+                }
+            }
         var winnerNiaoScore = 0, loserNiaoScore = 0
         if (winner.dn) {
             winner.nf = this.rule.nf // 鸟分
@@ -1655,7 +1669,7 @@ Room.prototype.noticeAllUserOnExit = function () {
             loser.nf = -this.rule.nf // 鸟分
             loserNiaoScore = loser.nf
         }
-        var winScore = winnerScore + winnerNiaoScore - loserScore + loserNiaoScore
+        var winScore = winnerScore + winnerNiaoScore - loserScore - loserNiaoScore
         if (winner) {
             winner.tjs = winScore
         }
@@ -1664,7 +1678,7 @@ Room.prototype.noticeAllUserOnExit = function () {
         }
         var params = {
             winner: winner.username,
-            loser: loser ? loser.username : '**@@**',
+            loser: loser ? loser.username : 'NULL USER',
             score: winScore, rid: this.rule.id,
             gid: this.channel.groupname.substr(5)
         }
