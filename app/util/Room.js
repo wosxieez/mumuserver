@@ -1607,7 +1607,8 @@ Room.prototype.noticeAllUserOnWin = function (wd) {
                 winner: winner.username,
                 loser: loser ? loser.username : 'NULL USER',
                 score: winScore, rid: this.rule.id,
-                gid: this.channel.groupname.substr(5)
+                gid: this.channel.groupname.substr(5),
+                rn: this.channel.name
             }
             console.log('win...', winnerScore, winnerNiaoScore, loserScore, loserNiaoScore)
             axios.post('http://hefeixiaomu.com:3008/update_score', params).catch(error => { })
@@ -1680,7 +1681,8 @@ Room.prototype.noticeAllUserOnExit = function () {
             winner: winner.username,
             loser: loser ? loser.username : 'NULL USER',
             score: winScore, rid: this.rule.id,
-            gid: this.channel.groupname.substr(5)
+            gid: this.channel.groupname.substr(5),
+            rn: this.channel.name
         }
         console.log('win...', winnerScore, winnerNiaoScore, loserScore, loserNiaoScore)
         axios.post('http://hefeixiaomu.com:3008/update_score', params).catch(error => { })
