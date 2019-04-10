@@ -49,7 +49,7 @@ Room.prototype.addUser = function (username) {
     // username 玩家用户名
     // hx       玩家这局的总胡息
     // dn       玩家是否打鸟
-    this.users.push({ username, hx: 0, dn: false, thx: 0, tjs: 0, ae: -1 })
+    this.users.push({ username, hx: 0, dn: false, nf: 0, thx: 0, tjs: 0, ae: -1 })
 }
 
 //---------------------------------------------------------------------------------------------------------------
@@ -909,7 +909,7 @@ Room.prototype.checkPlayerUserCanTiWithPlayerCard = function () {
                 canTiData2.name = Actions.Pao
                 canTiData2.cards.push(this.player_card)
                 this.player_card = 0 // 翻的牌被跑起来起来了
-                this.noticeAllUserOnPao() 
+                this.noticeAllUserOnPao()
                 this.checkPlayerUserCanHuWithPlayerCard3()
             }, 1500);
         } else {
@@ -1571,37 +1571,38 @@ Room.prototype.noticeAllUserOnWin = function (wd) {
             this.forceRelease()
         }
     } else {
-        // user1 {thx: 100}
-        // user2 {thx: 63}
+        // user1 {thx: 100, hx: 30}
+        // user2 {thx: 63,  hx: -30}
         // 一局结束了
 
         if (this.rule.id === 0) {
             // 娱乐局不统计分数
         } else {
-            var winnerTHX = Math.round(winner.thx / 10) * 10
-            logger.info('winner...thx...', winnerTHX)
+            var winnerScore = Math.round(winner.thx / 10) * 10 * this.rule.xf
+            var loserScore = loser ? Math.round(loser.thx / 10) * 10 : 0 * this.rule.xf
+            var winnerNiaoScore = 0, loserNiaoScore = 0
             if (winner.dn) {
-                winnerTHX += this.rule.nf
-                winner.thx = winnerTHX
-                logger.info('winner...thx...with dn', winner.dn, winnerTHX)
+                winner.nf = this.rule.nf // 鸟分
+                winnerNiaoScore = winner.nf
             }
-            var loserTHX = loser ? Math.round(loser.thx / 10) * 10 : 0
-            logger.info('loser...thx...', loserTHX)
             if (loser && loser.dn) {
-                loserTHX -= this.rule.nf
-                loser.thx = loserTHX
-                logger.info('loser...thx...with dn', loserTHX)
+                loser.nf = -this.rule.nf // 鸟分
+                loserNiaoScore = loser.nf
             }
-            var winTHX = winnerTHX - loserTHX
-            logger.info('total win thx...', winTHX)
-            var winScore = winTHX * this.rule.xf
-            logger.info('total win score...', winScore)
+            var winScore = winnerScore + winnerNiaoScore - loserScore + loserNiaoScore
+            if (winner) {
+                winner.tjs = winScore
+            }
+            if (loser) {
+                loser.tjs = -winScore
+            }
             var params = {
                 winner: winner.username,
                 loser: loser ? loser.username : '**@@**',
                 score: winScore, rid: this.rule.id,
                 gid: this.channel.groupname.substr(5)
             }
+            console.log('win...', winnerScore, winnerNiaoScore, loserScore, loserNiaoScore)
             axios.post('http://hefeixiaomu.com:3008/update_score', params).catch(error => { })
         }
 
@@ -1620,6 +1621,7 @@ Room.prototype.noticeAllUserOnExit = function () {
     console.log('玩家申请退出成功')
     this.isGaming = false
     this.onGaming = false
+    this.actionUsers = []
 
     // 计算玩家胡息 TODO
     var winner, loser
@@ -1642,29 +1644,31 @@ Room.prototype.noticeAllUserOnExit = function () {
     if (this.rule.id === 0) {
         // 娱乐局不统计分数
     } else {
-        logger.info('player...allow...exit...success')
-        var winnerTHX = Math.round(winner.thx / 10) * 10
-        logger.info('winner...thx...', winnerTHX)
+        var winnerScore = Math.round(winner.thx / 10) * 10 * this.rule.xf
+        var loserScore = loser ? Math.round(loser.thx / 10) * 10 : 0 * this.rule.xf
+        var winnerNiaoScore = 0, loserNiaoScore = 0
         if (winner.dn) {
-            winnerTHX += this.rule.nf
-            logger.info('winner...thx...with dn', winner.dn, winnerTHX)
+            winner.nf = this.rule.nf // 鸟分
+            winnerNiaoScore = winner.nf
         }
-        var loserTHX = loser ? Math.round(loser.thx / 10) * 10 : 0
-        logger.info('loser...thx...', loserTHX)
         if (loser && loser.dn) {
-            loserTHX -= this.rule.nf
-            logger.info('loser...thx...with dn', loserTHX)
+            loser.nf = -this.rule.nf // 鸟分
+            loserNiaoScore = loser.nf
         }
-        var winTHX = winnerTHX - loserTHX
-        logger.info('total win thx...', winTHX)
-        var winScore = winTHX * this.rule.xf
-        logger.info('total win score...', winScore)
+        var winScore = winnerScore + winnerNiaoScore - loserScore + loserNiaoScore
+        if (winner) {
+            winner.tjs = winScore
+        }
+        if (loser) {
+            loser.tjs = -winScore
+        }
         var params = {
             winner: winner.username,
             loser: loser ? loser.username : '**@@**',
             score: winScore, rid: this.rule.id,
             gid: this.channel.groupname.substr(5)
         }
+        console.log('win...', winnerScore, winnerNiaoScore, loserScore, loserNiaoScore)
         axios.post('http://hefeixiaomu.com:3008/update_score', params).catch(error => { })
     }
 
