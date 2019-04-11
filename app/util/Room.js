@@ -280,7 +280,7 @@ Room.prototype.checkAllUserCanHuWith3Ti5Kan = function () {
         if (CardUtil.has3Ti5Kan(this.users[i].handCards)) {
             // 胡牌 3提 5坎 胡牌  天胡
             const huXi = HuXiUtil.getHuXi(this.users[i].groupCards, HuActions.Is3Ti5KanCard)
-            this.noticeAllUserOnWin({ wn: this.users[i].username, hc: 0, ...huXi})
+            this.noticeAllUserOnWin({ wn: this.users[i].username, hc: 0, ...huXi })
             return
         }
     }
@@ -1562,7 +1562,7 @@ Room.prototype.noticeAllUserOnWin = function (wd) {
         this.channel.pushMessage({
             route: 'onRoom',
             name: Notifications.onWin,
-            data: { ...this.getStatus(), hn: wd.wn, hts: wd.hts }
+            data: { ...this.getStatus(), hn: wd.wn, hc: wd.hc, hts: wd.hts }
         })
 
         if (this.rule.id === 0) {
@@ -1618,7 +1618,7 @@ Room.prototype.noticeAllUserOnWin = function (wd) {
         this.channel.pushMessage({
             route: 'onRoom',
             name: Notifications.onGameOver,
-            data: { ...this.getStatus(), hn: wd.wn, hts: wd.hts }
+            data: { ...this.getStatus(), hn: wd.wn, hc: wd.hc, hts: wd.hts }
         })
         this.forceRelease()
     }
@@ -1654,13 +1654,13 @@ Room.prototype.noticeAllUserOnExit = function () {
     } else {
         var winnerScore = Math.round(winner.thx / 10) * 10 * this.rule.xf
         var loserScore = 0
-            if (loser) {
-                if (loser.thx >= 0) {
-                    loserScore = Math.round(loser.thx / 10) * 10 * this.rule.xf
-                } else {
-                    loserScore = -Math.round(-loser.thx / 10) * 10 * this.rule.xf
-                }
+        if (loser) {
+            if (loser.thx >= 0) {
+                loserScore = Math.round(loser.thx / 10) * 10 * this.rule.xf
+            } else {
+                loserScore = -Math.round(-loser.thx / 10) * 10 * this.rule.xf
             }
+        }
         var winnerNiaoScore = 0, loserNiaoScore = 0
         if (winner.dn) {
             winner.nf = this.rule.nf // 鸟分
