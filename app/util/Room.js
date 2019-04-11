@@ -22,6 +22,7 @@ function Room(channel, rule) {
     this.player_card = 0
     this.cards = []
     this.ic = 0 // 记录这局中的第几把
+    this.hc = 0 // 胡的牌
 
     this.isZhuangFirstOutCard = false
     this.feadback = new Feadback(channel)
@@ -269,6 +270,7 @@ Room.prototype.faPai = function () {
 Room.prototype.faZhuangPai = function () {
     logger.info('发庄牌')
     this.zhuang_card = this.cards.pop()
+    this.hc = this.zhuang_card
 }
 
 /**
@@ -280,7 +282,7 @@ Room.prototype.checkAllUserCanHuWith3Ti5Kan = function () {
         if (CardUtil.has3Ti5Kan(this.users[i].handCards)) {
             // 胡牌 3提 5坎 胡牌  天胡
             const huXi = HuXiUtil.getHuXi(this.users[i].groupCards, HuActions.Is3Ti5KanCard)
-            this.noticeAllUserOnWin({ wn: this.users[i].username, hc: 0, ...huXi })
+            this.noticeAllUserOnWin({ wn: this.users[i].username, ...huXi })
             return
         }
     }
@@ -302,7 +304,7 @@ Room.prototype.checkZhuangCanHuWithZhuangCard = function () {
                 maxHuXi = huXi
             }
         })
-        this.noticeAllUserOnWin({ wn: this.zhuang.username, hc: this.zhuang_card, ...maxHuXi })
+        this.noticeAllUserOnWin({ wn: this.zhuang.username, ...maxHuXi })
     } else {
         this.zhuangStart()
     }
@@ -401,6 +403,7 @@ Room.prototype.zhuangPlayCard = function () {
             // 庄家出牌
             if (this.actionUsers[0].nd.ac === 1) {
                 this.player_card = this.actionUsers[0].nd.dt
+                this.hc = this.player_card
                 this.player = this.zhuang
                 this.actionUsers = []
                 this.feadback.manualCancel()  // 手动取消反馈
@@ -418,6 +421,7 @@ Room.prototype.zhuangPlayCard = function () {
                 const riffleCards = CardUtil.riffle(this.zhuang.handCards)
                 const lastGroup = riffleCards.pop()
                 this.player_card = lastGroup.pop()
+                this.hc = this.player_card
                 this.player = this.zhuang
                 this.actionUsers = []
                 this.feadback.manualCancel()  // 手动取消反馈
@@ -814,7 +818,7 @@ Room.prototype.checkHuAction = function (aus) {
                 user.handCards = []
                 this.actionUsers = []
                 this.feadback.manualCancel()
-                this.noticeAllUserOnWin({ wn: aus[i].un, hc: this.player_card, ...aus[i].hd.dt.hx })
+                this.noticeAllUserOnWin({ wn: aus[i].un, ...aus[i].hd.dt.hx })
                 return
             } else if (aus[i].hd.ac === 0) {
                 // 玩家不胡操作 继续判断下家
@@ -876,6 +880,7 @@ Room.prototype.nextPlayCard = function (user) {
     }
 
     this.player_card = this.cards.pop()
+    this.hc = this.player_card
     logger.info('翻的牌为', this.player_card)
     this.isOut = false
     this.noticeAllUserOnNewCard()
@@ -994,7 +999,7 @@ Room.prototype.checkPlayerUserCanHuWithPlayerCard2 = function () {
                         this.player.handCards = []
                         this.actionUsers = []
                         this.feadback.manualCancel()
-                        this.noticeAllUserOnWin({ wn: this.player.username, hc: this.player_card, ...maxHuXi })
+                        this.noticeAllUserOnWin({ wn: this.player.username, ...maxHuXi })
                     } else {
                         // 不胡
                         this.actionUsers = []
@@ -1039,7 +1044,7 @@ Room.prototype.checkPlayerUserCanHuWithPlayerCard3 = function () {
                         this.player.handCards = []
                         this.actionUsers = []
                         this.feadback.manualCancel()
-                        this.noticeAllUserOnWin({ wn: this.player.username, hc: this.player_card, ...maxHuXi })
+                        this.noticeAllUserOnWin({ wn: this.player.username, ...maxHuXi })
                     } else {
                         // 不胡
                         this.actionUsers = []
@@ -1086,6 +1091,7 @@ Room.prototype.playerPlayCard = function (user) {
                     logger.info('收到出牌', this.actionUsers[0].nd.dt)
                     this.player = user
                     this.player_card = this.actionUsers[0].nd.dt
+                    this.hc = this.player_card
                     this.isZhuangFirstOutCard = false
                     this.player.ucCards.push(this.player_card)
                     this.player.upCards.push(this.player_card)
@@ -1102,6 +1108,7 @@ Room.prototype.playerPlayCard = function (user) {
                     const lastGroup = riffleCards.pop()
                     this.player = user
                     this.player_card = lastGroup.pop()
+                    this.hc = this.player_card
                     this.isZhuangFirstOutCard = false
                     logger.info('默认出的牌为', this.player_card)
                     this.player.ucCards.push(this.player_card)
@@ -1162,7 +1169,7 @@ Room.prototype.loopOtherUserCanHuWithPlayerCard2 = function () {
                 // 地胡 放炮胡 必须胡
                 user.groupCards = maxHuData
                 user.handCards = []
-                this.noticeAllUserOnWin({ wn: user.username, hc: this.player_card, ...maxHuXi })
+                this.noticeAllUserOnWin({ wn: user.username, ...maxHuXi })
             } else {
                 // 胡息小于15 不能胡
                 this.loopOtherUserCanHuWithPlayerCard2()
@@ -1562,7 +1569,7 @@ Room.prototype.noticeAllUserOnWin = function (wd) {
         this.channel.pushMessage({
             route: 'onRoom',
             name: Notifications.onWin,
-            data: { ...this.getStatus(), hn: wd.wn, hc: wd.hc, hts: wd.hts }
+            data: { ...this.getStatus(), hn: wd.wn, hts: wd.hts }
         })
 
         if (this.rule.id === 0) {
@@ -1618,7 +1625,7 @@ Room.prototype.noticeAllUserOnWin = function (wd) {
         this.channel.pushMessage({
             route: 'onRoom',
             name: Notifications.onGameOver,
-            data: { ...this.getStatus(), hn: wd.wn, hc: wd.hc, hts: wd.hts }
+            data: { ...this.getStatus(), hn: wd.wn, hts: wd.hts }
         })
         this.forceRelease()
     }
@@ -1739,7 +1746,8 @@ Room.prototype.getStatus = function () {
         aus: this.actionUsers,
         cc: this.cards.length,
         io: this.isOut,
-        ic: this.ic
+        ic: this.ic,
+        hc: this.hc
     }
     // console.log(status)
     return status
