@@ -280,7 +280,7 @@ Room.prototype.checkAllUserCanHuWith3Ti5Kan = function () {
         if (CardUtil.has3Ti5Kan(this.users[i].handCards)) {
             // 胡牌 3提 5坎 胡牌  天胡
             const huXi = HuXiUtil.getHuXi(this.users[i].groupCards, HuActions.Is3Ti5KanCard)
-            this.noticeAllUserOnWin({ wn: this.users[i].username, ...huXi })
+            this.noticeAllUserOnWin({ wn: this.users[i].username, hc: 0, ...huXi})
             return
         }
     }
@@ -302,7 +302,7 @@ Room.prototype.checkZhuangCanHuWithZhuangCard = function () {
                 maxHuXi = huXi
             }
         })
-        this.noticeAllUserOnWin({ wn: this.zhuang.username, ...maxHuXi })
+        this.noticeAllUserOnWin({ wn: this.zhuang.username, hc: this.zhuang_card, ...maxHuXi })
     } else {
         this.zhuangStart()
     }
@@ -814,7 +814,7 @@ Room.prototype.checkHuAction = function (aus) {
                 user.handCards = []
                 this.actionUsers = []
                 this.feadback.manualCancel()
-                this.noticeAllUserOnWin({ wn: aus[i].un, ...aus[i].hd.dt.hx })
+                this.noticeAllUserOnWin({ wn: aus[i].un, hc: this.player_card, ...aus[i].hd.dt.hx })
                 return
             } else if (aus[i].hd.ac === 0) {
                 // 玩家不胡操作 继续判断下家
@@ -994,7 +994,7 @@ Room.prototype.checkPlayerUserCanHuWithPlayerCard2 = function () {
                         this.player.handCards = []
                         this.actionUsers = []
                         this.feadback.manualCancel()
-                        this.noticeAllUserOnWin({ wn: this.player.username, ...maxHuXi })
+                        this.noticeAllUserOnWin({ wn: this.player.username, hc: this.player_card, ...maxHuXi })
                     } else {
                         // 不胡
                         this.actionUsers = []
@@ -1039,7 +1039,7 @@ Room.prototype.checkPlayerUserCanHuWithPlayerCard3 = function () {
                         this.player.handCards = []
                         this.actionUsers = []
                         this.feadback.manualCancel()
-                        this.noticeAllUserOnWin({ wn: this.player.username, ...maxHuXi })
+                        this.noticeAllUserOnWin({ wn: this.player.username, hc: this.player_card, ...maxHuXi })
                     } else {
                         // 不胡
                         this.actionUsers = []
@@ -1162,7 +1162,7 @@ Room.prototype.loopOtherUserCanHuWithPlayerCard2 = function () {
                 // 地胡 放炮胡 必须胡
                 user.groupCards = maxHuData
                 user.handCards = []
-                this.noticeAllUserOnWin({ wn: user.username, ...maxHuXi })
+                this.noticeAllUserOnWin({ wn: user.username, hc: this.player_card, ...maxHuXi })
             } else {
                 // 胡息小于15 不能胡
                 this.loopOtherUserCanHuWithPlayerCard2()
