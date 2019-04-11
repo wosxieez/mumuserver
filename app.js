@@ -9,11 +9,12 @@ const HuXiUtil = require('./app/util/HuXiUtil')
 var app = pomelo.createApp();
 app.set('name', 'chatofpomelo');
 
+// CardUtil.canChi([9,20,14,9,5,17,11,10,9,2,5,20,11,16], 12)
+// return
 // var canHuData = CardUtil.canHu2([ 11, 11, 14, 14, 14, 1, 9, 9 ], [ { name: 'chi', cards: [ 12, 17, 20 ] },
 // { name: 'chi', cards: [ 6, 7, 8 ] },
 // { name: 'ti', cards: [ 15, 15, 15, 15 ] },
 // { name: 'wei', cards: [ 2, 2, 2 ] } ], 0)
-
 // var huX= HuXiUtil.getHuXi(canHuData[0], 3, true)
 // console.log(huX)
 // return

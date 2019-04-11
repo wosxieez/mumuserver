@@ -1,5 +1,6 @@
 const _ = require('underscore')
 const Actions = require('./Actions')
+const logger = require('pomelo-logger').getLogger('pomelo', __filename);
 
 var CardUtil = {};
 
@@ -276,7 +277,7 @@ CardUtil.tiPaoCount = function (cardsOnGroup) {
 }
 
 CardUtil.canHu = function (cardsOnHand, cardsOnGroup, currentCard) {
-  console.log('检查能否胡', cardsOnHand, cardsOnGroup, currentCard)
+  logger.info('检查能否胡', cardsOnHand, cardsOnGroup, currentCard)
   var allGroups = []
   if (currentCard != 0) {
     var canChiPaoPeng = false
@@ -286,7 +287,7 @@ CardUtil.canHu = function (cardsOnHand, cardsOnGroup, currentCard) {
     var aGroupCards = JSON.parse(JSON.stringify(cardsOnGroup))
     var paoGroup = CardUtil.canTi2(aGroupCards, currentCard)
     if (paoGroup) {
-      console.log('能跑')
+      logger.info('能跑')
       canChiPaoPeng = true
       paoGroup.name = Actions.Pao
       paoGroup.cards.push(currentCard)
@@ -301,7 +302,7 @@ CardUtil.canHu = function (cardsOnHand, cardsOnGroup, currentCard) {
     var aGroupCards = JSON.parse(JSON.stringify(cardsOnGroup))
     var canPaoCards = CardUtil.canTi(aHandCards, currentCard)
     if (canPaoCards) {
-      console.log('能跑')
+      logger.info('能跑')
       canChiPaoPeng = true
       canPaoCards.forEach(card => {
         CardUtil.deleteCard(aHandCards, card)
@@ -318,7 +319,7 @@ CardUtil.canHu = function (cardsOnHand, cardsOnGroup, currentCard) {
     var aGroupCards = JSON.parse(JSON.stringify(cardsOnGroup))
     var canPengCards = CardUtil.canPeng(aHandCards, currentCard)
     if (canPengCards) {
-      console.log('能碰')
+      logger.info('能碰')
       canChiPaoPeng = true
       canPengCards.forEach(card => {
         CardUtil.deleteCard(aHandCards, card)
@@ -333,7 +334,7 @@ CardUtil.canHu = function (cardsOnHand, cardsOnGroup, currentCard) {
     // 看手里牌能不能吃
     var canChiGroups = CardUtil.canChi(cardsOnHand, currentCard)
     if (canChiGroups) {
-      console.log('能吃')
+      logger.info('能吃')
       canChiPaoPeng = true
       canChiGroups.forEach(chiGroup => {
         var aHandCards = JSON.parse(JSON.stringify(cardsOnHand))
@@ -369,7 +370,7 @@ CardUtil.canHu = function (cardsOnHand, cardsOnGroup, currentCard) {
     }
   }
 
-  console.log('能胡的组合', JSON.stringify(allGroups))
+  logger.info('能胡的组合', JSON.stringify(allGroups))
 
   if (allGroups.length >= 1) {
     return allGroups
@@ -379,7 +380,7 @@ CardUtil.canHu = function (cardsOnHand, cardsOnGroup, currentCard) {
 }
 
 CardUtil.canHu2 = function (cardsOnHand, cardsOnGroup, currentCard) {
-  console.log('检查能否胡', cardsOnHand, cardsOnGroup, currentCard)
+  logger.info('检查能否胡', cardsOnHand, cardsOnGroup, currentCard)
   var allGroups = []
   if (currentCard != 0) {
     var canChiPaoPeng = false
@@ -389,7 +390,7 @@ CardUtil.canHu2 = function (cardsOnHand, cardsOnGroup, currentCard) {
     var aGroupCards = JSON.parse(JSON.stringify(cardsOnGroup))
     var paoGroup = CardUtil.canTi3(aGroupCards, currentCard)
     if (paoGroup) {
-      console.log('能跑')
+      logger.info('能跑')
       canChiPaoPeng = true
       paoGroup.name = Actions.Pao
       paoGroup.cards.push(currentCard)
@@ -404,7 +405,7 @@ CardUtil.canHu2 = function (cardsOnHand, cardsOnGroup, currentCard) {
     var aGroupCards = JSON.parse(JSON.stringify(cardsOnGroup))
     var canPaoCards = CardUtil.canTi(aHandCards, currentCard)
     if (canPaoCards) {
-      console.log('能跑')
+      logger.info('能跑')
       canChiPaoPeng = true
       canPaoCards.forEach(card => {
         CardUtil.deleteCard(aHandCards, card)
@@ -421,7 +422,7 @@ CardUtil.canHu2 = function (cardsOnHand, cardsOnGroup, currentCard) {
     var aGroupCards = JSON.parse(JSON.stringify(cardsOnGroup))
     var canPengCards = CardUtil.canPeng(aHandCards, currentCard)
     if (canPengCards) {
-      console.log('能碰')
+      logger.info('能碰')
       canChiPaoPeng = true
       canPengCards.forEach(card => {
         CardUtil.deleteCard(aHandCards, card)
@@ -436,7 +437,7 @@ CardUtil.canHu2 = function (cardsOnHand, cardsOnGroup, currentCard) {
     // 看手里牌能不能吃
     var canChiGroups = CardUtil.canChi(cardsOnHand, currentCard)
     if (canChiGroups) {
-      console.log('能吃')
+      logger.info('能吃')
       canChiPaoPeng = true
       canChiGroups.forEach(chiGroup => {
         var aHandCards = JSON.parse(JSON.stringify(cardsOnHand))
@@ -472,7 +473,7 @@ CardUtil.canHu2 = function (cardsOnHand, cardsOnGroup, currentCard) {
     }
   }
 
-  console.log('能胡的组合', JSON.stringify(allGroups))
+  logger.info('能胡的组合', JSON.stringify(allGroups))
 
   if (allGroups.length >= 1) {
     return allGroups
@@ -576,7 +577,7 @@ CardUtil.shouShun = function (cards) {
     }
   })
 
-  console.log('顺子结果', countedCards, results)
+  logger.info('顺子结果', countedCards, results)
   var keys = _.keys(countedCards)
   if (keys.length > 1) {
     return false
@@ -624,7 +625,7 @@ CardUtil.canPeng = function (cardsOnHand, currentCard) {
 }
 
 CardUtil.canChi = function (cards, currentCard) {
-  console.log('能否吃牌', cards, currentCard)
+  logger.info('能否吃牌', cards, currentCard)
   var canChiDatas = []
   var countedCards = _.countBy(cards, function (c) { return c; });
   _.each(countedCards, function (value, key) {
@@ -633,7 +634,7 @@ CardUtil.canChi = function (cards, currentCard) {
     }
   });
 
-  // 比方 currentCard = 8
+  // 比方 currentCard = 12
   if (countedCards[currentCard - 1]) {
     if (countedCards[currentCard - 2] && currentCard !== 11 && currentCard !== 12) {
       canChiDatas.push({ name: Actions.Chi, cards: [currentCard - 1, currentCard - 2] }) // 判断8在尾部 查询 6 7 '8'  尾牌不能等于 11 12
@@ -693,7 +694,7 @@ CardUtil.canChi = function (cards, currentCard) {
     }
   })
 
-  console.log('吃的结果', JSON.stringify(validChiDatas))
+  logger.info('吃的结果', JSON.stringify(validChiDatas))
 
   if (validChiDatas.length > 0) {
     return validChiDatas
@@ -788,7 +789,7 @@ CardUtil.canBi = function (cards, needDeleteCards, currentCard) {
 }
 
 CardUtil.hasCard = function (cards, card) {
-  console.log('看牌是否已经存在', cards, card)
+  logger.info('看牌是否已经存在', cards, card)
   var countedCards = _.countBy(cards, function (c) { return c; });
   if (countedCards[card]) {
     return true
@@ -798,7 +799,7 @@ CardUtil.hasCard = function (cards, card) {
 }
 
 CardUtil.has3Ti5Kan = function (cards) {
-  console.log('看牌是否存在3提5坎', cards)
+  logger.info('看牌是否存在3提5坎', cards)
   var countedCards = _.countBy(cards, function (c) { return c; })
   var tiCount = 0
   var kanCount = 0
@@ -809,7 +810,7 @@ CardUtil.has3Ti5Kan = function (cards) {
       tiCount++
     }
   })
-  console.log('提数', tiCount, '坎数', kanCount)
+  logger.info('提数', tiCount, '坎数', kanCount)
   if (tiCount >= 3 || kanCount >= 5) {
     return true
   } else {
