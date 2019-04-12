@@ -1,7 +1,7 @@
 const _ = require('underscore')
 const Actions = require('./Actions')
 const logger = require('pomelo-logger').getLogger('pomelo', __filename);
-
+const HuXiUtil = require('./HuXiUtil')
 var CardUtil = {};
 
 // 组牌
@@ -487,109 +487,22 @@ CardUtil.canHu2 = function (cardsOnHand, cardsOnGroup, currentCard) {
  * @param cards: 手中的牌，或者手中的牌加新翻开的底牌。
  */
 CardUtil.shouShun = function (cards) {
-  var countedCards = _.countBy(cards, function (c) { return c; });
-  var results = [];
-  // 四张 三张的剔出来
-  _.each(countedCards, function (value, key) {
-    const card = parseInt(key)
-    if (value === 4) {
-      results.push({ name: Actions.Pao, cards: [card, card, card, card] });
-      delete countedCards[key];
-    } else if (value === 3) {
-      results.push({ name: Actions.Kan, cards: [card, card, card] });
-      delete countedCards[key];
-    }
-  })
-  // 去掉2，7 10
-  if (countedCards[2] >= 1 && countedCards[7] >= 1 && countedCards[10] >= 1) {
-    results.push({ name: Actions.Chi, cards: [2, 7, 10] });
-    countedCards[2]--
-    countedCards[7]--
-    countedCards[10]--
-  }
-  if (countedCards[2] >= 1 && countedCards[7] >= 1 && countedCards[10] >= 1) {
-    results.push({ name: Actions.Chi, cards: [2, 7, 10] });
-    countedCards[2]--
-    countedCards[7]--
-    countedCards[10]--
-  }
-  // 去掉12，17 20
-  if (countedCards[12] >= 1 && countedCards[17] >= 1 && countedCards[20] >= 1) {
-    results.push({ name: Actions.Chi, cards: [12, 17, 20] });
-    countedCards[12]--
-    countedCards[17]--
-    countedCards[20]--
-  }
-  if (countedCards[12] >= 1 && countedCards[17] >= 1 && countedCards[20] >= 1) {
-    results.push({ name: Actions.Chi, cards: [12, 17, 20] });
-    countedCards[12]--
-    countedCards[17]--
-    countedCards[20]--
-  }
-  var findShunzi = function (singleCard) {
-    // 顺子
-    if (countedCards[singleCard + 1] && countedCards[singleCard + 2] && singleCard !== 9 && singleCard !== 10) {
-      countedCards[singleCard]--;
-      countedCards[singleCard + 1]--;
-      countedCards[singleCard + 2]--;
-      return [singleCard, singleCard + 1, singleCard + 2];
-    }
-    if (countedCards[singleCard + 1] && countedCards[singleCard - 1] && singleCard !== 10 && singleCard !== 11) { // 
-      countedCards[singleCard]--;
-      countedCards[singleCard + 1]--;
-      countedCards[singleCard - 1]--;
-      return [singleCard - 1, singleCard, singleCard + 1];
-    }
-    if (countedCards[singleCard - 1] && countedCards[singleCard - 2] && singleCard !== 11 && singleCard !== 12) {
-      countedCards[singleCard]--;
-      countedCards[singleCard - 1]--;
-      countedCards[singleCard - 2]--;
-      return [singleCard - 2, singleCard - 1, singleCard];
-    }
-    // 大小混搭 6 16 16  
-    // 6 6 16
-    if (singleCard > 10 && (countedCards[singleCard - 10] > 1)) {
-      countedCards[singleCard]--;
-      countedCards[singleCard - 10] -= 2;
-      return [singleCard, singleCard - 10, singleCard - 10];
-    }
-    if (singleCard < 11 && (countedCards[singleCard + 10] > 1)) {
-      countedCards[singleCard]--;
-      countedCards[singleCard + 10] -= 2;
-      return [singleCard, singleCard + 10, singleCard + 10];
-    }
-    return false;
-  };
-  // 处理单张
-  _.each(countedCards, function (value, key) {
-    if (value === 1) {
-      const card = parseInt(key)
-      const shunzi = findShunzi(card)
-      if (!!shunzi) {
-        results.push({ name: Actions.Chi, cards: shunzi })
+  var allShuns = CardUtil.canShun(cards, [])
+  if (allShuns && allShuns.length > 0) {
+    var maxHuXi = 0
+    var maxHuGroup = null
+    allShuns.forEach(shuns => {
+      console.log(shuns)
+      var huxi = HuXiUtil.getAllGroupHuXi(shuns)
+      if (huxi >= maxHuXi) {
+        maxHuXi = huxi
+        maxHuGroup = shuns
       }
-    }
-  })
-  // 去掉所有能组合的牌
-  _.each(countedCards, function (value, key) {
-    if (value === 0) {
-      delete countedCards[key];
-    }
-  })
-
-  logger.info('顺子结果', countedCards, results)
-  var keys = _.keys(countedCards)
-  if (keys.length > 1) {
+    })
+    return maxHuGroup
+  } else {
     return false
-  } else if (keys.length == 1) {
-    if (countedCards[keys[0]] === 2) {
-      results.push({ name: Actions.Jiang, cards: [parseInt(keys[0]), parseInt(keys[0])] })
-    } else {
-      return false
-    }
   }
-
-  return results
 }
 
 CardUtil.hasValidaOutCards = function (cards) {
@@ -614,6 +527,11 @@ CardUtil.hasValidaOutCards = function (cards) {
   }
 }
 
+CardUtil.hasShun = function (cards) {
+  var firstCard = cards.shift()
+  var countedCards = _.countBy(cards, function (c) { return c })
+
+}
 
 CardUtil.canPeng = function (cardsOnHand, currentCard) {
   var canPeng = null;
@@ -863,5 +781,115 @@ CardUtil.deleteCard = function (cards, card) {
   }
 }
 
+CardUtil.canShun = function (cards, needDeleteCards) {
+  // logger.info('能否顺牌', cards, needDeleteCards)
+  needDeleteCards.forEach(card => {
+    CardUtil.deleteCard(cards, card)
+  })
+
+  var allShuns = []
+  var canShuns = []
+
+  if (cards.length > 0) {
+    var countedCards = _.countBy(cards, function (c) { return c; });
+    var currentCard = cards[0]
+    countedCards[currentCard]--
+
+    // 列出坎
+    if (countedCards[currentCard] > 1) {
+      canShuns.push({ name: Actions.Kan, cards: [currentCard, currentCard, currentCard] }) 
+    }
+
+    // 列出吃
+    if (countedCards[currentCard - 1]) {
+      if (countedCards[currentCard - 2] && currentCard !== 11 && currentCard !== 12) {
+        canShuns.push({ name: Actions.Chi, cards: [currentCard - 2, currentCard - 1, currentCard] }) // 判断8在尾部 查询 6 7 '8'  尾牌不能等于 11 12
+      }
+      if (countedCards[currentCard + 1] && currentCard !== 10 && currentCard !== 11) {
+        canShuns.push({ name: Actions.Chi, cards: [currentCard - 1, currentCard, currentCard + 1] }) // 判断8在中部 查询 7 '8' 9  中牌不能等于 10 11
+      }
+    }
+    if (countedCards[currentCard + 1]) {
+      if (countedCards[currentCard + 2] && currentCard !== 9 && currentCard !== 10) {
+        canShuns.push({ name: Actions.Chi, cards: [currentCard, currentCard + 1, currentCard + 2] }) // 判断8在首部 查询 '8' 9 10 首牌不能等于 9 10
+      }
+    }
+    var diff
+    if (currentCard < 11) {
+      // 8
+      if (countedCards[currentCard] && countedCards[currentCard + 10]) {
+        canShuns.push({ name: Actions.Chi, cards: [currentCard, currentCard, currentCard + 10] }) // 判断 8 8 18
+      }
+      if (countedCards[currentCard + 10] >= 2) {
+        canShuns.push({ name: Actions.Chi, cards: [currentCard, currentCard + 10, currentCard + 10] }) // 判断 8 18 18
+      }
+      // 2 7 10
+      diff = _.difference([2, 7, 10], [currentCard])
+      if (diff.length !== 3 && countedCards[diff[0]] && countedCards[diff[1]]) {
+        canShuns.push({ name: Actions.Chi, cards: [2, 7, 10] })
+      }
+    } else {
+      // 18
+      if (countedCards[currentCard] && countedCards[currentCard - 10]) {
+        canShuns.push({ name: Actions.Chi, cards: [currentCard, currentCard, currentCard - 10] }) // 判断 18 18 8
+      }
+      if (countedCards[currentCard - 10] >= 2) {
+        canShuns.push({ name: Actions.Chi, cards: [currentCard, currentCard - 10, currentCard - 10] }) // 判断 18 8 8
+      }
+      // 12 17 20
+      diff = _.difference([12, 17, 20], [currentCard])
+      if (diff.length !== 3 && countedCards[diff[0]] && countedCards[diff[1]]) {
+        canShuns.push({ name: Actions.Chi, cards: [12, 17, 20] })
+      }
+    }
+
+    // 12 12
+    // 列出 将
+    if (countedCards[currentCard] >= 1) {
+      canShuns.push({ name: Actions.Jiang, cards: [currentCard, currentCard] })
+    }
+
+    console.log('canSun', JSON.stringify(canShuns))
+
+    if (canShuns.length > 0) {
+      canShuns.forEach(shun => {
+        var subShuns = CardUtil.canShun(_.clone(cards), shun.cards)
+        console.log('sub', JSON.stringify(subShuns))
+        if (subShuns) {
+          if (subShuns.length > 0) {
+            subShuns.forEach(subShun => {
+              allShuns.push([shun].concat(subShun))
+            })
+          } else {
+            allShuns.push([shun])
+          }
+        }
+      })
+
+      var validAllShuns = []
+      allShuns.forEach(shuns => {
+        var jc = 0
+        shuns.forEach(shun => {
+          if (shun.name === Actions.Jiang)
+            jc++
+        })
+
+        if (jc <= 1) {
+          validAllShuns.push(shuns)
+        }
+      })
+
+      if (validAllShuns.length > 0) {
+        return validAllShuns
+      } else {
+        return false
+      }
+    } else {
+      return false
+    }
+  } else {
+    return []
+  }
+}
 
 module.exports = CardUtil
