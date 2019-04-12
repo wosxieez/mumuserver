@@ -1572,7 +1572,7 @@ Room.prototype.noticeAllUserOnWin = function (wd) {
         this.channel.pushMessage({
             route: 'onRoom',
             name: Notifications.onWin,
-            data: { ...this.getStatus(), hn: wd.wn, hts: wd.hts }
+            data: { ...this.getStatus(), hn: wd.wn, hts: wd.hts, cs: this.cards}
         })
 
         if (this.rule.id === 0) {
@@ -1628,7 +1628,7 @@ Room.prototype.noticeAllUserOnWin = function (wd) {
         this.channel.pushMessage({
             route: 'onRoom',
             name: Notifications.onGameOver,
-            data: { ...this.getStatus(), hn: wd.wn, hts: wd.hts }
+            data: { ...this.getStatus(), hn: wd.wn, hts: wd.hts, cs: this.cards}
         })
         this.forceRelease()
     }
