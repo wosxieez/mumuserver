@@ -487,16 +487,29 @@ CardUtil.canHu2 = function (cardsOnHand, cardsOnGroup, currentCard) {
  * @param cards: 手中的牌，或者手中的牌加新翻开的底牌。
  */
 CardUtil.shouShun = function (cards) {
+  // 坎牌不能拆
+  var kanShuns = []
+  var countedCards = _.countBy(cards, function (c) { return c })
+  _.each(countedCards, function (value, key) {
+    if (value === 3) {
+      var card = parseInt(key)
+      kanShuns.push({ name: Actions.Kan, cards: [card, card, card] })
+      CardUtil.deleteCard(cards, card)
+      CardUtil.deleteCard(cards, card)
+      CardUtil.deleteCard(cards, card)
+    }
+  })
+
   var allShuns = CardUtil.canShun(cards, [])
   if (allShuns && allShuns.length > 0) {
     var maxHuXi = 0
     var maxHuGroup = null
     allShuns.forEach(shuns => {
-      console.log(shuns)
-      var huxi = HuXiUtil.getAllGroupHuXi(shuns)
+      var lastedShuns = kanShuns.concat(shuns)
+      var huxi = HuXiUtil.getAllGroupHuXi(lastedShuns)
       if (huxi >= maxHuXi) {
         maxHuXi = huxi
-        maxHuGroup = shuns
+        maxHuGroup = lastedShuns
       }
     })
     return maxHuGroup
@@ -794,11 +807,6 @@ CardUtil.canShun = function (cards, needDeleteCards) {
     var countedCards = _.countBy(cards, function (c) { return c; });
     var currentCard = cards[0]
     countedCards[currentCard]--
-
-    // 列出坎
-    if (countedCards[currentCard] > 1) {
-      canShuns.push({ name: Actions.Kan, cards: [currentCard, currentCard, currentCard] }) 
-    }
 
     // 列出吃
     if (countedCards[currentCard - 1]) {

@@ -1702,7 +1702,7 @@ Room.prototype.noticeAllUserOnExit = function () {
     this.channel.pushMessage({
         route: 'onRoom',
         name: Notifications.onGameOver,
-        data: { ...this.getStatus(), hn: winner.username, hts: [] }
+        data: { ...this.getStatus() }
     })
     this.forceRelease()
 }
