@@ -15,7 +15,7 @@ var RoomRemote = function (app) {
 // 获取唯一的房间号 room123456
 //---------------------------------------------------------------------------------------------------------------
 RoomRemote.prototype.getRadom = function (groupname, num, cb) {
-	var code = Math.floor(Math.random()*9000) + 1000
+	var code = Math.floor(Math.random() * 9000) + 1000
 	var roomname = 'room' + code
 	for (key in this.channelService.channels) {
 		if (this.channelService.channels[key].name === roomname) {
@@ -111,19 +111,21 @@ RoomRemote.prototype.leaveRoom = function (sid, groupname, roomname, username, c
 			console.log('删除房间' + roomname)
 		} else {
 			// 看是不是所有玩家都不在线
-			// var isAllOffline = true
-			// channel.room.users.forEach(user => {
-			// 	if (!!channel.getMember(user.username)) {
-			// 		isAllOffline = false
-			// 	}
-			// })
-			// if (isAllOffline) { // 所有玩家都离线了 默认解散房间
-			// 	channel.room.feadback.release()
-			// 	channel.room.release()
-			// 	channel.room = null
-			// 	channel.destroy()
-			// 	console.log('删除房间' + roomname)
-			// }
+			var isAllOffline = true
+			channel.room.users.forEach(user => {
+				if (!!channel.getMember(user.username)) {
+					isAllOffline = false
+				}
+			})
+			if (isAllOffline) { // 所有玩家都离线了 默认解散房间
+				if (channel.room.id === 0) {
+					channel.room.feadback.release()
+					channel.room.release()
+					channel.room = null
+					channel.destroy()
+					console.log('删除娱乐房房间' + roomname)
+				}
+			}
 		}
 		this.notificationGroupStatus(groupname)
 		this.notificationRoomStatus(roomname)
@@ -157,7 +159,7 @@ RoomRemote.prototype.onAction = function (sid, groupname, roomname, username, ac
 				channel.room.askExit(username)
 				break
 			case Actions.Dae: // 玩家响应退出
-				channel.room.setExit(username, action.data)	
+				channel.room.setExit(username, action.data)
 				break
 			default:
 				break
