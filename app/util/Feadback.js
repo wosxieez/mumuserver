@@ -62,6 +62,7 @@ module.exports = function Feadback(channel) {
     this.timeoutCancel = function () {
         if (!this.isOk) return
         this.isOk = false
+        this.okFunction = null
         if (!this.channel.room.actionUsers) return 
         this.channel.room.actionUsers.forEach(oldUser => {
                 if (oldUser.nd && oldUser.nd.ac === -1 ) { oldUser.nd.ac = 0 }
@@ -82,6 +83,7 @@ module.exports = function Feadback(channel) {
     this.manualCancel = function () {
         // 手动取消了;
         this.isOk = false
+        this.okFunction = null
         logger.info('手动反馈结束', this.channel.room.actionUsers)
         this.timeouts.forEach(timeout => {
             clearTimeout(timeout)
@@ -91,6 +93,7 @@ module.exports = function Feadback(channel) {
 
     this.release = function () {
         this.isOk = false
+        this.okFunction = null
         logger.info('反馈释放')
         this.timeouts.forEach(timeout => {
             clearTimeout(timeout)

@@ -1087,7 +1087,10 @@ Room.prototype.playerPlayCard = function (user) {
         this.noticeAllUserOnAction()
         this.feadback.send(this.actionUsers)
             .thenOk(() => {
-                if (this.actionUsers[0].nd.ac === 1) {
+                if (this.actionUsers &&
+                    this.actionUsers[0] &&
+                    this.actionUsers[0].nd &&
+                    this.actionUsers[0].nd.ac === 1) {
                     logger.info('收到出牌', this.actionUsers[0].nd.dt)
                     this.player = user
                     this.player_card = this.actionUsers[0].nd.dt
@@ -1574,8 +1577,8 @@ Room.prototype.noticeAllUserOnWin = function (wd) {
 
         if (this.rule.id === 0) {
             // 娱乐房一盘就结束游戏
-            this.onGaming = false
-            this.forceRelease()
+            // this.onGaming = false
+            // this.forceRelease()
         }
     } else {
         // user1 {thx: 100, hx: 30}
@@ -1729,8 +1732,8 @@ Room.prototype.noticeAllUserOnRoundEnd = function () {
 
     if (this.rule.id === 0) {
         // 娱乐房一盘就结束游戏
-        this.onGaming = false
-        this.forceRelease()
+        // this.onGaming = false
+        // this.forceRelease()
     }
 }
 
