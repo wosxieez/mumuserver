@@ -205,7 +205,7 @@ Room.prototype.gameStart = function () {
         data: this.getStatus()
     })
 
-    this.timeout = setTimeout(this.checkAllUserCanHuWith3Ti5Kan.bind(this), 2000)
+    this.timeout = setTimeout(this.checkAllUserCanHuWith3Ti5Kan.bind(this), 1500)
 }
 
 Room.prototype.initRoom = function () {
@@ -388,7 +388,7 @@ Room.prototype.checkXianCanTi = function () {
         })
 
         // 提是服务器自动提的 所以需要有个延时
-        this.timeout = setTimeout(() => { this.nextPlayCard(this.zhuang) }, 1500)
+        this.timeout = setTimeout(() => { this.nextPlayCard(this.zhuang) }, 1000)
     } else {
         this.nextPlayCard(this.zhuang)
     }
@@ -470,7 +470,7 @@ Room.prototype.checkXianCanTi2 = function () {
                 data: this.getStatus()
             })
             this.checkOtherUserCanHuWithPlayerCard2()
-        }, 1500);
+        }, 1000);
     } else {
         this.checkOtherUserCanHuWithPlayerCard2()
     }
@@ -564,11 +564,11 @@ Room.prototype.loopOtherUserCanPaoWithPlayerCard = function () {
                 if (CardUtil.tiPaoCount(user.groupCards) >= 2) {
                     this.timeout = setTimeout(() => {
                         this.nextPlayCard(user) // 让user用户的下家出牌
-                    }, 1500);
+                    }, 1000);
                 } else {
                     this.playerPlayCard(user)
                 }
-            }, 1500);
+            }, 1000);
         } else {
             const canPaoData2 = CardUtil.canTi2(user.groupCards, this.player_card)
             if (canPaoData2) {
@@ -592,7 +592,7 @@ Room.prototype.loopOtherUserCanPaoWithPlayerCard = function () {
                     } else {
                         this.playerPlayCard(user)
                     }
-                }, 1500);
+                }, 1000);
             } else {
                 // 这个玩家不能跑操作，循环检查下个玩家
                 this.loopOtherUserCanPaoWithPlayerCard()
@@ -720,7 +720,7 @@ Room.prototype.checkNextUserCanChiWithPlayerCard = function () {
     } else {
         this.timeout = setTimeout(() => {
             this.passCard()
-        }, 1300);
+        }, 1000);
     }
 }
 
@@ -906,7 +906,7 @@ Room.prototype.checkPlayerUserCanTiWithPlayerCard = function () {
             this.player.groupCards.push({ name: Actions.Ti, cards: canTiData1 })
             this.noticeAllUserOnTi()
             this.checkPlayerUserCanHuWithPlayerCard3()
-        }, 1500);
+        }, 1000);
     } else {
         const canTiData2 = CardUtil.canTi2(this.player.groupCards, this.player_card)
         if (canTiData2) {
@@ -923,7 +923,7 @@ Room.prototype.checkPlayerUserCanTiWithPlayerCard = function () {
                     this.noticeAllUserOnPao()
                 }
                 this.checkPlayerUserCanHuWithPlayerCard3()
-            }, 1500);
+            }, 1000);
         } else {
             this.checkPlayerUserCanWeiWithPlayerCard()
         }
@@ -947,7 +947,7 @@ Room.prototype.checkPlayerUserCanWeiWithPlayerCard = function () {
             this.player.groupCards.push({ name: Actions.Wei, cards: canWeiData })
             this.noticeAllUserOnWei()
             this.checkPlayerUserCanHuWithPlayerCard2()
-        }, 1500);
+        }, 1000);
     } else {
         this.checkPlayerUserCanHuWithPlayerCard()
     }
@@ -1076,7 +1076,7 @@ Room.prototype.checkTiPaoCount = function () {
     if (CardUtil.tiPaoCount(this.player.groupCards) >= 2) {
         this.timeout = setTimeout(() => {
             this.nextPlayCard(this.player)
-        }, 1500);
+        }, 1000);
     } else {
         this.playerPlayCard(this.player)
     }
@@ -1224,11 +1224,11 @@ Room.prototype.loopOtherUserCanPaoWithPlayerCard2 = function () {
                 if (CardUtil.tiPaoCount(user.groupCards) >= 2) {
                     this.timeout = setTimeout(() => {
                         this.nextPlayCard(user) // 让user用户的下家出牌
-                    }, 1500);
+                    }, 1000);
                 } else {
                     this.playerPlayCard(user)
                 }
-            }, 1500);
+            }, 1000);
         } else {
             const canPaoData2 = CardUtil.canTi3(user.groupCards, this.player_card)
             if (canPaoData2) {
@@ -1242,11 +1242,11 @@ Room.prototype.loopOtherUserCanPaoWithPlayerCard2 = function () {
                     if (CardUtil.tiPaoCount(user.groupCards) >= 2) {
                         this.timeout = setTimeout(() => {
                             this.nextPlayCard(user) // 让user用户的下家出牌
-                        }, 1500);
+                        }, 1000);
                     } else {
                         this.playerPlayCard(user)
                     }
-                }, 1500)
+                }, 1000)
             } else {
                 // 这个玩家不能跑操作，循环检查下个玩家
                 this.loopOtherUserCanPaoWithPlayerCard2()
@@ -1360,7 +1360,7 @@ Room.prototype.checkNextUserCanChiWithPlayerCard2 = function () {
     } else {
         this.timeout = setTimeout(() => {
             this.passCard()
-        }, 1300);
+        }, 1000);
     }
 }
 
