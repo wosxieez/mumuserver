@@ -16,20 +16,22 @@ module.exports = function Feadback(channel) {
             clearTimeout(timeout)
         })  
         this.timeouts = []
+
+
+        // this.channel.room.actionUsers.forEach(oldUser => {
+        //     if (!this.channel.getMember(oldUser.un)) {
+        //         // 如果发送反馈的时候 玩家不在线 默认玩家所有操作都取消
+        //         if (oldUser.nd && oldUser.nd.ac === -1 ) { oldUser.nd.ac = 0 }
+        //         if (oldUser.hd && oldUser.hd.ac === -1 ) { oldUser.hd.ac = 0 }
+        //         if (oldUser.pd && oldUser.pd.ac === -1 ) { oldUser.pd.ac = 0 }
+        //         if (oldUser.cd && oldUser.cd.ac === -1 ) { oldUser.cd.ac = 0 }
+        //         var timeout = setTimeout(() => {
+        //             this.doOk(oldUser)
+        //         }, 1000);
+        //         this.timeouts.push(timeout)
+        //     }
+        // })
         
-        this.channel.room.actionUsers.forEach(oldUser => {
-            if (!this.channel.getMember(oldUser.un)) {
-                // 如果发送反馈的时候 玩家不在线 默认玩家所有操作都取消
-                if (oldUser.nd && oldUser.nd.ac === -1 ) { oldUser.nd.ac = 0 }
-                if (oldUser.hd && oldUser.hd.ac === -1 ) { oldUser.hd.ac = 0 }
-                if (oldUser.pd && oldUser.pd.ac === -1 ) { oldUser.pd.ac = 0 }
-                if (oldUser.cd && oldUser.cd.ac === -1 ) { oldUser.cd.ac = 0 }
-                var timeout = setTimeout(() => {
-                    this.doOk(oldUser)
-                }, 1000);
-                this.timeouts.push(timeout)
-            }
-        })
         logger.info('反馈启动', this.channel.room.actionUsers)
         this.isOk = true
         var timeout = setTimeout(this.timeoutCancel.bind(this), 18000000) // 300分钟后所有玩家默认为取消
