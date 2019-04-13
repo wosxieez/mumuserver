@@ -479,6 +479,7 @@ CardUtil.canHu2 = function (cardsOnHand, cardsOnGroup, currentCard) {
  * @param cards: 手中的牌，或者手中的牌加新翻开的底牌。
  */
 CardUtil.shouShun = function (cards) {
+  if (cards.length === 0) return []
   // 坎牌不能拆
   var kanShuns = []
   var countedCards = _.countBy(cards, function (c) { return c })
@@ -493,19 +494,23 @@ CardUtil.shouShun = function (cards) {
   })
 
   var allShuns = CardUtil.canShun(cards, [])
-  if (allShuns && allShuns.length > 0) {
-    var maxHuXi = 0
-    var maxHuGroup = null
-    allShuns.forEach(shuns => {
-      var lastedShuns = kanShuns.concat(shuns)
-      var huxi = HuXiUtil.getAllGroupHuXi(lastedShuns)
-      if (huxi >= maxHuXi) {
-        maxHuXi = huxi
-        maxHuGroup = lastedShuns
-      }
-    })
-    console.log('手里的牌能够组成顺子...', JSON.stringify(maxHuGroup))
-    return maxHuGroup
+  if (allShuns) {
+    if (allShuns.length > 0) {
+      var maxHuXi = 0
+      var maxHuGroup = null
+      allShuns.forEach(shuns => {
+        var lastedShuns = kanShuns.concat(shuns)
+        var huxi = HuXiUtil.getAllGroupHuXi(lastedShuns)
+        if (huxi >= maxHuXi) {
+          maxHuXi = huxi
+          maxHuGroup = lastedShuns
+        }
+      })
+      console.log('手里的牌能够组成顺子...', JSON.stringify(maxHuGroup))
+      return maxHuGroup
+    } else {
+      return kanShuns
+    }
   } else {
     return false
   }

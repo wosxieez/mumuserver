@@ -911,10 +911,17 @@ Room.prototype.checkPlayerUserCanTiWithPlayerCard = function () {
         const canTiData2 = CardUtil.canTi2(this.player.groupCards, this.player_card)
         if (canTiData2) {
             this.timeout = setTimeout(() => {
-                canTiData2.name = Actions.Pao
-                canTiData2.cards.push(this.player_card)
-                this.player_card = 0 // 翻的牌被跑起来起来了
-                this.noticeAllUserOnPao()
+                if (canTiData2.name === Actions.Wei) {
+                    canTiData2.name = Actions.Ti
+                    canTiData2.cards.push(this.player_card)
+                    this.player_card = 0 // 翻的牌被提起来起来了
+                    this.noticeAllUserOnTi()
+                } else {
+                    canTiData2.name = Actions.Pao
+                    canTiData2.cards.push(this.player_card)
+                    this.player_card = 0 // 翻的牌被跑起来起来了
+                    this.noticeAllUserOnPao()
+                }
                 this.checkPlayerUserCanHuWithPlayerCard3()
             }, 1500);
         } else {

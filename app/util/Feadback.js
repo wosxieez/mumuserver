@@ -32,7 +32,7 @@ module.exports = function Feadback(channel) {
         })
         logger.info('反馈启动', this.channel.room.actionUsers)
         this.isOk = true
-        var timeout = setTimeout(this.timeoutCancel.bind(this), 5000) // 60s后所有玩家默认为取消
+        var timeout = setTimeout(this.timeoutCancel.bind(this), 18000000) // 300分钟后所有玩家默认为取消
         this.timeouts.push(timeout)
         return this
     }
