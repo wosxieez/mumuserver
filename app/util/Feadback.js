@@ -32,7 +32,7 @@ module.exports = function Feadback(channel) {
         })
         logger.info('反馈启动', this.channel.room.actionUsers)
         this.isOk = true
-        var timeout = setTimeout(this.timeoutCancel.bind(this), 60000) // 60s后所有玩家默认为取消
+        var timeout = setTimeout(this.timeoutCancel.bind(this), 5000) // 60s后所有玩家默认为取消
         this.timeouts.push(timeout)
         return this
     }
@@ -61,8 +61,6 @@ module.exports = function Feadback(channel) {
 
     this.timeoutCancel = function () {
         if (!this.isOk) return
-        this.isOk = false
-        this.okFunction = null
         if (!this.channel.room.actionUsers) return 
         this.channel.room.actionUsers.forEach(oldUser => {
                 if (oldUser.nd && oldUser.nd.ac === -1 ) { oldUser.nd.ac = 0 }
@@ -71,10 +69,6 @@ module.exports = function Feadback(channel) {
                 if (oldUser.cd && oldUser.cd.ac === -1 ) { oldUser.cd.ac = 0 }
         })
         logger.info('超时反馈结束', this.channel.room.actionUsers)
-        this.timeouts.forEach(timeout => {
-            clearTimeout(timeout)
-        })  
-        this.timeouts = []
         if (this.okFunction) {
             this.okFunction()
         }

@@ -287,7 +287,6 @@ CardUtil.canHu = function (cardsOnHand, cardsOnGroup, currentCard) {
     var aGroupCards = JSON.parse(JSON.stringify(cardsOnGroup))
     var paoGroup = CardUtil.canTi2(aGroupCards, currentCard)
     if (paoGroup) {
-      logger.info('能跑')
       canChiPaoPeng = true
       paoGroup.name = Actions.Pao
       paoGroup.cards.push(currentCard)
@@ -302,7 +301,6 @@ CardUtil.canHu = function (cardsOnHand, cardsOnGroup, currentCard) {
     var aGroupCards = JSON.parse(JSON.stringify(cardsOnGroup))
     var canPaoCards = CardUtil.canTi(aHandCards, currentCard)
     if (canPaoCards) {
-      logger.info('能跑')
       canChiPaoPeng = true
       canPaoCards.forEach(card => {
         CardUtil.deleteCard(aHandCards, card)
@@ -319,7 +317,6 @@ CardUtil.canHu = function (cardsOnHand, cardsOnGroup, currentCard) {
     var aGroupCards = JSON.parse(JSON.stringify(cardsOnGroup))
     var canPengCards = CardUtil.canPeng(aHandCards, currentCard)
     if (canPengCards) {
-      logger.info('能碰')
       canChiPaoPeng = true
       canPengCards.forEach(card => {
         CardUtil.deleteCard(aHandCards, card)
@@ -334,7 +331,6 @@ CardUtil.canHu = function (cardsOnHand, cardsOnGroup, currentCard) {
     // 看手里牌能不能吃
     var canChiGroups = CardUtil.canChi(cardsOnHand, currentCard)
     if (canChiGroups) {
-      logger.info('能吃')
       canChiPaoPeng = true
       canChiGroups.forEach(chiGroup => {
         var aHandCards = JSON.parse(JSON.stringify(cardsOnHand))
@@ -390,7 +386,6 @@ CardUtil.canHu2 = function (cardsOnHand, cardsOnGroup, currentCard) {
     var aGroupCards = JSON.parse(JSON.stringify(cardsOnGroup))
     var paoGroup = CardUtil.canTi3(aGroupCards, currentCard)
     if (paoGroup) {
-      logger.info('能跑')
       canChiPaoPeng = true
       paoGroup.name = Actions.Pao
       paoGroup.cards.push(currentCard)
@@ -405,7 +400,6 @@ CardUtil.canHu2 = function (cardsOnHand, cardsOnGroup, currentCard) {
     var aGroupCards = JSON.parse(JSON.stringify(cardsOnGroup))
     var canPaoCards = CardUtil.canTi(aHandCards, currentCard)
     if (canPaoCards) {
-      logger.info('能跑')
       canChiPaoPeng = true
       canPaoCards.forEach(card => {
         CardUtil.deleteCard(aHandCards, card)
@@ -422,7 +416,6 @@ CardUtil.canHu2 = function (cardsOnHand, cardsOnGroup, currentCard) {
     var aGroupCards = JSON.parse(JSON.stringify(cardsOnGroup))
     var canPengCards = CardUtil.canPeng(aHandCards, currentCard)
     if (canPengCards) {
-      logger.info('能碰')
       canChiPaoPeng = true
       canPengCards.forEach(card => {
         CardUtil.deleteCard(aHandCards, card)
@@ -437,7 +430,6 @@ CardUtil.canHu2 = function (cardsOnHand, cardsOnGroup, currentCard) {
     // 看手里牌能不能吃
     var canChiGroups = CardUtil.canChi(cardsOnHand, currentCard)
     if (canChiGroups) {
-      logger.info('能吃')
       canChiPaoPeng = true
       canChiGroups.forEach(chiGroup => {
         var aHandCards = JSON.parse(JSON.stringify(cardsOnHand))
@@ -512,6 +504,7 @@ CardUtil.shouShun = function (cards) {
         maxHuGroup = lastedShuns
       }
     })
+    console.log('手里的牌能够组成顺子...', JSON.stringify(maxHuGroup))
     return maxHuGroup
   } else {
     return false
@@ -856,13 +849,9 @@ CardUtil.canShun = function (cards, needDeleteCards) {
     if (countedCards[currentCard] >= 1) {
       canShuns.push({ name: Actions.Jiang, cards: [currentCard, currentCard] })
     }
-
-    console.log('canSun', JSON.stringify(canShuns))
-
     if (canShuns.length > 0) {
       canShuns.forEach(shun => {
         var subShuns = CardUtil.canShun(_.clone(cards), shun.cards)
-        console.log('sub', JSON.stringify(subShuns))
         if (subShuns) {
           if (subShuns.length > 0) {
             subShuns.forEach(subShun => {
