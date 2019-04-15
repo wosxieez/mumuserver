@@ -543,7 +543,7 @@ Room.prototype.checkOtherUserCanPaoWithPlayerCard = function () {
 Room.prototype.loopOtherUserCanPaoWithPlayerCard = function () {
     const user = this.loopUsers.shift()
     if (user) {
-        const canPaoData1 = CardUtil.canTiHandCards(user.handCards, this.player_card)
+        const canPaoData1 = CardUtil.canPaoHandCards(user.handCards, this.player_card)
         if (canPaoData1) {
             this.timeout = setTimeout(() => {
                 // 跑起操作
@@ -1204,7 +1204,7 @@ Room.prototype.checkOtherUserCanPaoWithPlayerCard2 = function () {
 Room.prototype.loopOtherUserCanPaoWithPlayerCard2 = function () {
     const user = this.loopUsers.shift()
     if (user) {
-        const canPaoData1 = CardUtil.canTiHandCards(user.handCards, this.player_card)
+        const canPaoData1 = CardUtil.canPaoHandCards(user.handCards, this.player_card)
         if (canPaoData1) {
             // 跑起操作
             this.timeout = setTimeout(() => {

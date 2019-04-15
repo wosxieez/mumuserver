@@ -199,6 +199,15 @@ CardUtil.canTiHandCards = function (cardsOnHand, currentCard) {
   return canTiCards
 }
 
+CardUtil.canPaoHandCards = function (cardsOnHand, currentCard) {
+  var countedCards = _.countBy(cardsOnHand, function (c) { return c; })
+  var canTiCards = null
+  if (countedCards[currentCard] === 3) {
+    canTiCards = [currentCard, currentCard, currentCard]
+  }
+  return canTiCards
+}
+
 /**
  * 看组合牌中能不能提
  *
@@ -317,7 +326,7 @@ CardUtil.canHu = function (cardsOnHand, cardsOnGroup, currentCard) {
     // 看组合牌中能不能跑起
     var aHandCards = JSON.parse(JSON.stringify(cardsOnHand))
     var aGroupCards = JSON.parse(JSON.stringify(cardsOnGroup))
-    var paoGroup = CardUtil.canTi2(aGroupCards, currentCard)
+    var paoGroup = CardUtil.canPaoGroupCards(aGroupCards, currentCard)
     if (paoGroup) {
       canChiPaoPeng = true
       paoGroup.name = Actions.Pao
@@ -331,7 +340,7 @@ CardUtil.canHu = function (cardsOnHand, cardsOnGroup, currentCard) {
     // 看手里牌能不能跑
     var aHandCards = JSON.parse(JSON.stringify(cardsOnHand))
     var aGroupCards = JSON.parse(JSON.stringify(cardsOnGroup))
-    var canPaoCards = CardUtil.canTi(aHandCards, currentCard)
+    var canPaoCards = CardUtil.canPaoHandCards(aHandCards, currentCard)
     if (canPaoCards) {
       canChiPaoPeng = true
       canPaoCards.forEach(card => {
@@ -416,7 +425,7 @@ CardUtil.canHu2 = function (cardsOnHand, cardsOnGroup, currentCard) {
     // 看组合牌中能不能跑起
     var aHandCards = JSON.parse(JSON.stringify(cardsOnHand))
     var aGroupCards = JSON.parse(JSON.stringify(cardsOnGroup))
-    var paoGroup = CardUtil.canTi3(aGroupCards, currentCard)
+    var paoGroup = CardUtil.canPaoGroupCardsWithoutPeng(aGroupCards, currentCard)
     if (paoGroup) {
       canChiPaoPeng = true
       paoGroup.name = Actions.Pao
@@ -430,7 +439,7 @@ CardUtil.canHu2 = function (cardsOnHand, cardsOnGroup, currentCard) {
     // 看手里牌能不能跑
     var aHandCards = JSON.parse(JSON.stringify(cardsOnHand))
     var aGroupCards = JSON.parse(JSON.stringify(cardsOnGroup))
-    var canPaoCards = CardUtil.canTi(aHandCards, currentCard)
+    var canPaoCards = CardUtil.canPaoHandCards(aHandCards, currentCard)
     if (canPaoCards) {
       canChiPaoPeng = true
       canPaoCards.forEach(card => {
