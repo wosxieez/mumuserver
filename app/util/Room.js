@@ -543,7 +543,7 @@ Room.prototype.checkOtherUserCanPaoWithPlayerCard = function () {
 Room.prototype.loopOtherUserCanPaoWithPlayerCard = function () {
     const user = this.loopUsers.shift()
     if (user) {
-        const canPaoData1 = CardUtil.canTi(user.handCards, this.player_card)
+        const canPaoData1 = CardUtil.canTiHandCards(user.handCards, this.player_card)
         if (canPaoData1) {
             this.timeout = setTimeout(() => {
                 // 跑起操作
@@ -570,7 +570,7 @@ Room.prototype.loopOtherUserCanPaoWithPlayerCard = function () {
                 }
             }, 1000);
         } else {
-            const canPaoData2 = CardUtil.canTi2(user.groupCards, this.player_card)
+            const canPaoData2 = CardUtil.canPaoGroupCards(user.groupCards, this.player_card)
             if (canPaoData2) {
                 // 组合牌里能跑 跑起操作
                 this.timeout = setTimeout(() => {
@@ -894,7 +894,7 @@ Room.prototype.nextPlayCard = function (user) {
  */
 Room.prototype.checkPlayerUserCanTiWithPlayerCard = function () {
     logger.info('check13 翻牌玩家是否可以提')
-    const canTiData1 = CardUtil.canTi(this.player.handCards, this.player_card)
+    const canTiData1 = CardUtil.canTiHandCards(this.player.handCards, this.player_card)
     if (canTiData1) {
         // 如果能提 做个延时处理
         this.timeout = setTimeout(() => {
@@ -908,20 +908,14 @@ Room.prototype.checkPlayerUserCanTiWithPlayerCard = function () {
             this.checkPlayerUserCanHuWithPlayerCard3()
         }, 1000);
     } else {
-        const canTiData2 = CardUtil.canTi2(this.player.groupCards, this.player_card)
+        const canTiData2 = CardUtil.canTiGroupCards(this.player.groupCards, this.player_card)
+        // 组合牌能提
         if (canTiData2) {
             this.timeout = setTimeout(() => {
-                if (canTiData2.name === Actions.Wei) {
-                    canTiData2.name = Actions.Ti
-                    canTiData2.cards.push(this.player_card)
-                    this.player_card = 0 // 翻的牌被提起来起来了
-                    this.noticeAllUserOnTi()
-                } else {
-                    canTiData2.name = Actions.Pao
-                    canTiData2.cards.push(this.player_card)
-                    this.player_card = 0 // 翻的牌被跑起来起来了
-                    this.noticeAllUserOnPao()
-                }
+                canTiData2.name = Actions.Ti
+                canTiData2.cards.push(this.player_card)
+                this.player_card = 0 // 翻的牌被提起来起来了
+                this.noticeAllUserOnTi()
                 this.checkPlayerUserCanHuWithPlayerCard3()
             }, 1000);
         } else {
@@ -1210,7 +1204,7 @@ Room.prototype.checkOtherUserCanPaoWithPlayerCard2 = function () {
 Room.prototype.loopOtherUserCanPaoWithPlayerCard2 = function () {
     const user = this.loopUsers.shift()
     if (user) {
-        const canPaoData1 = CardUtil.canTi(user.handCards, this.player_card)
+        const canPaoData1 = CardUtil.canTiHandCards(user.handCards, this.player_card)
         if (canPaoData1) {
             // 跑起操作
             this.timeout = setTimeout(() => {
@@ -1230,7 +1224,7 @@ Room.prototype.loopOtherUserCanPaoWithPlayerCard2 = function () {
                 }
             }, 1000);
         } else {
-            const canPaoData2 = CardUtil.canTi3(user.groupCards, this.player_card)
+            const canPaoData2 = CardUtil.canPaoGroupCardsWithoutPeng(user.groupCards, this.player_card)
             if (canPaoData2) {
                 // 组合牌里能跑 跑起操作
                 canPaoData2.name = Actions.Pao
@@ -1577,7 +1571,7 @@ Room.prototype.noticeAllUserOnWin = function (wd) {
         this.channel.pushMessage({
             route: 'onRoom',
             name: Notifications.onWin,
-            data: { ...this.getStatus(), hn: wd.wn, hts: wd.hts, cs: this.cards}
+            data: { ...this.getStatus(), hn: wd.wn, hts: wd.hts, cs: this.cards }
         })
 
         if (this.rule.id === 0) {
@@ -1633,7 +1627,7 @@ Room.prototype.noticeAllUserOnWin = function (wd) {
         this.channel.pushMessage({
             route: 'onRoom',
             name: Notifications.onGameOver,
-            data: { ...this.getStatus(), hn: wd.wn, hts: wd.hts, cs: this.cards}
+            data: { ...this.getStatus(), hn: wd.wn, hts: wd.hts, cs: this.cards }
         })
         this.forceRelease()
     }

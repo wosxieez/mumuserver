@@ -190,7 +190,7 @@ CardUtil.canWei = function (cardsOnHand, currentCard) {
  * @param {*} currentCard
  * @returns
  */
-CardUtil.canTi = function (cardsOnHand, currentCard) {
+CardUtil.canTiHandCards = function (cardsOnHand, currentCard) {
   var countedCards = _.countBy(cardsOnHand, function (c) { return c; })
   var canTiCards = null
   if (countedCards[currentCard] === 3) {
@@ -200,13 +200,45 @@ CardUtil.canTi = function (cardsOnHand, currentCard) {
 }
 
 /**
- * 看组合牌中能不能 跑 / 提
+ * 看组合牌中能不能提
  *
  * @param {*} cardsOnGroup
  * @param {*} currentCard
  * @returns
  */
-CardUtil.canTi2 = function (cardsOnGroup, currentCard) {
+CardUtil.canTiGroupCards = function (cardsOnGroup, currentCard) {
+  var group
+  var can = false
+  for (var i = 0; i < cardsOnGroup.length; i++) {
+    group = cardsOnGroup[i]
+    if (group.cards.length == 3 && group.name === Actions.Wei) {
+      can = true
+      for (var j = 0; j < group.cards.length; j++) {
+        if (group.cards[j] != currentCard) {
+          can = false
+          break
+        }
+      }
+    } else {
+      can = false
+    }
+
+    if (can) {
+      return group
+    }
+  }
+
+  return null
+}
+
+/**
+ * 看组合牌中能不能跑 
+ *
+ * @param {*} cardsOnGroup
+ * @param {*} currentCard
+ * @returns
+ */
+CardUtil.canPaoGroupCards = function (cardsOnGroup, currentCard) {
   var group
   var can = false
   for (var i = 0; i < cardsOnGroup.length; i++) {
@@ -232,14 +264,14 @@ CardUtil.canTi2 = function (cardsOnGroup, currentCard) {
 }
 
 /**
- * 看组合牌中能不能 跑 / 提,  
- * 但是碰的牌将不能再跑 / 提
+ * 看组合牌中能不能跑,  
+ * 但是碰的牌将不能再跑
  *
  * @param {*} cardsOnGroup
  * @param {*} currentCard
  * @returns
  */
-CardUtil.canTi3 = function (cardsOnGroup, currentCard) {
+CardUtil.canPaoGroupCardsWithoutPeng = function (cardsOnGroup, currentCard) {
   var group
   var can = false
   for (var i = 0; i < cardsOnGroup.length; i++) {
