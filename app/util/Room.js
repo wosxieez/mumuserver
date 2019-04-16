@@ -519,7 +519,7 @@ Room.prototype.loopOtherUserCanHuWithPlayerCard = function () {
                     this.checkHuAction(this.actionUsers)
                 })
         } else {
-            this.checkOAllUserCanPaoWithPlayerCard()
+            this.checkAllUserCanPaoWithPlayerCard()
         }
     }
 }
@@ -527,7 +527,7 @@ Room.prototype.loopOtherUserCanHuWithPlayerCard = function () {
 /**
  * 参见流程图 check8
  */
-Room.prototype.checkOAllUserCanPaoWithPlayerCard = function () {
+Room.prototype.checkAllUserCanPaoWithPlayerCard = function () {
     logger.info('check8')
     for (var i = 0; i < this.users.length; i++) {
         if (this.users[i].username == this.player.username) {
