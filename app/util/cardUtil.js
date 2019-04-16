@@ -696,16 +696,16 @@ CardUtil.canBi = function (cards, needDeleteCards, currentCard) {
   // 比方 currentCard = 8
   if (countedCards[currentCard - 1]) {
     if (countedCards[currentCard - 2] && currentCard !== 11 && currentCard !== 12) {
-      biDatas.push({ name: Actions.Chi, cards: [currentCard, currentCard - 1, currentCard - 2] }) // 判断8在尾部 查询 6 7 '8'  尾牌不能等于 11 12
+      biDatas.push({ name: Actions.Chi, cards: [currentCard - 2, currentCard - 1, currentCard] }) // 判断8在尾部 查询 6 7 '8'  尾牌不能等于 11 12
     }
     if (countedCards[currentCard + 1] && currentCard !== 10 && currentCard !== 11) {
-      biDatas.push({ name: Actions.Chi, cards: [currentCard - 1, currentCard, currentCard + 1] }) // 判断8在中部 查询 7 '8' 9  中牌不能等于 10 11
+      biDatas.push({ name: Actions.Chi, cards: [currentCard - 1, currentCard + 1, currentCard] }) // 判断8在中部 查询 7 '8' 9  中牌不能等于 10 11
     }
   }
 
   if (countedCards[currentCard + 1]) {
     if (countedCards[currentCard + 2] && currentCard !== 9 && currentCard !== 10) {
-      biDatas.push({ name: Actions.Chi, cards: [currentCard, currentCard + 1, currentCard + 2] }) // 判断8在首部 查询 '8' 9 10 首牌不能等于 9 10
+      biDatas.push({ name: Actions.Chi, cards: [currentCard + 1, currentCard + 2, currentCard] }) // 判断8在首部 查询 '8' 9 10 首牌不能等于 9 10
     }
   }
 
@@ -713,10 +713,10 @@ CardUtil.canBi = function (cards, needDeleteCards, currentCard) {
   if (currentCard < 11) {
     // 8
     if (countedCards[currentCard] >= 2 && countedCards[currentCard + 10]) {
-      biDatas.push({ name: Actions.Chi, cards: [currentCard, currentCard, currentCard + 10] }) // 判断 8 8 18
+      biDatas.push({ name: Actions.Chi, cards: [currentCard + 10, currentCard, currentCard] }) // 判断 8 8 18
     }
     if (countedCards[currentCard + 10] >= 2) {
-      biDatas.push({ name: Actions.Chi, cards: [currentCard, currentCard + 10, currentCard + 10] }) // 判断 8 18 18
+      biDatas.push({ name: Actions.Chi, cards: [currentCard + 10, currentCard + 10, currentCard] }) // 判断 8 18 18
     }
 
     // 2 7 10
@@ -728,10 +728,10 @@ CardUtil.canBi = function (cards, needDeleteCards, currentCard) {
   } else {
     // 18
     if (countedCards[currentCard] >= 2 && countedCards[currentCard - 10]) {
-      biDatas.push({ name: Actions.Chi, cards: [currentCard, currentCard, currentCard - 10] }) // 判断 18 18 8
+      biDatas.push({ name: Actions.Chi, cards: [currentCard - 10, currentCard, currentCard] }) // 判断 18 18 8
     }
     if (countedCards[currentCard - 10] >= 2) {
-      biDatas.push({ name: Actions.Chi, cards: [currentCard, currentCard - 10, currentCard - 10] }) // 判断 18 8 8
+      biDatas.push({ name: Actions.Chi, cards: [currentCard - 10, currentCard - 10, currentCard] }) // 判断 18 8 8
     }
 
     // 12 17 20
