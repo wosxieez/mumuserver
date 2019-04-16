@@ -519,7 +519,7 @@ Room.prototype.loopOtherUserCanHuWithPlayerCard = function () {
                     this.checkHuAction(this.actionUsers)
                 })
         } else {
-            this.checkOtherUserCanPaoWithPlayerCard()
+            this.checkOAllUserCanPaoWithPlayerCard()
         }
     }
 }
@@ -527,20 +527,19 @@ Room.prototype.loopOtherUserCanHuWithPlayerCard = function () {
 /**
  * 参见流程图 check8
  */
-Room.prototype.checkOtherUserCanPaoWithPlayerCard = function () {
+Room.prototype.checkOAllUserCanPaoWithPlayerCard = function () {
     logger.info('check8')
     for (var i = 0; i < this.users.length; i++) {
         if (this.users[i].username == this.player.username) {
             var endUsers = this.users.slice(i)
             var startUsers = this.users.slice(0, i)
             this.loopUsers = endUsers.concat(startUsers)
-            this.loopUsers.shift()
             break
         }
     }
-    this.loopOtherUserCanPaoWithPlayerCard()
+    this.loopAllUserCanPaoWithPlayerCard()
 }
-Room.prototype.loopOtherUserCanPaoWithPlayerCard = function () {
+Room.prototype.loopAllUserCanPaoWithPlayerCard = function () {
     const user = this.loopUsers.shift()
     if (user) {
         const canPaoData1 = CardUtil.canPaoHandCards(user.handCards, this.player_card)
@@ -595,7 +594,7 @@ Room.prototype.loopOtherUserCanPaoWithPlayerCard = function () {
                 }, 1000);
             } else {
                 // 这个玩家不能跑操作，循环检查下个玩家
-                this.loopOtherUserCanPaoWithPlayerCard()
+                this.loopAllUserCanPaoWithPlayerCard()
             }
         }
     } else {
@@ -835,7 +834,7 @@ Room.prototype.checkHuAction = function (aus) {
     this.actionUsers = []
     this.feadback.manualCancel()
 
-    this.checkOtherUserCanPaoWithPlayerCard()
+    this.checkAllUserCanPaoWithPlayerCard()
 }
 
 /**
