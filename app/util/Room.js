@@ -1574,41 +1574,44 @@ Room.prototype.noticeAllUserOnWin = function (wd) {
         // user2 {thx: 63,  hx: -30}
         // 一局结束了
 
+        var winnerScore = Math.round(winner.thx / 10) * 10 * this.rule.xf
+        var loserScore = 0
+        if (loser) {
+            if (loser.thx >= 0) {
+                loserScore = Math.round(loser.thx / 10) * 10 * this.rule.xf
+            } else {
+                loserScore = -Math.round(-loser.thx / 10) * 10 * this.rule.xf
+            }
+        }
+        var winnerNiaoScore = 0, loserNiaoScore = 0
+        if (winner.dn) {
+            winner.nf = this.rule.nf // 鸟分
+            winnerNiaoScore = winner.nf
+        }
+        if (loser && loser.dn) {
+            loser.nf = -this.rule.nf // 鸟分
+            loserNiaoScore = loser.nf
+        }
+        var winScore = winnerScore + winnerNiaoScore - loserScore - loserNiaoScore
+        if (winner) {
+            winner.tjs = winScore
+        }
+        if (loser) {
+            loser.tjs = -winScore
+        }
+        var params = {
+            winner: winner.username,
+            loser: loser ? loser.username : 'NULL USER',
+            score: winScore, rid: this.rule.id,
+            gid: this.channel.groupname.substr(5),
+            rn: this.channel.name
+        }
+
+
         if (this.rule.id === 0) {
-            // 娱乐局不统计分数
+            console.log('win...', winnerScore, winnerNiaoScore, loserScore, loserNiaoScore)
+            axios.post('http://hefeixiaomu.com:3008/update_gold', params).catch(error => { })
         } else {
-            var winnerScore = Math.round(winner.thx / 10) * 10 * this.rule.xf
-            var loserScore = 0
-            if (loser) {
-                if (loser.thx >= 0) {
-                    loserScore = Math.round(loser.thx / 10) * 10 * this.rule.xf
-                } else {
-                    loserScore = -Math.round(-loser.thx / 10) * 10 * this.rule.xf
-                }
-            }
-            var winnerNiaoScore = 0, loserNiaoScore = 0
-            if (winner.dn) {
-                winner.nf = this.rule.nf // 鸟分
-                winnerNiaoScore = winner.nf
-            }
-            if (loser && loser.dn) {
-                loser.nf = -this.rule.nf // 鸟分
-                loserNiaoScore = loser.nf
-            }
-            var winScore = winnerScore + winnerNiaoScore - loserScore - loserNiaoScore
-            if (winner) {
-                winner.tjs = winScore
-            }
-            if (loser) {
-                loser.tjs = -winScore
-            }
-            var params = {
-                winner: winner.username,
-                loser: loser ? loser.username : 'NULL USER',
-                score: winScore, rid: this.rule.id,
-                gid: this.channel.groupname.substr(5),
-                rn: this.channel.name
-            }
             console.log('win...', winnerScore, winnerNiaoScore, loserScore, loserNiaoScore)
             axios.post('http://hefeixiaomu.com:3008/update_score', params).catch(error => { })
         }
@@ -1648,41 +1651,44 @@ Room.prototype.noticeAllUserOnExit = function () {
     // user2 {thx: 63}
     // 一局结束了
 
+    var winnerScore = Math.round(winner.thx / 10) * 10 * this.rule.xf
+    var loserScore = 0
+    if (loser) {
+        if (loser.thx >= 0) {
+            loserScore = Math.round(loser.thx / 10) * 10 * this.rule.xf
+        } else {
+            loserScore = -Math.round(-loser.thx / 10) * 10 * this.rule.xf
+        }
+    }
+    var winnerNiaoScore = 0, loserNiaoScore = 0
+    if (winner.dn) {
+        winner.nf = this.rule.nf // 鸟分
+        winnerNiaoScore = winner.nf
+    }
+    if (loser && loser.dn) {
+        loser.nf = -this.rule.nf // 鸟分
+        loserNiaoScore = loser.nf
+    }
+    var winScore = winnerScore + winnerNiaoScore - loserScore - loserNiaoScore
+    if (winner) {
+        winner.tjs = winScore
+    }
+    if (loser) {
+        loser.tjs = -winScore
+    }
+    var params = {
+        winner: winner.username,
+        loser: loser ? loser.username : 'NULL USER',
+        score: winScore, rid: this.rule.id,
+        gid: this.channel.groupname.substr(5),
+        rn: this.channel.name
+    }
+
     if (this.rule.id === 0) {
         // 娱乐局不统计分数
+        console.log('win...', winnerScore, winnerNiaoScore, loserScore, loserNiaoScore)
+        axios.post('http://hefeixiaomu.com:3008/update_gold', params).catch(error => { })
     } else {
-        var winnerScore = Math.round(winner.thx / 10) * 10 * this.rule.xf
-        var loserScore = 0
-        if (loser) {
-            if (loser.thx >= 0) {
-                loserScore = Math.round(loser.thx / 10) * 10 * this.rule.xf
-            } else {
-                loserScore = -Math.round(-loser.thx / 10) * 10 * this.rule.xf
-            }
-        }
-        var winnerNiaoScore = 0, loserNiaoScore = 0
-        if (winner.dn) {
-            winner.nf = this.rule.nf // 鸟分
-            winnerNiaoScore = winner.nf
-        }
-        if (loser && loser.dn) {
-            loser.nf = -this.rule.nf // 鸟分
-            loserNiaoScore = loser.nf
-        }
-        var winScore = winnerScore + winnerNiaoScore - loserScore - loserNiaoScore
-        if (winner) {
-            winner.tjs = winScore
-        }
-        if (loser) {
-            loser.tjs = -winScore
-        }
-        var params = {
-            winner: winner.username,
-            loser: loser ? loser.username : 'NULL USER',
-            score: winScore, rid: this.rule.id,
-            gid: this.channel.groupname.substr(5),
-            rn: this.channel.name
-        }
         console.log('win...', winnerScore, winnerNiaoScore, loserScore, loserNiaoScore)
         axios.post('http://hefeixiaomu.com:3008/update_score', params).catch(error => { })
     }
