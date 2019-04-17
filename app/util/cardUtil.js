@@ -321,14 +321,11 @@ CardUtil.canHu = function (cardsOnHand, cardsOnGroup, currentCard) {
   logger.info('检查能否胡', cardsOnHand, cardsOnGroup, currentCard)
   var allGroups = []
   if (currentCard != 0) {
-    var canChiPaoPeng = false
-
     // 看组合牌中能不能跑起
     var aHandCards = JSON.parse(JSON.stringify(cardsOnHand))
     var aGroupCards = JSON.parse(JSON.stringify(cardsOnGroup))
     var paoGroup = CardUtil.canPaoGroupCards(aGroupCards, currentCard)
     if (paoGroup) {
-      canChiPaoPeng = true
       paoGroup.name = Actions.Pao
       paoGroup.cards.push(currentCard)
       var shun = CardUtil.shouShun(aHandCards)
@@ -342,7 +339,6 @@ CardUtil.canHu = function (cardsOnHand, cardsOnGroup, currentCard) {
     var aGroupCards = JSON.parse(JSON.stringify(cardsOnGroup))
     var canPaoCards = CardUtil.canPaoHandCards(aHandCards, currentCard)
     if (canPaoCards) {
-      canChiPaoPeng = true
       canPaoCards.forEach(card => {
         CardUtil.deleteCard(aHandCards, card)
       })
@@ -358,7 +354,6 @@ CardUtil.canHu = function (cardsOnHand, cardsOnGroup, currentCard) {
     var aGroupCards = JSON.parse(JSON.stringify(cardsOnGroup))
     var canPengCards = CardUtil.canPeng(aHandCards, currentCard)
     if (canPengCards) {
-      canChiPaoPeng = true
       canPengCards.forEach(card => {
         CardUtil.deleteCard(aHandCards, card)
       })
@@ -372,7 +367,6 @@ CardUtil.canHu = function (cardsOnHand, cardsOnGroup, currentCard) {
     // 看手里牌能不能吃
     var canChiGroups = CardUtil.canChi(cardsOnHand, currentCard)
     if (canChiGroups) {
-      canChiPaoPeng = true
       canChiGroups.forEach(chiGroup => {
         var aHandCards = JSON.parse(JSON.stringify(cardsOnHand))
         var aGroupCards = JSON.parse(JSON.stringify(cardsOnGroup))
@@ -388,14 +382,12 @@ CardUtil.canHu = function (cardsOnHand, cardsOnGroup, currentCard) {
       })
     }
 
-    if (!canChiPaoPeng) {
-      var aHandCards = JSON.parse(JSON.stringify(cardsOnHand))
-      var aGroupCards = JSON.parse(JSON.stringify(cardsOnGroup))
-      aHandCards.push(currentCard)
-      var shun = CardUtil.shouShun(aHandCards)
-      if (shun) {
-        allGroups.push(aGroupCards.concat(shun))
-      }
+    var aHandCards = JSON.parse(JSON.stringify(cardsOnHand))
+    var aGroupCards = JSON.parse(JSON.stringify(cardsOnGroup))
+    aHandCards.push(currentCard)
+    var shun = CardUtil.shouShun(aHandCards)
+    if (shun) {
+      allGroups.push(aGroupCards.concat(shun))
     }
   } else {
     // currentCard === 0
@@ -420,14 +412,11 @@ CardUtil.canHu2 = function (cardsOnHand, cardsOnGroup, currentCard) {
   logger.info('检查能否胡', cardsOnHand, cardsOnGroup, currentCard)
   var allGroups = []
   if (currentCard != 0) {
-    var canChiPaoPeng = false
-
     // 看组合牌中能不能跑起
     var aHandCards = JSON.parse(JSON.stringify(cardsOnHand))
     var aGroupCards = JSON.parse(JSON.stringify(cardsOnGroup))
     var paoGroup = CardUtil.canPaoGroupCardsWithoutPeng(aGroupCards, currentCard)
     if (paoGroup) {
-      canChiPaoPeng = true
       paoGroup.name = Actions.Pao
       paoGroup.cards.push(currentCard)
       var shun = CardUtil.shouShun(aHandCards)
@@ -441,7 +430,6 @@ CardUtil.canHu2 = function (cardsOnHand, cardsOnGroup, currentCard) {
     var aGroupCards = JSON.parse(JSON.stringify(cardsOnGroup))
     var canPaoCards = CardUtil.canPaoHandCards(aHandCards, currentCard)
     if (canPaoCards) {
-      canChiPaoPeng = true
       canPaoCards.forEach(card => {
         CardUtil.deleteCard(aHandCards, card)
       })
@@ -457,7 +445,6 @@ CardUtil.canHu2 = function (cardsOnHand, cardsOnGroup, currentCard) {
     var aGroupCards = JSON.parse(JSON.stringify(cardsOnGroup))
     var canPengCards = CardUtil.canPeng(aHandCards, currentCard)
     if (canPengCards) {
-      canChiPaoPeng = true
       canPengCards.forEach(card => {
         CardUtil.deleteCard(aHandCards, card)
       })
@@ -471,7 +458,6 @@ CardUtil.canHu2 = function (cardsOnHand, cardsOnGroup, currentCard) {
     // 看手里牌能不能吃
     var canChiGroups = CardUtil.canChi(cardsOnHand, currentCard)
     if (canChiGroups) {
-      canChiPaoPeng = true
       canChiGroups.forEach(chiGroup => {
         var aHandCards = JSON.parse(JSON.stringify(cardsOnHand))
         var aGroupCards = JSON.parse(JSON.stringify(cardsOnGroup))
@@ -487,14 +473,12 @@ CardUtil.canHu2 = function (cardsOnHand, cardsOnGroup, currentCard) {
       })
     }
 
-    if (!canChiPaoPeng) {
-      var aHandCards = JSON.parse(JSON.stringify(cardsOnHand))
-      var aGroupCards = JSON.parse(JSON.stringify(cardsOnGroup))
-      aHandCards.push(currentCard)
-      var shun = CardUtil.shouShun(aHandCards)
-      if (shun) {
-        allGroups.push(aGroupCards.concat(shun))
-      }
+    var aHandCards = JSON.parse(JSON.stringify(cardsOnHand))
+    var aGroupCards = JSON.parse(JSON.stringify(cardsOnGroup))
+    aHandCards.push(currentCard)
+    var shun = CardUtil.shouShun(aHandCards)
+    if (shun) {
+      allGroups.push(aGroupCards.concat(shun))
     }
   } else {
     // currentCard === 0
