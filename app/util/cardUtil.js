@@ -318,7 +318,7 @@ CardUtil.tiPaoCount = function (cardsOnGroup) {
 }
 
 CardUtil.canHu = function (cardsOnHand, cardsOnGroup, currentCard) {
-  logger.info('检查能否胡', cardsOnHand, cardsOnGroup, currentCard)
+  logger.info('check can hu:', cardsOnHand, cardsOnGroup, currentCard)
   var allGroups = []
   if (currentCard != 0) {
     // 看组合牌中能不能跑起
@@ -328,7 +328,7 @@ CardUtil.canHu = function (cardsOnHand, cardsOnGroup, currentCard) {
     if (paoGroup) {
       paoGroup.name = Actions.Pao
       paoGroup.cards.push(currentCard)
-      var shun = CardUtil.shouShun(aHandCards)
+      var shun = CardUtil.shouShun(aHandCards, currentCard)
       if (shun) {
         allGroups.push(aGroupCards.concat(shun))
       }
@@ -343,7 +343,7 @@ CardUtil.canHu = function (cardsOnHand, cardsOnGroup, currentCard) {
         CardUtil.deleteCard(aHandCards, card)
       })
       aGroupCards.push({ name: Actions.Pao, cards: [currentCard, currentCard, currentCard, currentCard] })
-      var shun = CardUtil.shouShun(aHandCards)
+      var shun = CardUtil.shouShun(aHandCards, currentCard)
       if (shun) {
         allGroups.push(aGroupCards.concat(shun))
       }
@@ -358,7 +358,7 @@ CardUtil.canHu = function (cardsOnHand, cardsOnGroup, currentCard) {
         CardUtil.deleteCard(aHandCards, card)
       })
       aGroupCards.push({ name: Actions.Peng, cards: [currentCard, currentCard, currentCard] })
-      var shun = CardUtil.shouShun(aHandCards)
+      var shun = CardUtil.shouShun(aHandCards, currentCard)
       if (shun) {
         allGroups.push(aGroupCards.concat(shun))
       }
@@ -375,7 +375,7 @@ CardUtil.canHu = function (cardsOnHand, cardsOnGroup, currentCard) {
         })
         chiGroup.cards.push(currentCard)
         aGroupCards.push({ name: Actions.Chi, cards: chiGroup.cards })
-        var shun = CardUtil.shouShun(aHandCards)
+        var shun = CardUtil.shouShun(aHandCards, currentCard)
         if (shun) {
           allGroups.push(aGroupCards.concat(shun))
         }
@@ -385,7 +385,7 @@ CardUtil.canHu = function (cardsOnHand, cardsOnGroup, currentCard) {
     var aHandCards = JSON.parse(JSON.stringify(cardsOnHand))
     var aGroupCards = JSON.parse(JSON.stringify(cardsOnGroup))
     aHandCards.push(currentCard)
-    var shun = CardUtil.shouShun(aHandCards)
+    var shun = CardUtil.shouShun(aHandCards, currentCard)
     if (shun) {
       allGroups.push(aGroupCards.concat(shun))
     }
@@ -393,13 +393,13 @@ CardUtil.canHu = function (cardsOnHand, cardsOnGroup, currentCard) {
     // currentCard === 0
     var aHandCards = JSON.parse(JSON.stringify(cardsOnHand))
     var aGroupCards = JSON.parse(JSON.stringify(cardsOnGroup))
-    var shun = CardUtil.shouShun(aHandCards)
+    var shun = CardUtil.shouShun(aHandCards, currentCard)
     if (shun) {
       allGroups.push(aGroupCards.concat(shun))
     }
   }
 
-  logger.info('能胡的组合', JSON.stringify(allGroups))
+  logger.info('can hu groups:', JSON.stringify(allGroups))
 
   if (allGroups.length >= 1) {
     return allGroups
@@ -409,7 +409,7 @@ CardUtil.canHu = function (cardsOnHand, cardsOnGroup, currentCard) {
 }
 
 CardUtil.canHu2 = function (cardsOnHand, cardsOnGroup, currentCard) {
-  logger.info('检查能否胡', cardsOnHand, cardsOnGroup, currentCard)
+  logger.info('check can hu:', cardsOnHand, cardsOnGroup, currentCard)
   var allGroups = []
   if (currentCard != 0) {
     // 看组合牌中能不能跑起
@@ -419,7 +419,7 @@ CardUtil.canHu2 = function (cardsOnHand, cardsOnGroup, currentCard) {
     if (paoGroup) {
       paoGroup.name = Actions.Pao
       paoGroup.cards.push(currentCard)
-      var shun = CardUtil.shouShun(aHandCards)
+      var shun = CardUtil.shouShun(aHandCards, currentCard)
       if (shun) {
         allGroups.push(aGroupCards.concat(shun))
       }
@@ -434,7 +434,7 @@ CardUtil.canHu2 = function (cardsOnHand, cardsOnGroup, currentCard) {
         CardUtil.deleteCard(aHandCards, card)
       })
       aGroupCards.push({ name: Actions.Pao, cards: [currentCard, currentCard, currentCard, currentCard] })
-      var shun = CardUtil.shouShun(aHandCards)
+      var shun = CardUtil.shouShun(aHandCards, currentCard)
       if (shun) {
         allGroups.push(aGroupCards.concat(shun))
       }
@@ -449,7 +449,7 @@ CardUtil.canHu2 = function (cardsOnHand, cardsOnGroup, currentCard) {
         CardUtil.deleteCard(aHandCards, card)
       })
       aGroupCards.push({ name: Actions.Peng, cards: [currentCard, currentCard, currentCard] })
-      var shun = CardUtil.shouShun(aHandCards)
+      var shun = CardUtil.shouShun(aHandCards, currentCard)
       if (shun) {
         allGroups.push(aGroupCards.concat(shun))
       }
@@ -466,7 +466,7 @@ CardUtil.canHu2 = function (cardsOnHand, cardsOnGroup, currentCard) {
         })
         chiGroup.cards.push(currentCard)
         aGroupCards.push({ name: Actions.Chi, cards: chiGroup.cards })
-        var shun = CardUtil.shouShun(aHandCards)
+        var shun = CardUtil.shouShun(aHandCards, currentCard)
         if (shun) {
           allGroups.push(aGroupCards.concat(shun))
         }
@@ -476,7 +476,7 @@ CardUtil.canHu2 = function (cardsOnHand, cardsOnGroup, currentCard) {
     var aHandCards = JSON.parse(JSON.stringify(cardsOnHand))
     var aGroupCards = JSON.parse(JSON.stringify(cardsOnGroup))
     aHandCards.push(currentCard)
-    var shun = CardUtil.shouShun(aHandCards)
+    var shun = CardUtil.shouShun(aHandCards, currentCard)
     if (shun) {
       allGroups.push(aGroupCards.concat(shun))
     }
@@ -484,13 +484,13 @@ CardUtil.canHu2 = function (cardsOnHand, cardsOnGroup, currentCard) {
     // currentCard === 0
     var aHandCards = JSON.parse(JSON.stringify(cardsOnHand))
     var aGroupCards = JSON.parse(JSON.stringify(cardsOnGroup))
-    var shun = CardUtil.shouShun(aHandCards)
+    var shun = CardUtil.shouShun(aHandCards, currentCard)
     if (shun) {
       allGroups.push(aGroupCards.concat(shun))
     }
   }
 
-  logger.info('能胡的组合', JSON.stringify(allGroups))
+  logger.info('can hu groups:', JSON.stringify(allGroups))
 
   if (allGroups.length >= 1) {
     return allGroups
@@ -503,14 +503,14 @@ CardUtil.canHu2 = function (cardsOnHand, cardsOnGroup, currentCard) {
  * 玩家的牌是否无单牌。
  * @param cards: 手中的牌，或者手中的牌加新翻开的底牌。
  */
-CardUtil.shouShun = function (cards) {
+CardUtil.shouShun = function (cards, currentCard) {
   if (cards.length === 0) return []
   // 坎牌不能拆
   var kanShuns = []
   var countedCards = _.countBy(cards, function (c) { return c })
   _.each(countedCards, function (value, key) {
-    if (value === 3) {
-      var card = parseInt(key)
+    var card = parseInt(key)
+    if (value === 3 && card != currentCard) {
       kanShuns.push({ name: Actions.Kan, cards: [card, card, card] })
       CardUtil.deleteCard(cards, card)
       CardUtil.deleteCard(cards, card)
@@ -531,7 +531,7 @@ CardUtil.shouShun = function (cards) {
           maxHuGroup = lastedShuns
         }
       })
-      console.log('手里的牌能够组成顺子...', JSON.stringify(maxHuGroup))
+      console.log('shun on hands:', JSON.stringify(maxHuGroup))
       return maxHuGroup
     } else {
       return kanShuns
@@ -579,7 +579,7 @@ CardUtil.canPeng = function (cardsOnHand, currentCard) {
 }
 
 CardUtil.canChi = function (cards, currentCard) {
-  logger.info('能否吃牌', cards, currentCard)
+  logger.info('check can chi:', cards, currentCard)
   var canChiDatas = []
   var countedCards = _.countBy(cards, function (c) { return c; });
   _.each(countedCards, function (value, key) {
@@ -648,7 +648,7 @@ CardUtil.canChi = function (cards, currentCard) {
     }
   })
 
-  logger.info('吃的结果', JSON.stringify(validChiDatas))
+  logger.info('can chi datas:', JSON.stringify(validChiDatas))
 
   if (validChiDatas.length > 0) {
     return validChiDatas
@@ -743,7 +743,6 @@ CardUtil.canBi = function (cards, needDeleteCards, currentCard) {
 }
 
 CardUtil.hasCard = function (cards, card) {
-  logger.info('看牌是否已经存在', cards, card)
   var countedCards = _.countBy(cards, function (c) { return c; });
   if (countedCards[card]) {
     return true
@@ -753,7 +752,6 @@ CardUtil.hasCard = function (cards, card) {
 }
 
 CardUtil.has3Ti5Kan = function (cards) {
-  logger.info('看牌是否存在3提5坎', cards)
   var countedCards = _.countBy(cards, function (c) { return c; })
   var tiCount = 0
   var kanCount = 0
@@ -818,7 +816,6 @@ CardUtil.deleteCard = function (cards, card) {
 }
 
 CardUtil.canShun = function (cards, needDeleteCards) {
-  // logger.info('能否顺牌', cards, needDeleteCards)
   needDeleteCards.forEach(card => {
     CardUtil.deleteCard(cards, card)
   })

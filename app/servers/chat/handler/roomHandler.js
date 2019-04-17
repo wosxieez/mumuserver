@@ -12,7 +12,7 @@ var handler = Handler.prototype;
  * Send action to room
  */
 handler.sendAction = function (action, session, next) {
-	// console.log('---------------------------服务器', this.app.get('serverId'), '---------------------------')
+	// console.log('---------------------------server', this.app.get('serverId'), '---------------------------')
 	// console.log('onAction', action)
 	this.app.rpc.chat.roomRemote.onAction(session, this.app.get('serverId'), session.get('groupname'), session.get('roomname'),
 		session.get('username'), action, function (result) {
@@ -32,7 +32,7 @@ handler.sendAction = function (action, session, next) {
  */
 
 handler.pushMessage = function (message, session, next) {
-	// console.log('---------------------------服务器', this.app.get('serverId'), '---------------------------')
+	// console.log('---------------------------server', this.app.get('serverId'), '---------------------------')
 	// console.log('pushMessage')
 	const roomname = session.get('roomname')
 	channel = this.app.get('channelService').getChannel(roomname, false)

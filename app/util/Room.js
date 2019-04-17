@@ -159,7 +159,6 @@ Room.prototype.setExit = function (username, ae) {
             agreeExit = false
         }
     }
-    console.log(agreeExit)
     if (agreeExit) {
         this.noticeAllUserOnExit()
     }
@@ -209,7 +208,7 @@ Room.prototype.gameStart = function () {
 }
 
 Room.prototype.initRoom = function () {
-    logger.info('初始化房间信息')
+    logger.info('init room info')
     clearTimeout(this.timeout)
     this.actionUsers = []
     if (!this.onGaming) { // 一局没有开始的话  初始化下庄
@@ -231,13 +230,13 @@ Room.prototype.initRoom = function () {
 }
 
 Room.prototype.xiPai = function () {
-    logger.info('洗牌')
+    logger.info('Xi Pai...')
     this.cards = CardUtil.shufflePoker(CardUtil.generatePoker())
 }
 
 Room.prototype.selectZhuang = function () {
     if (this.onGaming) return  // 一局开始了就不选择庄了
-    logger.info('选中庄家')
+    logger.info('Select Zhuang...')
     const random = Math.floor(Math.random() * this.rule.cc)
     this.zhuang = this.users[random]
 
@@ -252,7 +251,7 @@ Room.prototype.selectZhuang = function () {
 }
 
 Room.prototype.faPai = function () {
-    logger.info('发牌')
+    logger.info('Fa Pai...')
 
     // 删除多余的牌
     const more = (3 - this.users.length) * 20
@@ -268,7 +267,7 @@ Room.prototype.faPai = function () {
 }
 
 Room.prototype.faZhuangPai = function () {
-    logger.info('发庄牌')
+    logger.info('Fa Zhuang Pai...')
     this.zhuang_card = this.cards.pop()
     this.hc = this.zhuang_card
 }
@@ -395,7 +394,7 @@ Room.prototype.checkXianCanTi = function () {
 }
 
 Room.prototype.zhuangPlayCard = function () {
-    logger.info('庄家出牌')
+    logger.info('Zhuang out card...')
     this.actionUsers = [{ un: this.zhuang.username, nd: { dt: 'oc', ac: -1 } }]
     this.noticeAllUserOnAction()
     this.feadback.send(this.actionUsers)
@@ -408,7 +407,7 @@ Room.prototype.zhuangPlayCard = function () {
                 this.actionUsers = []
                 this.feadback.manualCancel()  // 手动取消反馈
 
-                logger.info('庄家出牌', this.player_card)
+                logger.info('Zhuang out card', this.player_card)
                 this.player.ucCards.push(this.player_card)
                 this.player.upCards.push(this.player_card)
                 this.isZhuangFirstOutCard = true
@@ -426,7 +425,7 @@ Room.prototype.zhuangPlayCard = function () {
                 this.actionUsers = []
                 this.feadback.manualCancel()  // 手动取消反馈
 
-                logger.info('庄家出牌', this.player_card)
+                logger.info('Zhuang out card', this.player_card)
                 this.player.ucCards.push(this.player_card)
                 this.player.upCards.push(this.player_card)
                 this.isZhuangFirstOutCard = true
@@ -634,8 +633,7 @@ Room.prototype.checkOtherUserCanPengWithPlayerCard = function () {
 Room.prototype.loopOtherUserCanPengWithPlayerCard = function () {
     const user = this.loopUsers.shift()
     if (user) {
-        logger.info('检查', user.username, '能否碰这张牌', this.player_card)
-        logger.info('不碰的牌', user.upCards)
+        logger.info('check', user.username, 'can peng', this.player_card)
         if (!CardUtil.hasCard(user.upCards, this.player_card)) {
             const canPengData = CardUtil.canPeng(user.handCards, this.player_card)
             if (canPengData) {
@@ -670,7 +668,7 @@ Room.prototype.checkPlayerUserCanChiWithPlayerCard = function () {
  * 参见流程图 check11
  */
 Room.prototype.checkNextUserCanChiWithPlayerCard = function () {
-    logger.info('check11 检查下家手里牌 + player_card 是否能吃')
+    logger.info('check11')
     // 找到下家
     var nextUser
     for (var i = 0; i < this.users.length; i++) {
@@ -689,12 +687,11 @@ Room.prototype.checkNextUserCanChiWithPlayerCard = function () {
     }
 
     if (nextUser) {
-        logger.info('检查', nextUser.username, '能否吃这张牌', this.player_card)
-        logger.info('不吃的牌', nextUser.ucCards)
+        logger.info('check', nextUser.username, 'can chi', this.player_card)
         if (!CardUtil.hasCard(nextUser.ucCards, this.player_card)) {
             const canChiData = CardUtil.canChi(nextUser.handCards, this.player_card)
             if (canChiData) {
-                logger.info(nextUser.username, '可以吃牌 通知用户要不要吃')
+                logger.info(nextUser.username, 'can chi... notice user')
                 // 通知出牌玩家是否要吃
                 canChiData.forEach(canChiItem => {
                     canChiItem.cards.push(this.player_card)
@@ -725,7 +722,7 @@ Room.prototype.checkNextUserCanChiWithPlayerCard = function () {
 
 Room.prototype.checkPengAction = function (aus) {
     // 检查碰响应的玩家
-    console.log('检查碰响应的玩家', aus)
+    console.log('check peng response:', aus)
     for (var i = 0; i < aus.length; i++) {
         if (aus[i].pd) {
             if (aus[i].pd.ac === 1) {
@@ -761,7 +758,7 @@ Room.prototype.checkPengAction = function (aus) {
 
 Room.prototype.checkChiAction = function (aus) {
     // 检查吃响应的玩家
-    console.log('检查吃响应的玩家', aus)
+    console.log('check chi response:', aus)
     for (var i = 0; i < aus.length; i++) {
         if (aus[i].cd) {
             if (aus[i].cd.ac === 1) {
@@ -806,7 +803,7 @@ Room.prototype.checkChiAction = function (aus) {
 
 Room.prototype.checkHuAction = function (aus) {
     // 检查碰响应的玩家
-    console.log('检查胡响应的玩家', aus)
+    console.log('check hu response:', aus)
     for (var i = 0; i < aus.length; i++) {
         if (aus[i].hd) {
             if (aus[i].hd.ac === 1) {
@@ -841,7 +838,7 @@ Room.prototype.checkHuAction = function (aus) {
  * 废牌操作
  */
 Room.prototype.passCard = function () {
-    logger.info('废牌操作', this.player_card)
+    logger.info('Pass card', this.player_card)
     this.player.passCards.push(this.player_card)
     this.player_card = 0
 
@@ -856,7 +853,7 @@ Room.prototype.passCard = function () {
  *  参见流程图 check23
  */
 Room.prototype.nextPlayCard = function (user) {
-    logger.info('check23 下家翻牌')
+    logger.info('check23 Next user play card')
 
     if (this.cards.length === 0) {
         this.noticeAllUserOnRoundEnd()
@@ -880,7 +877,7 @@ Room.prototype.nextPlayCard = function (user) {
 
     this.player_card = this.cards.pop()
     this.hc = this.player_card
-    logger.info('翻的牌为', this.player_card)
+    logger.info('play card:', this.player_card)
     this.isOut = false
     this.noticeAllUserOnNewCard()
     this.checkPlayerUserCanTiWithPlayerCard()
@@ -892,7 +889,7 @@ Room.prototype.nextPlayCard = function (user) {
  * 参见流程图 check13
  */
 Room.prototype.checkPlayerUserCanTiWithPlayerCard = function () {
-    logger.info('check13 翻牌玩家是否可以提')
+    logger.info('check13 player can ti play card ?')
     const canTiData1 = CardUtil.canTiHandCards(this.player.handCards, this.player_card)
     if (canTiData1) {
         // 如果能提 做个延时处理
@@ -928,7 +925,7 @@ Room.prototype.checkPlayerUserCanTiWithPlayerCard = function () {
  * 参见流程图 check14
  */
 Room.prototype.checkPlayerUserCanWeiWithPlayerCard = function () {
-    logger.info('check14 翻牌玩家是否可以偎')
+    logger.info('check14 player can wei play card ?')
     const canWeiData = CardUtil.canWei(this.player.handCards, this.player_card)
     if (canWeiData) {
         this.timeout = setTimeout(() => {
@@ -951,7 +948,7 @@ Room.prototype.checkPlayerUserCanWeiWithPlayerCard = function () {
  * 参见流程图 check15
  */
 Room.prototype.checkPlayerUserCanHuWithPlayerCard = function () {
-    logger.info('check15 翻牌玩家是否可以胡')
+    logger.info('check15 player can hu play card ?')
     this.actionUsers = []
     const canHuDatas = CardUtil.canHu(this.player.handCards, this.player.groupCards, this.player_card)
     if (canHuDatas) {
@@ -976,7 +973,7 @@ Room.prototype.checkPlayerUserCanHuWithPlayerCard = function () {
  * 参见流程图 check16
  */
 Room.prototype.checkPlayerUserCanHuWithPlayerCard2 = function () {
-    logger.info('check16 翻牌玩家是否可以胡')
+    logger.info('check16 player can hu play card?')
     const canHuDatas = CardUtil.canHu(this.player.handCards, this.player.groupCards, this.player_card) // 
     if (canHuDatas) {
         var maxHuXi = { hx: 0 }
@@ -1021,7 +1018,7 @@ Room.prototype.checkPlayerUserCanHuWithPlayerCard2 = function () {
  * 参见流程图 check24
  */
 Room.prototype.checkPlayerUserCanHuWithPlayerCard3 = function () {
-    logger.info('check24 翻牌玩家是否可以胡')
+    logger.info('check24 player can hu play card ?')
     const canHuDatas = CardUtil.canHu(this.player.handCards, this.player.groupCards, this.player_card)
     if (canHuDatas) {
         var maxHuData
@@ -1081,14 +1078,14 @@ Room.prototype.checkTiPaoCount = function () {
  * 参见流程图 check17
  */
 Room.prototype.playerPlayCard = function (user) {
-    logger.info('check17 本人出牌')
+    logger.info('check17 Mine out card...')
     if (CardUtil.hasValidaOutCards(user.handCards)) {
         this.actionUsers = [{ un: user.username, nd: { dt: '', ac: -1 } }]
         this.noticeAllUserOnAction()
         this.feadback.send(this.actionUsers)
             .thenOk(() => {
                 if (this.actionUsers[0].nd.ac === 1) {
-                    logger.info('收到出牌', this.actionUsers[0].nd.dt)
+                    logger.info('Mine out card', this.actionUsers[0].nd.dt)
                     this.player = user
                     this.player_card = this.actionUsers[0].nd.dt
                     this.hc = this.player_card
@@ -1103,14 +1100,13 @@ Room.prototype.playerPlayCard = function (user) {
                     this.checkOtherUserCanHuWithPlayerCard2()
                 } else if (this.actionUsers[0].nd.ac === 0) {
                     // 超时了
-                    logger.info('不出牌或超时')
                     const riffleCards = CardUtil.riffle(user.handCards)
                     const lastGroup = riffleCards.pop()
                     this.player = user
                     this.player_card = lastGroup.pop()
                     this.hc = this.player_card
                     this.isZhuangFirstOutCard = false
-                    logger.info('默认出的牌为', this.player_card)
+                    logger.info('Mine out card', this.player_card)
                     this.player.ucCards.push(this.player_card)
                     this.player.upCards.push(this.player_card)
                     CardUtil.deleteCard(this.player.handCards, this.player_card)
@@ -1120,7 +1116,6 @@ Room.prototype.playerPlayCard = function (user) {
                     this.noticeAllUserOnNewCard()
                     this.checkOtherUserCanHuWithPlayerCard2()
                 } else {
-                    logger.info('无效的出牌响应')
                 }
             })
     } else {
@@ -1133,7 +1128,7 @@ Room.prototype.playerPlayCard = function (user) {
  * 参见流程图
  */
 Room.prototype.checkOtherUserCanHuWithPlayerCard2 = function () {
-    logger.info('check18 检查其他玩家手里牌 + player_card 是否胡牌', this.player.username)
+    logger.info('check18')
     for (var i = 0; i < this.users.length; i++) {
         if (this.users[i].username == this.player.username) {
             var endUsers = this.users.slice(i)
@@ -1143,7 +1138,6 @@ Room.prototype.checkOtherUserCanHuWithPlayerCard2 = function () {
             break
         }
     }
-    logger.info(this.loopUsers)
     this.loopOtherUserCanHuWithPlayerCard2()
 }
 Room.prototype.loopOtherUserCanHuWithPlayerCard2 = function () {
@@ -1188,7 +1182,7 @@ Room.prototype.loopOtherUserCanHuWithPlayerCard2 = function () {
  * 参见流程图 check19
  */
 Room.prototype.checkOtherUserCanPaoWithPlayerCard2 = function () {
-    logger.info('check19 检查其他玩家手里牌 + player_card 是否能跑')
+    logger.info('check19')
     for (var i = 0; i < this.users.length; i++) {
         if (this.users[i].username == this.player.username) {
             var endUsers = this.users.slice(i)
@@ -1270,7 +1264,7 @@ Room.prototype.loopOtherUserCanPaoWithPlayerCard2 = function () {
  * 参见流程图 check20
  */
 Room.prototype.checkOtherUserCanPengWithPlayerCard2 = function () {
-    logger.info('check20 检查其他玩家手里牌 + player_card 是否能碰')
+    logger.info('check20')
     for (var i = 0; i < this.users.length; i++) {
         if (this.users[i].username == this.player.username) {
             var endUsers = this.users.slice(i)
@@ -1285,8 +1279,7 @@ Room.prototype.checkOtherUserCanPengWithPlayerCard2 = function () {
 Room.prototype.loopOtherUserCanPengWithPlayerCard2 = function () {
     const user = this.loopUsers.shift()
     if (user) {
-        logger.info('检查', user.username, '能否碰这张牌', this.player_card)
-        logger.info('不碰的牌', user.upCards)
+        logger.info('check', user.username, 'can peng', this.player_card)
         if (!CardUtil.hasCard(user.upCards, this.player_card)) {
             const canPengData = CardUtil.canPeng(user.handCards, this.player_card)
             if (canPengData) {
@@ -1304,7 +1297,7 @@ Room.prototype.loopOtherUserCanPengWithPlayerCard2 = function () {
  * 参见流程图 check21
  */
 Room.prototype.checkNextUserCanChiWithPlayerCard2 = function () {
-    logger.info('check21 检查下家手里牌 + player_card 是否能吃')
+    logger.info('check21')
 
     // 找到下家
     var nextUser
@@ -1324,12 +1317,10 @@ Room.prototype.checkNextUserCanChiWithPlayerCard2 = function () {
     }
 
     if (nextUser) {
-        logger.info('检查', nextUser.username, '能否吃这张牌', this.player_card)
-        logger.info('不吃的牌', nextUser.ucCards)
+        logger.info('check', nextUser.username, 'can chi', this.player_card)
         if (!CardUtil.hasCard(nextUser.ucCards, this.player_card)) {
             const canChiData = CardUtil.canChi(nextUser.handCards, this.player_card)
             if (canChiData) {
-                logger.info(nextUser.username, '可以吃这张牌，通知玩家要不要吃')
                 canChiData.forEach(canChiItem => {
                     canChiItem.cards.push(this.player_card)
                 })
@@ -1360,7 +1351,7 @@ Room.prototype.checkNextUserCanChiWithPlayerCard2 = function () {
 
 Room.prototype.checkPengAction2 = function (aus) {
     // 检查碰响应的玩家
-    console.log('检查碰响应的玩家', aus)
+    console.log('check peng response:', aus)
     for (var i = 0; i < aus.length; i++) {
         if (aus[i].pd) {
             if (aus[i].pd.ac === 1) {
@@ -1396,7 +1387,7 @@ Room.prototype.checkPengAction2 = function (aus) {
 
 Room.prototype.checkChiAction2 = function (aus) {
     // 检查吃响应的玩家
-    console.log('检查吃响应的玩家', aus)
+    console.log('check chi response:', aus)
     for (var i = 0; i < aus.length; i++) {
         if (aus[i].cd) {
             if (aus[i].cd.ac === 1) {
@@ -1634,7 +1625,7 @@ Room.prototype.noticeAllUserOnWin = function (wd) {
 
 
 Room.prototype.noticeAllUserOnExit = function () {
-    console.log('玩家申请退出成功')
+    console.log('ask for exit success')
     this.isGaming = false
     this.onGaming = false
     this.actionUsers = []

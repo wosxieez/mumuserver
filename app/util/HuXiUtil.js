@@ -236,7 +236,6 @@ HuXiUtil.getTotalHuXi = function (huXi) {
   var a = (countedTypes[0] || 0) + (countedTypes[1] || 0)
   var b = (countedTypes[4] || 0) + (countedTypes[10] || 0) + (countedTypes[5] || 0)
   var c = (countedTypes[2] || 0) + (countedTypes[3] || 0) + (countedTypes[11] || 0) + (countedTypes[6] || 0) + (countedTypes[7] || 0) + (countedTypes[8] || 0) + (countedTypes[9] || 0)
-  console.log(a, b, c)
   if (a >= 1) {
     thx = 200
   } else {

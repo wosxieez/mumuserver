@@ -32,7 +32,7 @@ module.exports = function Feadback(channel) {
         //     }
         // })
         
-        logger.info('反馈启动', this.channel.room.actionUsers)
+        logger.info('Feadback start', this.channel.room.actionUsers)
         this.isOk = true
         var timeout = setTimeout(this.timeoutCancel.bind(this), 18000000) // 300分钟后所有玩家默认为取消
         this.timeouts.push(timeout)
@@ -55,7 +55,7 @@ module.exports = function Feadback(channel) {
                 if (newUser.cd) { oldUser.cd = newUser.cd }
             }
         })
-        logger.info('收到反馈后结果', this.channel.room.actionUsers)
+        logger.info('Feadbak response:', this.channel.room.actionUsers)
         if (this.okFunction) {
             this.okFunction()
         }
@@ -70,7 +70,7 @@ module.exports = function Feadback(channel) {
                 if (oldUser.pd && oldUser.pd.ac === -1 ) { oldUser.pd.ac = 0 }
                 if (oldUser.cd && oldUser.cd.ac === -1 ) { oldUser.cd.ac = 0 }
         })
-        logger.info('超时反馈结束', this.channel.room.actionUsers)
+        logger.info('Feadback timeout', this.channel.room.actionUsers)
         if (this.okFunction) {
             this.okFunction()
         }
@@ -80,7 +80,7 @@ module.exports = function Feadback(channel) {
         // 手动取消了;
         this.isOk = false
         this.okFunction = null
-        logger.info('手动反馈结束', this.channel.room.actionUsers)
+        logger.info('Feadback manual cancel', this.channel.room.actionUsers)
         this.timeouts.forEach(timeout => {
             clearTimeout(timeout)
         })  
@@ -90,7 +90,7 @@ module.exports = function Feadback(channel) {
     this.release = function () {
         this.isOk = false
         this.okFunction = null
-        logger.info('反馈释放')
+        logger.info('Feadback release...')
         this.timeouts.forEach(timeout => {
             clearTimeout(timeout)
         })  

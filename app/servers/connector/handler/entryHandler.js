@@ -22,7 +22,7 @@ handler.joinGroup = function (msg, session, next) {
 
 	// 判断是否重复登录
 	if (!!this.sessionService.getByUid(username)) {
-		console.log('用户重复登录')
+		console.log('user login repeat')
 	}
 
 	session.bind(username)
@@ -71,7 +71,6 @@ handler.leaveGroup = function (msg, session, next) {
  *	创建房间
  */
 handler.createRoom = function (rule, session, next) {
-	console.log('fuck fuck')
 	const sid = this.app.get('serverId')
 	const groupname = session.get('groupname')
 	const username = session.get('username')
@@ -162,5 +161,5 @@ function onSessionClosed(app, session) {
 		app.rpc.chat.groupRemote.leaveGroup(session, sid, groupname, username, function (result) { })
 	}
 
-	console.log(username, '已断开连接')
+	console.log(username, 'session closed')
 }

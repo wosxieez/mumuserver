@@ -18,7 +18,7 @@ var handler = Handler.prototype;
  */
 
 handler.pushMessage = function (message, session, next) {
-	// console.log('---------------------------服务器', this.app.get('serverId'), '---------------------------')
+	// console.log('---------------------------server', this.app.get('serverId'), '---------------------------')
 	// console.log('pushMessage')
 	const groupname = session.get('groupname')
 	channel = this.app.get('channelService').getChannel(groupname, false)
