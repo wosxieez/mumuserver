@@ -9,7 +9,7 @@ const axios = require('axios')
 const _ = require('underscore')
 
 function Room(channel, rule) {
-    console.log('创建了一个跑胡子Room')
+    console.log('创建了一个跑得快Room')
     this.channel = channel
     this.rule = rule      //  玩法
     this.onGaming = false // 是否在局中
@@ -196,7 +196,6 @@ Room.prototype.gameStart = function () {
     this.onGaming = true
     this.isGaming = true // 游戏开始
     this.faPai()
-    this.faZhuangPai()
 
     // 新的一轮开始了 通知每个玩家
     this.channel.pushMessage({
@@ -232,7 +231,7 @@ Room.prototype.initRoom = function () {
 
 Room.prototype.xiPai = function () {
     logger.info('Xi Pai...')
-    this.cards = CardUtil.shufflePoker(CardUtil.generatePoker())
+    this.cards = CardUtil.shufflePoker(CardUtil.generatePDKPoker())
 }
 
 Room.prototype.selectZhuang = function () {
@@ -255,12 +254,14 @@ Room.prototype.faPai = function () {
     logger.info('Fa Pai...')
 
     // 删除多余的牌
-    const more = (3 - this.users.length) * 20
+    const more = (3 - this.users.length) * 16
     for (var m = 0; m < more; m++) {
         this.cards.pop()
     }
 
-    for (var i = 0; i < 20; i++) {
+    console.log('发牌了...', this.cards)
+
+    for (var i = 0; i < 16; i++) {
         for (var j = 0; j < this.users.length; j++) {
             this.users[j].handCards.push(this.cards.pop())
         }
@@ -314,9 +315,6 @@ Room.prototype.checkZhuangCanHuWithZhuangCard = function () {
  * 参考流程 Fun1
  */
 Room.prototype.zhuangStart = function () {
-    this.zhuang.handCards.push(this.zhuang_card)
-    this.zhuang_card = 0
-
     // 游戏正式开始 通知每个玩家
     this.channel.pushMessage({
         route: 'onRoom',
@@ -324,7 +322,7 @@ Room.prototype.zhuangStart = function () {
         data: this.getStatus()
     })
 
-    this.checkZhuangCanTi()
+    this.zhuangPlayCard()
 }
 
 /**

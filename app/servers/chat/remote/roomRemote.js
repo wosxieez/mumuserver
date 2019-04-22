@@ -1,6 +1,7 @@
 const Actions = require('../../../util/Actions')
 const Notifications = require('../../../util/Notifications')
 const Room = require('../../../util/Room')
+const Room2 = require('../../../util/Room2')
 
 module.exports = function (app) {
 	return new RoomRemote(app)
@@ -40,7 +41,11 @@ RoomRemote.prototype.createRoom = function (sid, groupname, roomname, username, 
 	} else {
 		// 房间不存在 开始创建房间
 		channel = this.channelService.getChannel(roomname, true)
-		channel.room = new Room(channel, rule)
+		if (rule.type === 1) {
+			channel.room = new Room2(channel, rule)
+		} else {
+			channel.room = new Room(channel, rule)
+		}
 		channel.groupname = groupname
 		channel.room.addUser(username)
 		channel.add(username, sid)
