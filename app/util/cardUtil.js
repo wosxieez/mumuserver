@@ -510,7 +510,12 @@ CardUtil.shouShun = function (cards, currentCard) {
   var countedCards = _.countBy(cards, function (c) { return c })
   _.each(countedCards, function (value, key) {
     var card = parseInt(key)
-    if (value === 3 && card != currentCard) {
+    if (value === 4) {
+      kanShuns.push({ name: Actions.Kan, cards: [card, card, card] })
+      CardUtil.deleteCard(cards, card)
+      CardUtil.deleteCard(cards, card)
+      CardUtil.deleteCard(cards, card)
+    } else if (value === 3 && card != currentCard) {
       kanShuns.push({ name: Actions.Kan, cards: [card, card, card] })
       CardUtil.deleteCard(cards, card)
       CardUtil.deleteCard(cards, card)

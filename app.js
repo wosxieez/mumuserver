@@ -13,13 +13,12 @@ app.set('name', 'chatofpomelo');
 // console.log(JSON.stringify(shuns))
 // return
 // var canHuData = CardUtil.canHu2(
-// 	[20, 4, 5, 6, 12, 17, 20],
-// 	[{ name: 'chi', cards: [11, 11, 1] },
-// 	{ name: 'chi', cards: [13, 14, 15] },
-// 	{ name: 'pao', cards: [19, 19, 19, 19] },
-// 	{ name: 'chi', cards: [8, 9, 10] }], 20)
-// var huX= HuXiUtil.getHuXi(canHuData[0], 3, true)
-// console.log(huX)
+// 	[ 18, 8, 18, 9, 7, 17, 16, 18 ],
+// 	[ { cards: [ 11, 13, 12 ], name: 'chi' },
+//   { name: 'chi', cards: [ 2, 1, 3 ] },
+//   { cards: [ 6, 16, 6 ], name: 'chi' },
+//   { name: 'chi', cards: [ 14, 14, 4 ] } ], 18)
+// console.log(canHuData)
 // return
 
 // app configure
