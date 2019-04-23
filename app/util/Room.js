@@ -304,7 +304,11 @@ Room.prototype.checkZhuangCanHuWithZhuangCard = function () {
                 maxHuXi = huXi
             }
         })
-        this.noticeAllUserOnWin({ wn: this.zhuang.username, ...maxHuXi })
+        if (maxHuXi.hx >= this.rule.hx) {
+            this.noticeAllUserOnWin({ wn: this.zhuang.username, ...maxHuXi })
+        } else {
+            this.zhuangStart()
+        }
     } else {
         this.zhuangStart()
     }
@@ -980,7 +984,7 @@ Room.prototype.checkPlayerUserCanHuWithPlayerCard2 = function () {
         var maxHuXi = { hx: 0 }
         var maxHuData
         canHuDatas.forEach(canHuData => {
-            const huXi = HuXiUtil.getHuXi(canHuData, HuActions.IsMeFlopCard)
+            const huXi = HuXiUtil.getHuXi(canHuData, HuActions.IsMeFlopCard, this.cards.length === 0)
             if (huXi.hx > maxHuXi.hx) {
                 maxHuXi = huXi
                 maxHuData = canHuData
@@ -1025,7 +1029,7 @@ Room.prototype.checkPlayerUserCanHuWithPlayerCard3 = function () {
         var maxHuData
         var maxHuXi = { hx: 0 }
         canHuDatas.forEach(canHuData => {
-            const huXi = HuXiUtil.getHuXi(canHuData, HuActions.IsMeFlopCard)
+            const huXi = HuXiUtil.getHuXi(canHuData, HuActions.IsMeFlopCard, this.cards.length === 0)
             if (huXi.hx > maxHuXi.hx) {
                 maxHuXi = huXi
                 maxHuData = canHuData
@@ -1126,7 +1130,7 @@ Room.prototype.playerPlayCard = function (user) {
 }
 
 /**
- * 参见流程图
+ * 参见流程图 check18
  */
 Room.prototype.checkOtherUserCanHuWithPlayerCard2 = function () {
     logger.info('check18')
