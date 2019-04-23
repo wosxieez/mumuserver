@@ -198,7 +198,7 @@ HuXiUtil.checkYiDianHong = function (groupCards, huXi, isLatestCard) {
     // 红数 等一 1 一点红
     huXi.hts.push(HuTypes.YiDianHong)
     HuXiUtil.checkKaHu(groupCards, huXi, isLatestCard)
-  } else if (hongGroupCount === 1 && hongCount >= 3) {
+  } else if (hongGroupCount === 1 && hongCount >= 2) {
     // 一块匾
     huXi.hts.push(HuTypes.YiKuaiBian)
     HuXiUtil.checkKaHu(groupCards, huXi, isLatestCard)
