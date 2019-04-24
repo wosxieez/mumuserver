@@ -298,13 +298,17 @@ Room.prototype.checkZhuangCanHuWithZhuangCard = function () {
     const canHuDatas = CardUtil.canHu(this.zhuang.handCards, this.zhuang.groupCards, this.zhuang_card)
     if (canHuDatas) {
         var maxHuXi = { hx: 0 }
+        var maxHuData 
         canHuDatas.forEach(canHuData => {
             const huXi = HuXiUtil.getHuXi(canHuData, HuActions.IsZhuangCard)
             if (huXi.hx > maxHuXi.hx) {
                 maxHuXi = huXi
+                maxHuData = canHuData
             }
         })
         if (maxHuXi.hx >= this.rule.hx) {
+            this.zhuang.handCards = []
+            this.zhuang.groupCards = maxHuData
             this.noticeAllUserOnWin({ wn: this.zhuang.username, ...maxHuXi })
         } else {
             this.zhuangStart()
