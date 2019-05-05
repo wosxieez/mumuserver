@@ -1,15 +1,12 @@
 const CardUtil = require('./CardUtil')
 const Notifications = require('./Notifications')
-const HuXiUtil = require('./HuXiUtil')
-const HuActions = require('./HuActions')
-const Actions = require('./Actions')
 const Feadback = require('./Feadback')
 const logger = require('pomelo-logger').getLogger('pomelo', __filename);
 const axios = require('axios')
 const _ = require('underscore')
 
-function Room(channel, rule) {
-    console.log('创建了一个跑得快Room')
+function Room2(channel, rule) {
+    console.log('创建了一个跑得快Room2')
     this.channel = channel
     this.rule = rule      //  玩法
     this.onGaming = false // 是否在局中
@@ -21,13 +18,10 @@ function Room(channel, rule) {
     this.cards = []
     this.feadback = new Feadback(channel)
     this.timeout = 0
-    // test 1
-    // var params = { winner: 'wosxieez', loser: 'wosxieez2', score: 100, gid: 2, rid: this.rule.id }
-    // axios.post('http://127.0.0.1:3008/update_score', params).catch(error => {})
 }
 
-Room.prototype.release = function () {
-    logger.info('Room release')
+Room2.prototype.release = function () {
+    logger.info('Room2 release')
     this.channel = null
     clearTimeout(this.timeout)
 }
@@ -35,7 +29,7 @@ Room.prototype.release = function () {
 //---------------------------------------------------------------------------------------------------------------
 // 添加用户到渠道
 //---------------------------------------------------------------------------------------------------------------
-Room.prototype.addUser = function (username) {
+Room2.prototype.addUser = function (username) {
     if (this.isGaming || this.onGaming) {
         return
     }
@@ -49,7 +43,7 @@ Room.prototype.addUser = function (username) {
 //---------------------------------------------------------------------------------------------------------------
 // 删除用户从渠道
 //---------------------------------------------------------------------------------------------------------------
-Room.prototype.deleteUser = function (username) {
+Room2.prototype.deleteUser = function (username) {
     if (this.isGaming || this.onGaming) {
         return
     }
@@ -64,7 +58,7 @@ Room.prototype.deleteUser = function (username) {
 //---------------------------------------------------------------------------------------------------------------
 // 用户是否在房间里
 //---------------------------------------------------------------------------------------------------------------
-Room.prototype.hasUser = function (username) {
+Room2.prototype.hasUser = function (username) {
     for (var i = 0; i < this.users.length; i++) {
         if (this.users[i].username === username) {
             return true
@@ -72,7 +66,7 @@ Room.prototype.hasUser = function (username) {
     }
     return false
 }
-Room.prototype.getUser = function (username) {
+Room2.prototype.getUser = function (username) {
     for (var i = 0; i < this.users.length; i++) {
         if (this.users[i].username === username) {
             return this.users[i]
@@ -84,7 +78,7 @@ Room.prototype.getUser = function (username) {
 //---------------------------------------------------------------------------------------------------------------
 // 获取当前正在交互的玩家
 //---------------------------------------------------------------------------------------------------------------
-Room.prototype.getActionUser = function (username) {
+Room2.prototype.getActionUser = function (username) {
     if (!this.actionUsers) return null
     for (var i = 0; i < this.actionUsers.length; i++) {
         if (this.actionUsers[i].un === username) {
@@ -97,7 +91,7 @@ Room.prototype.getActionUser = function (username) {
 //---------------------------------------------------------------------------------------------------------------
 // 设置玩家准备
 //---------------------------------------------------------------------------------------------------------------
-Room.prototype.setReady = function (username, isReady) {
+Room2.prototype.setReady = function (username, isReady) {
     if (this.isGaming) return
 
     for (var i = 0; i < this.users.length; i++) {
@@ -110,24 +104,9 @@ Room.prototype.setReady = function (username, isReady) {
 }
 
 //---------------------------------------------------------------------------------------------------------------
-// 设置打鸟信息
-//---------------------------------------------------------------------------------------------------------------
-Room.prototype.setDaNiao = function (username, dn) {
-    if (this.onGaming || this.isGaming) return
-
-    for (var i = 0; i < this.users.length; i++) {
-        if (this.users[i].username === username) {
-            this.users[i].dn = dn
-        }
-    }
-
-    this.noticeAllUserOnReady()
-}
-
-//---------------------------------------------------------------------------------------------------------------
 // 玩家请求退出
 //---------------------------------------------------------------------------------------------------------------
-Room.prototype.askExit = function (username) {
+Room2.prototype.askExit = function (username) {
     for (var i = 0; i < this.users.length; i++) {
         if (this.users[i].username != username) {
             this.users[i].ae = -1
@@ -143,7 +122,7 @@ Room.prototype.askExit = function (username) {
     }
 }
 
-Room.prototype.setExit = function (username, ae) {
+Room2.prototype.setExit = function (username, ae) {
     this.getUser(username).ae = ae
 
     var agreeExit = true
@@ -163,7 +142,7 @@ Room.prototype.setExit = function (username, ae) {
 /**
  *  check1
  */
-Room.prototype.checkGameStart = function () {
+Room2.prototype.checkGameStart = function () {
     if (this.isGaming) return
 
     if (this.users.length < this.rule.cc) {
@@ -184,7 +163,7 @@ Room.prototype.checkGameStart = function () {
 /**
  * check2
  */
-Room.prototype.gameStart = function () {
+Room2.prototype.gameStart = function () {
     logger.info('game start...')
 
     this.onGaming = true
@@ -207,7 +186,7 @@ Room.prototype.gameStart = function () {
 /**
  * check3
  */
-Room.prototype.initRoom = function () {
+Room2.prototype.initRoom = function () {
     logger.info('init room info')
     clearTimeout(this.timeout)
     this.actionUsers = []
@@ -226,7 +205,7 @@ Room.prototype.initRoom = function () {
 /**
  *  check4
  */
-Room.prototype.xiPai = function () {
+Room2.prototype.xiPai = function () {
     logger.info('Xi Pai...')
     this.cards = CardUtil.shufflePoker(CardUtil.generatePDKPoker())
 }
@@ -235,7 +214,7 @@ Room.prototype.xiPai = function () {
 /**
  * check5
  */
-Room.prototype.faPai = function () {
+Room2.prototype.faPai = function () {
     logger.info('Fa Pai...')
 
     // 删除多余的牌
@@ -256,56 +235,92 @@ Room.prototype.faPai = function () {
 /**
  * check6
  */
-Room.prototype.playerPlayCard = function (user) {
+Room2.prototype.playerPlayCard = function (user) {
     logger.info('check6 player play card')
-    if (CardUtil.hasValidaOutCards(user.handCards)) {
-        this.actionUsers = [{ un: user.username, nd: { dt: '', ac: -1 } }]
+    this.actionUsers = [{ un: user.username, nd: { dt: '', ac: -1 } }]
+    this.noticeAllUserOnAction()
+    this.feadback.send(this.actionUsers)
+        .thenOk(() => {
+            if (this.actionUsers[0].nd.ac === 1) {
+                this.player = user
+                this.player_cards = this.actionUsers[0].nd.dt
+                this.player_cards.forEach(card => {
+                    CardUtil.deleteCard(this.player.handCards, card)
+                })
+                this.actionUsers = []
+                this.feadback.manualCancel()
+                this.noticeAllUserOnNewCard()
+
+                if (this.player.handCards.length === 0) {
+                    // 牌出完了
+                    this.noticeAllUserOnWin({ wn: this.player.username })
+                } else {
+                    this.checkOtherUserChiWithPlayerCard()
+                }
+            } else {
+                // 不出牌 不可能的
+                this.actionUsers = []
+                this.feadback.manualCancel()
+            }
+        })
+}
+
+/**
+ * 参见流程图 check7
+ */
+Room2.prototype.checkOtherUserChiWithPlayerCard = function () {
+    logger.info('check7')
+    for (var i = 0; i < this.users.length; i++) {
+        if (this.users[i].username == this.player.username) {
+            var endUsers = this.users.slice(i)
+            var startUsers = this.users.slice(0, i)
+            this.loopUsers = endUsers.concat(startUsers)
+            this.loopUsers.shift()
+            break
+        }
+    }
+    this.loopOtherUserCanChiWithPlayerCard()
+}
+Room2.prototype.loopOtherUserCanChiWithPlayerCard = function () {
+    const user = this.loopUsers.shift()
+    if (user) {
+        this.actionUsers = [{ un: user.username, cd: { dt: '', ac: -1 } }]
         this.noticeAllUserOnAction()
         this.feadback.send(this.actionUsers)
             .thenOk(() => {
-                if (this.actionUsers[0].nd.ac === 1) {
+                if (this.actionUsers[0].cd.ac === 1) {
+                    // 其他玩家吃了这牌
                     this.player = user
-                    this.player_card = this.actionUsers[0].nd.dt
-                    this.hc = this.player_card
-                    this.isZhuangFirstOutCard = false
-                    this.player.ucCards.push(this.player_card)
-                    this.player.upCards.push(this.player_card)
-                    CardUtil.deleteCard(this.player.handCards, this.player_card)
-                    this.isOut = true
+                    this.player_cards = this.actionUsers[0].cd.dt
+                    this.player_cards.forEach(card => {
+                        CardUtil.deleteCard(user.handCards, card)
+                    })
                     this.actionUsers = []
                     this.feadback.manualCancel()
                     this.noticeAllUserOnNewCard()
-                    this.checkOtherUserCanHuWithPlayerCard2()
-                } else if (this.actionUsers[0].nd.ac === 0) {
-                    // 超时了
-                    const riffleCards = CardUtil.riffle(user.handCards)
-                    const lastGroup = riffleCards.pop()
-                    this.player = user
-                    this.player_card = lastGroup.pop()
-                    this.hc = this.player_card
-                    this.isZhuangFirstOutCard = false
-                    logger.info('Mine out card', this.player_card)
-                    this.player.ucCards.push(this.player_card)
-                    this.player.upCards.push(this.player_card)
-                    CardUtil.deleteCard(this.player.handCards, this.player_card)
-                    this.isOut = true
-                    this.actionUsers = []
-                    this.feadback.manualCancel()
-                    this.noticeAllUserOnNewCard()
-                    this.checkOtherUserCanHuWithPlayerCard2()
+
+                    if (this.player.handCards.length === 0) {
+                        // 牌出完了
+                        this.noticeAllUserOnWin({ wn: this.player.username })
+                    } else {
+                        this.checkOtherUserChiWithPlayerCard()
+                    }
                 } else {
+                    // 不要
+                    this.actionUsers = []
+                    this.feadback.manualCancel()
+                    this.loopOtherUserCanChiWithPlayerCard()
                 }
             })
     } else {
-        // 玩家无法出牌了 直接下家出牌
-        this.nextPlayCard(user)
+        this.playerPlayCard(this.player)
     }
 }
 
 /**
  * 通知所有玩家有准备操作
  */
-Room.prototype.noticeAllUserOnReady = function () {
+Room2.prototype.noticeAllUserOnReady = function () {
     this.channel.pushMessage({
         route: 'onRoom',
         name: Notifications.onReady,
@@ -315,7 +330,7 @@ Room.prototype.noticeAllUserOnReady = function () {
 /**
  * 通知所有玩家有跑操作
  */
-Room.prototype.noticeAllUserOnPao = function () {
+Room2.prototype.noticeAllUserOnPao = function () {
     this.channel.pushMessage({
         route: 'onRoom',
         name: Notifications.onPao,
@@ -325,7 +340,7 @@ Room.prototype.noticeAllUserOnPao = function () {
 /**
  * 通知所有玩家有提操作
  */
-Room.prototype.noticeAllUserOnTi = function () {
+Room2.prototype.noticeAllUserOnTi = function () {
     this.channel.pushMessage({
         route: 'onRoom',
         name: Notifications.onTi,
@@ -335,7 +350,7 @@ Room.prototype.noticeAllUserOnTi = function () {
 /**
  * 通知所有玩家有碰操作
  */
-Room.prototype.noticeAllUserOnPeng = function () {
+Room2.prototype.noticeAllUserOnPeng = function () {
     this.channel.pushMessage({
         route: 'onRoom',
         name: Notifications.onPeng,
@@ -345,7 +360,7 @@ Room.prototype.noticeAllUserOnPeng = function () {
 /**
  * 通知所有玩家有吃操作
  */
-Room.prototype.noticeAllUserOnChi = function () {
+Room2.prototype.noticeAllUserOnChi = function () {
     this.channel.pushMessage({
         route: 'onRoom',
         name: Notifications.onEat,
@@ -355,7 +370,7 @@ Room.prototype.noticeAllUserOnChi = function () {
 /**
  * 通知所有玩家有比牌操作
  */
-Room.prototype.noticeAllUserOnBi = function () {
+Room2.prototype.noticeAllUserOnBi = function () {
     this.channel.pushMessage({
         route: 'onRoom',
         name: Notifications.onBi,
@@ -365,141 +380,43 @@ Room.prototype.noticeAllUserOnBi = function () {
 /**
  * 通知所有玩家有偎操作
  */
-Room.prototype.noticeAllUserOnWei = function () {
+Room2.prototype.noticeAllUserOnWei = function () {
     this.channel.pushMessage({
         route: 'onRoom',
         name: Notifications.onWei,
         data: this.getStatus()
     })
 }
-Room.prototype.noticeAllUserOnNewCard = function () {
+Room2.prototype.noticeAllUserOnNewCard = function () {
     this.channel.pushMessage({
         route: 'onRoom',
         name: Notifications.onNewCard,
         data: this.getStatus()
     })
 }
-Room.prototype.noticeAllUserOnAction = function () {
+Room2.prototype.noticeAllUserOnAction = function () {
     this.channel.pushMessage({
         route: 'onRoom',
         name: Notifications.onAction,
         data: this.getStatus()
     })
 }
-Room.prototype.noticeAllUserOnWin = function (wd) {
+Room2.prototype.noticeAllUserOnWin = function (wd) {
     // wd = {wn: 'wosxieez', hx: 15, thx: 30, hts: [2, 3, 4]}
     console.log('game win...', wd)
     this.isGaming = false
-    this.zhuang = this.getUser(wd.wn) // 赢的玩家为庄
-    // 看没有人放炮
-    var countedTypes = _.countBy(wd.hts, function (c) { return c })
-    var hasFangPao = false
-    if (countedTypes[3]) {
-        hasFangPao = true
-    }
-    // 计算玩家胡息 TODO
-    var winner, loser
-    this.users.forEach(user => {
-        if (!!this.channel.getMember(user.username)) {
-            user.isReady = false
-        } else {
-            // 一盘结束了 如果玩家不在线了，默认玩家准备就绪
-            user.isReady = true
-        }
-        if (user.username === wd.wn) {
-            winner = user
-            if (hasFangPao) {
-                winner.hx = wd.thx / 2
-                winner.thx += winner.hx
-            } else {
-                winner.hx = wd.thx
-                winner.thx += winner.hx
-            }
-            if (winner.thx >= 100) {
-                this.onGaming = false
-            }
-        } else {
-            // TODO
-            loser = user
-            if (hasFangPao) {
-                loser.hx = -wd.thx / 2
-                loser.thx += loser.hx
-            }
-        }
+
+    // 发送一局结束的通知
+    this.channel.pushMessage({
+        route: 'onRoom',
+        name: Notifications.onGameOver,
+        data: { ...this.getStatus(), hn: wd.wn, hts: wd.hts, cs: this.cards }
     })
-
-    if (this.onGaming) { // 一局还在进行中
-        // 发送一局结束的通知
-        this.channel.pushMessage({
-            route: 'onRoom',
-            name: Notifications.onWin,
-            data: { ...this.getStatus(), hn: wd.wn, hts: wd.hts, cs: this.cards }
-        })
-
-        if (this.rule.id === 0) {
-            // 娱乐房一盘就结束游戏
-            // this.onGaming = false
-            // this.forceRelease()
-        }
-    } else {
-        // user1 {thx: 100, hx: 30}
-        // user2 {thx: 63,  hx: -30}
-        // 一局结束了
-
-        var winnerScore = Math.round(winner.thx / 10) * 10 * this.rule.xf
-        var loserScore = 0
-        if (loser) {
-            if (loser.thx >= 0) {
-                loserScore = Math.round(loser.thx / 10) * 10 * this.rule.xf
-            } else {
-                loserScore = -Math.round(-loser.thx / 10) * 10 * this.rule.xf
-            }
-        }
-        var winnerNiaoScore = 0, loserNiaoScore = 0
-        if (winner.dn) {
-            winner.nf = this.rule.nf // 鸟分
-            winnerNiaoScore = winner.nf
-        }
-        if (loser && loser.dn) {
-            loser.nf = -this.rule.nf // 鸟分
-            loserNiaoScore = loser.nf
-        }
-        var winScore = winnerScore + winnerNiaoScore - loserScore - loserNiaoScore
-        if (winner) {
-            winner.tjs = winScore
-        }
-        if (loser) {
-            loser.tjs = -winScore
-        }
-        var params = {
-            winner: winner.username,
-            loser: loser ? loser.username : 'NULL USER',
-            score: winScore, rid: this.rule.id,
-            gid: this.channel.groupname.substr(5),
-            rn: this.channel.name
-        }
-
-
-        if (this.rule.id === 0) {
-            console.log('win...', winnerScore, winnerNiaoScore, loserScore, loserNiaoScore)
-            axios.post('http://hefeixiaomu.com:3008/update_gold', params).catch(error => { })
-        } else {
-            console.log('win...', winnerScore, winnerNiaoScore, loserScore, loserNiaoScore)
-            axios.post('http://hefeixiaomu.com:3008/update_score', params).catch(error => { })
-        }
-
-        // 发送一局结束的通知
-        this.channel.pushMessage({
-            route: 'onRoom',
-            name: Notifications.onGameOver,
-            data: { ...this.getStatus(), hn: wd.wn, hts: wd.hts, cs: this.cards }
-        })
-        this.forceRelease()
-    }
+    this.forceRelease()
 }
 
 
-Room.prototype.noticeAllUserOnExit = function () {
+Room2.prototype.noticeAllUserOnExit = function () {
     console.log('ask for exit success')
     this.isGaming = false
     this.onGaming = false
@@ -574,7 +491,7 @@ Room.prototype.noticeAllUserOnExit = function () {
     this.forceRelease()
 }
 
-Room.prototype.noticeAllUserOnRoundEnd = function () {
+Room2.prototype.noticeAllUserOnRoundEnd = function () {
     this.isGaming = false
     this.users.forEach(user => {
         if (!!this.channel.getMember(user.username)) {
@@ -604,7 +521,7 @@ Room.prototype.noticeAllUserOnRoundEnd = function () {
     }
 }
 
-Room.prototype.getStatus = function () {
+Room2.prototype.getStatus = function () {
     var status = {
         og: this.onGaming,
         ig: this.isGaming,
@@ -618,7 +535,7 @@ Room.prototype.getStatus = function () {
     return status
 }
 
-Room.prototype.forceRelease = function () {
+Room2.prototype.forceRelease = function () {
     this.channel.room.feadback.release()
     this.channel.room = null
     this.channel.destroy()
@@ -627,4 +544,4 @@ Room.prototype.forceRelease = function () {
     console.log('room deleted')
 }
 
-module.exports = Room
+module.exports = Room2
